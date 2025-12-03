@@ -1,0 +1,14 @@
+.meme-transaction-popup-manager {
+  pointer-events: none;
+}
+
+.meme-transaction-popup-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  width: 400px;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+              opacity 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}

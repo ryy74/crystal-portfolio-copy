@@ -1,0 +1,34 @@
+.trades-container {
+  color: #ffffffbe;
+  font-size: 0.8rem;
+  font-weight: 300;
+  overflow: hidden;
+  position: relative;
+  background-color: transparent;
+  height: 100%;
+}
+
+.trades-list {
+  height: 100%;
+  overflow-y: scroll;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  user-select: none;
+}
+
+.trades-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(15, 15, 18, 0.2), rgb(10, 10, 12));
+  pointer-events: none;
+  z-index: 4;
+  border-radius: 0 0 10px 10px; 
+}
+
+.trades-container.hidden {
+  display: none;
+}

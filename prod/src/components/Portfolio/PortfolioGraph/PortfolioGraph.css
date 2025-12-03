@@ -1,0 +1,89 @@
+.portfolio-graph-container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 0;
+  position: relative;
+}
+
+.portfolio-graph-container,
+.graph-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  color: #333;
+  font-size: 14px;
+}
+
+.recharts-cartesian-grid-horizontal line {
+  stroke-opacity: 0.5;
+}
+
+.no-data-detected {
+  color: rgb(255 255 255 / 55.9%);
+  font-size: 0.8rem;
+  padding: 20px;
+  text-align: center;
+}
+
+.chart-days-dropdown {
+  border-radius: 8px;
+  display: flex;
+  gap: 6px;
+  margin: -20px 20px 0 auto;
+  padding: 2px;
+  position: relative;
+  top: -5px;
+  z-index: 1;
+}
+
+.time-period-button {
+  background: none;
+  border: none;
+  color: #ffffff9e;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 400;
+  padding: 5px;
+  transition: color 0.3s ease;
+  line-height: revert;
+}
+
+.time-period-button:not(.active):not(.disabled):hover {
+  opacity: 0.8;
+}
+
+.time-period-button.active {
+  color: #ffffffc9;
+  cursor: default;
+}
+
+.time-period-button.disabled {
+  cursor: not-allowed;
+}
+
+.time-period-sliding-indicator {
+  cursor: pointer;
+  background-color: #ffffff0d;
+  border-radius: 3px;
+  bottom: 6px;
+  height: 19px;
+  position: absolute;
+  transition:
+    left 0.3s ease,
+    width 0.3s ease;
+}
+
+.graph-blurred {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: calc(100% - 30px);
+  width: 60px; 
+  backdrop-filter: blur(6px); 
+  pointer-events: none;
+  z-index: 1; 
+}

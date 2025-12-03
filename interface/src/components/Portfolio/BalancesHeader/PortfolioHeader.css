@@ -1,0 +1,24 @@
+.portfolio-header {
+  align-items: center;
+  background: rgb(6,6,6);
+  color: #ffffff70;
+  cursor: pointer;
+  display: grid;
+  font-size: 0.85rem;
+  grid-template-columns:
+    minmax(120px, 1.2fr) minmax(80px, 1.1fr) minmax(85px, 0.7fr)
+    minmax(85px, 0.4fr);
+  height: 32px;
+  min-height: 32px; 
+  position: sticky;
+  top: 0;
+  user-select: none;
+  z-index: 2;
+  margin-bottom: -4px;
+  min-width: 410px;
+}
+
+.portfolio-header > * {
+  position: relative;
+  z-index: 1;
+}

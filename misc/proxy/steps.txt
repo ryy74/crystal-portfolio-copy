@@ -1,0 +1,15 @@
+sudo apt update
+sudo apt install -y python3-pip python3-venv nginx
+
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt
+
+export UPSTREAM_BASE="https://pro.edgex.exchange"
+export CORS_ALLOW_ORIGINS="https://crystal.exchange,https://test.crystal.exchange,http://localhost:3000"
+export LOG_LEVEL="info"
+
+./venv/bin/uvicorn server:app --host 0.0.0.0 --port 8080
+
+sudo tee /etc/nginx/nginx.conf > /dev/null < nginx.conf
+sudo nginx -t
+sudo systemctl restart nginx

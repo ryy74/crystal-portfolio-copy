@@ -1,0 +1,385 @@
+.txpopup {
+  background: #19191eb0;
+  border: 1px solid rgba(255, 255, 255, 0.034);
+  border-radius: 8px;
+  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.3);
+  height: auto;
+  opacity: 1;
+  overflow: hidden;
+  pointer-events: auto;
+  position: relative;
+  transition: all 0.3s ease;
+  width: 270px;
+  backdrop-filter: blur(5px);
+
+}
+
+.txpopup-inner,
+.txpopup-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.txpopup-inner{
+  padding:10px
+}
+
+.txpopup-title{
+  display:flex;
+  color:#ffffffa4;
+  font-size:.75rem;
+  font-weight:300;
+  letter-spacing:-.2px
+}
+
+
+.txpopup-swap-details {
+  align-items: left;
+  display: flex;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.txpopup-token-group {
+  gap: 4px;
+  font-size: 0.8rem;
+}
+
+.txpopup-token-group,
+.txpopup-token-details {
+  align-items: center;
+  display: flex;
+}
+
+.txpopup-token-details {
+  gap: 5px;
+}
+
+.txpopup-details-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.txpopup-token-icon {
+  border-radius: 50%;
+  height: 17px;
+  width: 17px;
+}
+
+.txpopup-amount {
+  color: #ffffffcf;
+  font-weight: 400;
+  font-weight: 400;
+  text-wrap: nowrap;
+}
+
+.txpopup-amount,
+.txpopup-arrow {
+  font-size: 0.8rem;
+}
+
+.txpopup-arrow {
+  color: #ffffff7d;
+  font-size: 0.75rem;
+  font-weight: 300;
+}
+
+.txpopup-recipient {
+  color: #ffffffcf;
+  font-size: 0.8rem;
+  font-weight: 300;
+}
+
+.view-transaction {
+  color: #c3c6e6;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: 0px;
+  text-wrap: nowrap;
+}
+
+.view-transaction:hover {
+  color: #c3c6e6;
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.txpopup-item-time{
+  font-size:.75rem;
+  color:#ffffff80;
+  margin-left:auto
+}
+
+.txpopup-progress-container {
+  background-color: rgb(64 64 71 / 0%);
+  bottom: 0;
+  height: 1px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+}
+
+.txpopup-progress-bar {
+  background: linear-gradient(
+    90deg,
+    rgb(170 174 207 / 50%) 0%,
+    rgb(170 174 207 / 80%) 50%,
+    rgb(170 174 207 / 50%) 100%
+  );
+  box-shadow: 0 0 8px rgb(170 174 207 / 30%);
+  height: 100%;
+}
+
+.txpopup.failed .txpopup-progress-bar {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 107, 107, 0.5) 0%,
+    rgba(255, 107, 107, 0.8) 50%,
+    rgba(255, 107, 107, 0.5) 100%
+  );
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressBar {
+  0% {
+    opacity: 1;
+    width: 0;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    width: 100%;
+  }
+}
+
+.txpopup-close-button {
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  transition: all 0.2s ease;
+  width: 24px;
+}
+
+.txpopup-close-button-icon {
+  height: 14px;
+  opacity: 0.6;
+  width: 14px;
+}
+
+.txpopup-price {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  margin-left: 4px;
+  margin-top: 1px;
+}
+
+.txpopup-price-label {
+  color: #ffffff7d;
+  font-size: 0.75rem;
+  font-weight: 300;
+}
+
+.txpopup-price-value {
+  color: #ffffffcf;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.txpopup.exit {
+  animation: slideOut 0.3s cubic-bezier(0.2, 0, 0.1, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 1020px) {
+  .txpopup.new {
+    animation: slideDown 0.3s cubic-bezier(0.2, 0, 0.1, 1);
+  }
+}
+
+.txpopup.new {
+  animation: slideUp 0.3s cubic-bezier(0.2, 0, 0.1, 1);
+}
+
+
+
+
+
+
+.txpopup-failed-content{
+  padding-left: 50px;
+}
+
+.txpopup-title-failed{
+  display:flex;
+  color:#ffffffa4;
+  font-size:.8rem;
+  font-weight:300;
+  letter-spacing:-.2px;
+  margin-bottom: -4px;
+}
+.txpopup-inner-failed{
+  padding: 5px;
+}
+
+.txpopup-error-x-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 15px;
+  z-index: 1;
+}
+
+.txpopup-error-x {
+  position: relative;
+  width: 17px;
+  height: 17px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.txpopup-error-circle {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: circleAnimation 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes circleAnimation {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+    border-color: rgba(255, 107, 107, 0);
+  }
+  50% {
+    opacity: 1;
+    border-color: rgba(255, 107, 107, 0.8);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    border-color: rgba(255, 107, 107, 0.8);
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+  }
+}
+
+.txpopup-error-x-line1 {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #ff6b6b, #ff9b8f, #ff6b6b);
+  background-size: 200% 200%;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  transform-origin: center;
+  animation: 
+    gradientShift 3s infinite linear,
+    xLine1Animation 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  box-shadow: 0 0 4px rgba(255, 107, 107, 0.6);
+}
+
+.txpopup-error-x-line2 {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #ff9b8f, #ff6b6b, #ff9b8f);
+  background-size: 200% 200%;
+  border-radius: 2px;
+  transform: rotate(-45deg);
+  transform-origin: center;
+  animation: 
+    gradientShift 3s infinite linear reverse,
+    xLine2Animation 1s cubic-bezier(0.19, 1, 0.22, 1) 0.2s forwards;
+  box-shadow: 0 0 4px rgba(255, 107, 107, 0.6);
+  opacity: 0;
+}
+
+
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes xLine1Animation {
+  0% {
+    transform: rotate(45deg) scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(45deg) scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes xLine2Animation {
+  0% {
+    transform: rotate(-45deg) scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(-45deg) scaleX(1);
+    opacity: 1;
+  }
+}

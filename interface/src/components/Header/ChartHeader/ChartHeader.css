@@ -1,0 +1,15 @@
+.chart-header {
+  display: flex;
+  height: 53px;
+  justify-content: flex-start;
+  user-select: none;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+
+@media (max-width: 1020px) {
+  .chart-header {
+    max-width: 100vw;
+  }
+}

@@ -1,0 +1,4550 @@
+.lp-vaults-grid {
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%
+}
+
+.lp-card {
+  cursor: pointer;
+  margin-bottom: 2px;
+  min-width: 780px;
+  padding: .2rem;
+  transition: background-color.2s ease
+}
+
+.lp-card:hover,
+.vault-row:hover {
+  background-color: #2d2d3124
+}
+
+.lp-card:hover .lp-summary,
+.vault-holdings-row:hover,
+.vault-data-table-row:hover {
+  background-color: #2727314d
+}
+
+.lp-summary {
+  align-items: center;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  padding: .4rem .4rem
+}
+
+.lp-asset-col {
+  align-items: center;
+  display: flex;
+  flex: 2;
+  gap: .3rem
+}
+
+.lp-token-pair-icons {
+  height: 27px;
+  position: relative;
+  width: 50px
+}
+
+.lp-token-icon {
+  border: 1.5px solid #131317;
+  border-radius: 50%;
+  height: 27px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  position: absolute;
+  top: 0;
+  width: 27px
+}
+
+.lp-token-icon-first {
+  left: 0;
+  z-index: 1
+}
+
+.lp-token-icon-second {
+  left: 20px;
+  z-index: 2
+}
+
+.lp-asset-info h3 {
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 350
+}
+
+.lp-asset-info {
+  align-items: center;
+  display: flex;
+  gap: 8px
+}
+
+.lp-tags {
+  display: flex;
+  gap: .5rem
+}
+
+.lp-deposit-button {
+  background: linear-gradient(135deg, #aaaecf 0, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  color: #000;
+  font-size: .75rem;
+  font-weight: 400;
+  letter-spacing: -.5px;
+  padding: 3px 8px
+}
+
+.lp-main-deposit-button {
+  background-color: #a5a5e70d;
+  border: none;
+  border-radius: 6px;
+  color: #ffffffc3;
+  font-size: .75rem;
+  font-weight: 300;
+  letter-spacing: -.5px;
+  padding: 3px 8px
+}
+
+.lp-borrow-apy-value,
+.lp-borrowed-value,
+.lp-deposit-amount,
+.lp-supply-apy-value,
+.lp-supply-value {
+  font-size: .9rem;
+  font-weight: 300
+}
+
+.lp-apy-label,
+.lp-tvl-label {
+  color: #e0e8fd90;
+  font-size: .7rem;
+  margin-top: .2rem
+}
+
+.lp-action-col {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end
+}
+
+.lp-action-col-button {
+  align-items: center;
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end
+}
+
+.lp-total-tvl {
+  font-size: 2rem;
+  font-weight: 100
+}
+
+.lp-total-tvl-subtitle {
+  color: #e0e8fd90;
+  font-size: .85rem;
+  font-weight: 100
+}
+
+.lp-total-value-locked-container,
+.lp-token-details,
+.lp-supply-tooltip-top-row-left,
+.lp-supply-tooltip-top-row-right,
+.vault-socials,
+.vault-social-field,
+.withdraw-token-preview {
+  display: flex;
+  flex-direction: column
+}
+
+.lp-detail-top {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-right: 1rem;
+}
+
+.filter-controls {
+  align-items: center;
+  display: flex;
+  gap: .35rem;
+}
+
+.lp-detail-token-pair {
+  height: 36px;
+  position: relative;
+  width: 60px
+}
+
+.lp-detail-token-icon {
+  border: 1.5px solid #131317;
+  border-radius: 50%;
+  height: 36px;
+  position: absolute;
+  top: 0;
+  width: 36px
+}
+
+.lp-first-token {
+  left: 0;
+  z-index: 2
+}
+
+.lp-second-token {
+  left: 24px;
+  z-index: 1
+}
+
+.lp-detail-name {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 350
+}
+
+.lp-detail-stats {
+  align-items: center;
+  display: flex;
+  gap: 2rem
+}
+
+.lp-detail-stat {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column
+}
+
+.lp-rectangle {
+  display: flex;
+  flex-direction: column;
+  justify-self: center;
+  margin-bottom: 1rem;
+  width: 100%
+}
+
+.lp-rectangle.no-border {
+  border: none;
+  margin-bottom: 1rem
+}
+
+.lp-listname {
+  font-size: .9rem
+}
+
+.lp-container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0 10px;
+  width: calc(100% - 20px)
+}
+
+.lp-stat-label,
+.lp-token-label,
+.lp-token-balance,
+.balance-label {
+  color: #e0e8fd90;
+  font-size: .8rem
+}
+
+
+.lp-detail-description {
+  margin: 1.25rem 0
+}
+
+.lp-detail-description h4 {
+  color: #ffffffcf;
+  font-size: 1rem;
+  font-weight: 400
+}
+
+.lp-detail-description p {
+  color: #e0e8fd90;
+  font-size: .85rem;
+  line-height: 1.2;
+  margin-bottom: .75rem
+}
+
+.lp-learn-more {
+  align-items: center;
+  color: #aaaecf;
+  display: inline-flex;
+  font-size: .85rem;
+  font-weight: 400;
+  gap: .25rem;
+  text-decoration: none
+}
+
+.lp-learn-more:hover {
+  text-decoration: underline
+}
+
+.lp-info-row,
+.lp-token-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: .5rem
+}
+
+.lp-info-row:last-child,
+.form-group .vault-socials-grid .form-input,
+.preview-row:last-child {
+  margin-bottom: 0
+}
+
+.lp-deposit-section {
+  margin-top: 1.5rem;
+  max-width: 100%;
+  width: 100%
+}
+
+.lp-deposit-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: .8rem
+}
+
+.lp-deposit-header h4 {
+  color: #ffffffcf;
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0
+}
+
+.lp-input-container,
+.tradable-tokens,
+.vault-row.vault-loading .col {
+  align-items: center;
+  display: flex;
+  position: relative
+}
+
+.lp-sliding-tab-indicator {
+  transform: translateX(0);
+  width: 50%
+}
+
+.lp-sliding-tab-indicator.deposited,
+.lp-tabs[data-active=deposited]::before,
+.page-toggle[data-active=vaults]::before {
+  transform: translateX(100%)
+}
+
+.lp-header {
+  align-items: center;
+  display: flex;
+  height: 32px;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 10px
+}
+
+.lp-filter-buttons,
+.type-filters,
+.vault-action-buttons {
+  align-items: center;
+  display: flex;
+  gap: .5rem
+}
+
+.lp-filter-button {
+  align-items: center;
+  background: 0 0;
+  background-color: rgba(162, 168, 232, 0.035);
+  border-radius: 20px;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  font-size: .85rem;
+  height: 32px;
+  justify-content: center;
+  padding: .5rem .75rem;
+  transition: all.3s ease;
+  white-space: nowrap
+}
+
+.lp-filter-button:hover,
+.filter-button:hover,
+.percentage-btn:hover {
+  background-color: #ffffff05;
+  border-color: #2a2a2f;
+  color: #fff
+}
+
+.lp-filter-button.active,
+.step.active .step-number,
+.fee-tier-option.active,
+.filter-button.active,
+.type-option.active,
+.percentage-btn.active {
+  background-color: #7375a931;
+  color:#d8dcff;
+}
+
+.lp-filter-button:focus,
+.lp-tab:focus,
+.page-toggle-tab:focus {
+  outline: 0
+}
+
+.lp-tabs {
+  display: flex;
+  gap: 12px;
+  height: 33px;
+  overflow: hidden;
+  position: relative
+}
+
+
+.lp-tab {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: #e0e8fd90;
+  font-size: 1.2rem;
+  font-weight: 300;
+  cursor: pointer;
+  transition: color .3s ease;
+  white-space: nowrap;
+  text-align: center;
+  height: 30px;
+  letter-spacing: -0.5px;
+}
+
+.lp-tab:hover {
+    color: #fff;
+}
+
+.lp-tab.active {
+    color: #fff;
+}
+
+.lp-tab:focus {
+    outline: 0;
+}
+
+
+.lp-tab:hover,
+.lp-tab.active,
+.breadcrumb-link:hover,
+.breadcrumb-current,
+.add-liquidity-breadcrumb .breadcrumb-link:hover,
+.page-toggle-tab:hover,
+.page-toggle-tab.active,
+.contract-address,
+.leader-address,
+.twitter-link-description span,
+.token-dropdown-button:hover {
+  color: #fff
+}
+
+.lp-search-container,
+.token-selector-container,
+.token-selector-input-wrapper,
+.market-selector-container,
+.time-range-dropdown-container {
+  position: relative
+}
+
+.market-selector-container {
+  align-self: flex-start;
+  width: 100%;
+}
+
+.lp-search-input {
+  align-items: center;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 20px;
+  display: flex;
+  gap: .3rem;
+  height: 32px;
+  min-width: 240px;
+  padding: 0 .5rem;
+  transition: all.2s ease
+}
+
+.lp-search-input:active {
+  border-color: #3a3a3f
+}
+
+.lp-search-input:focus-within,
+.vaults-search-container:focus-within,
+.vault-input-container:focus-within {
+  border-color: #aaaecf;
+  box-shadow: 0 0 0 2px rgba(170, 174, 207, .3)
+}
+
+.lp-search-field {
+  background: 0 0;
+  border: none;
+  color: #fff;
+  flex: 1;
+  font-size: .8rem;
+  min-width: 0;
+  outline: 0
+}
+
+.lp-search-field::-moz-placeholder, .vaults-search-input::-moz-placeholder, .form-input::-moz-placeholder, .form-textarea::-moz-placeholder, .form-group .vault-socials-grid .form-input::-moz-placeholder, .vault-amount-input::-moz-placeholder, .withdraw-percentage-input::-moz-placeholder {
+  color: #ffffff4d
+}
+
+.lp-search-field::placeholder,
+.vaults-search-input::placeholder,
+.form-input::placeholder,
+.form-textarea::placeholder,
+.form-group .vault-socials-grid .form-input::placeholder,
+.vault-amount-input::placeholder,
+.withdraw-percentage-input::placeholder {
+  color: #ffffff4d
+}
+
+.lp-search-selected-token {
+  align-items: center;
+  background-color: #121214;
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  flex-shrink: 0;
+  font-size: .7rem;
+  gap: .25rem;
+  padding: .15rem .4rem
+}
+
+.lp-search-selected-token:hover {
+  background-color: #1f1f23
+}
+
+.lp-search-selected-icon {
+  border-radius: 50%;
+  height: 14px;
+  width: 14px
+}
+
+.lp-search-remove-token {
+  align-items: center;
+  background: 0 0;
+  border: none;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  font-size: 1.2rem;
+  font-weight: 100;
+  height: 14px;
+  justify-content: center;
+  line-height: 1;
+  margin-left: -2px;
+  padding: 0;
+  width: 14px
+}
+
+.lp-search-dropdown {
+  background-color: #060606;
+  border: 1.5px solid #0f0f11;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+  left: 0;
+  max-height: 400px;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 100
+}
+
+.lp-search-tokens {
+  padding: .25rem
+}
+
+.lp-search-token-symbol-favorite {
+  color: #dfe0e9;
+  font-size: .8rem;
+  font-weight: 400;
+  margin: 0 5px;
+  width: auto
+}
+
+.lp-search-token-icon-favorite {
+  border: 1.5px solid #131317;
+  border-radius: 50%;
+  height: 24px;
+  width: 24px
+}
+
+.lp-token-favorites,
+.lp-search-token-favorites:hover .lp-favorite-close-button {
+  display: flex
+}
+
+.lp-favorites-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 5px;
+  padding-top: 1px
+}
+
+.lp-search-token {
+  align-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  gap: .5rem;
+  padding: .5rem;
+  position: relative;
+  transition: all.2s ease
+}
+
+.lp-search-token-icon {
+  border: 1.5px solid #131317;
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 28px;
+  width: 28px
+}
+
+.lp-search-token-symbol {
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 400;
+  min-width: 60px
+}
+
+.lp-search-token-name {
+  color: #e0e8fd90;
+  font-size: .75rem;
+  margin-top: -3px
+}
+
+.lp-search-empty {
+  color: #ffffff54;
+  font-size: .75rem !important;
+  font-weight: 300;
+  padding: 1rem;
+  text-align: center
+}
+
+.lp-search-dropdown::-webkit-scrollbar,
+.vault-market-dropdown-list::-webkit-scrollbar {
+  width: 6px
+}
+
+.lp-search-dropdown::-webkit-scrollbar-track,
+.vault-market-dropdown-list::-webkit-scrollbar-track {
+  background: #1a1a1f
+}
+
+.lp-search-dropdown::-webkit-scrollbar-thumb,
+.vault-market-dropdown-list::-webkit-scrollbar-thumb {
+  background: #3a3a3f;
+  border-radius: 3px
+}
+
+@media(max-width:768px) {
+  .lp-detail-top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1.5rem
+  }
+  .lp-detail-stats {
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    width: 100%
+  }
+  .lp-filter {
+    flex-wrap: wrap;
+    gap: .5rem;
+    height: auto
+  }
+  .lp-header {
+    flex-direction: column;
+    gap: .5rem;
+    height: auto;
+    padding: 10px
+  }
+  .lp-filter-buttons {
+    padding-top: 0
+  }
+  .lp-search-container {
+    margin-left: 0;
+    margin-top: .5rem;
+    width: 100%
+  }
+  .deposit-token-badge {
+    justify-content: center;
+    margin-left: 0
+  }
+  .deposit-amount-input {
+    text-align: center
+  }
+  .fee-tier-options,
+  .vault-type-selector,
+  .vault-strategy-types-rectangle {
+    flex-direction: column
+  }
+  .fee-tier-option {
+    padding: 12px
+  }
+  .lp-detail-stat,
+  .vault-stat,
+  .metric {
+    align-items: center;
+    text-align: center
+  }
+  .vault-form-title {
+    font-size: 1rem
+  }
+  .add-liquidity-container {
+    padding-bottom: 2rem;
+    padding-top: 3.5rem
+  }
+  .page-toggle {
+    max-width: 400px;
+    width: 100%
+  }
+  .page-toggle-tab {
+    flex: 1;
+    font-size: .8rem;
+    min-width: auto
+  }
+  .vaults-stats {
+    gap: 1rem;
+    justify-content: center
+  }
+  .stat-value,
+  .vault-strategy-name {
+    font-size: 1.2rem
+  }
+  .vaults-filters {
+    padding: 0
+  }
+  .search-container {
+    min-width: auto;
+    width: 100%
+  }
+  .modal-overlay,
+  .vault-tab-content {
+    padding: 1rem
+  }
+  .deposit-info,
+  .vault-strategy-contract {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .25rem
+  }
+  .performance-chart {
+    height: 250px
+  }
+  .table-header,
+  .table-row,
+  .vault-data-table-header,
+  .vault-data-table-row {
+    gap: .5rem;
+    grid-template-columns: 1fr
+  }
+  .table-col {
+    justify-content: space-between;
+    padding: .25rem 0
+  }
+  .table-col::before {
+    color: #e0e8fd90;
+    content: attr(data-label)': ';
+    font-weight: 500
+  }
+  .vault-snapshot-col::before {
+    color: #e0e8fd90;
+    content: 'Performance: '
+  }
+  .vault-snapshot {
+    justify-content: space-between;
+    width: 100%
+  }
+  .snapshot-chart {
+    height: 40px;
+    width: 80px
+  }
+  .vault-socials-grid {
+    gap: .75rem;
+    grid-template-columns: 1fr
+  }
+  .vault-social-field {
+    margin-bottom: .5rem
+  }
+  .vault-strategy-breadcrumb-container {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem
+  }
+  .vault-detail-action-buttons {
+    justify-content: center;
+    margin-top: 0;
+    width: 100%
+  }
+  .vault-detail-deposit-btn,
+  .vault-detail-withdraw-btn {
+    flex: 1;
+    justify-content: center
+  }
+  .vault-strategy-type {
+    border-bottom: 1px solid rgba(179, 184, 249, .1);
+    border-right: none;
+    padding: .75rem 1rem
+  }
+  .vault-strategy-type:last-child {
+    border-bottom: none
+  }
+  .vault-data-col {
+    border-bottom: 1px solid rgba(179, 184, 249, .05);
+    justify-content: space-between;
+    padding: .25rem 0
+  }
+  .vault-data-col::before {
+    color: #e0e8fd90;
+    content: attr(data-label)': ';
+    display: none
+  }
+  .vault-holdings h4 {
+    font-size: .9rem
+  }
+  .vault-row.vault-loading {
+    height: auto;
+    min-height: 80px;
+    padding: 1rem
+  }
+  .vault-skeleton-name {
+    height: 14px;
+    width: 100px
+  }
+  .vault-skeleton-leader {
+    height: 12px;
+    width: 70px
+  }
+  .vault-skeleton-value {
+    height: 12px;
+    width: 60px
+  }
+
+  .vault-strategy-sticky-bar {
+    margin-top: 1rem;
+  }
+
+  .vault-strategy-overview {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(0)
+  }
+
+  to {
+    transform: translateX(100%)
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%)
+  }
+
+  to {
+    transform: translateX(0)
+  }
+}
+
+
+.lp-label-container {
+  color: #e0e8fd90;
+  font-size: .85rem
+}
+
+.lp-value-container {
+  color: #ffffffcf;
+  font-size: .85rem;
+  font-weight: 400
+}
+
+.lp-token-deposit-item,
+.withdraw-section,
+.withdraw-amount-section {
+  margin-bottom: 1.5rem
+}
+
+.lp-token-amount-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: .25rem
+}
+
+.lp-token-amount {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 300
+}
+
+.lp-token-badge {
+  align-items: center;
+  background-color: #1a1a1f;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  position: relative
+}
+
+.lp-token-symbol {
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 400
+}
+
+.lp-token-selector {
+  align-items: center;
+  border: 1.5px solid #3a3a3f;
+  border-radius: 50%;
+  display: flex;
+  height: 20px;
+  justify-content: center;
+  margin-left: .5rem;
+  width: 20px
+}
+
+.lp-token-usd-value {
+  color: #e0e8fd90;
+  font-size: .75rem
+}
+
+.lp-deposit-total-row {
+  align-items: center;
+  border-top: 1px solid #ffffff0a;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-top: 1rem
+}
+
+.lp-deposit-total-label {
+  color: #ffffffcf;
+  font-size: .9rem
+}
+
+.lp-deposit-total-value {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 400
+}
+
+.lp-deposit-ratio-row {
+  align-items: center;
+  color: #e0e8fd90;
+  display: flex;
+  font-size: .85rem;
+  justify-content: space-between
+}
+
+.lp-deposit-ratio-display,
+.curator-info,
+.vault-actions,
+.coin-info,
+.vault-holding-asset,
+.vault-trade-asset,
+.vault-depositor-address,
+.position-pair {
+  align-items: center;
+  display: flex;
+  gap: .5rem
+}
+
+.lp-token-indicator {
+  align-items: center;
+  border-radius: 50%;
+  display: flex;
+  font-size: .6rem;
+  font-weight: 600;
+  height: 16px;
+  justify-content: center;
+  width: 16px
+}
+
+.lp-token-indicator-a {
+  background-color: #50f08dde;
+  color: #000
+}
+
+.lp-token-indicator-b {
+  background-color: #7f82ac;
+  color: #fff
+}
+
+.lp-search-section-header {
+  border-bottom: 1px solid #ffffff0a;
+  color: #e0e8fd90;
+  font-size: .75rem;
+  letter-spacing: 0 5em;
+  margin-bottom: .25rem;
+  padding: .75rem.5rem.25rem;
+  text-transform: uppercase
+}
+
+.lp-search-section-header:first-child {
+  padding-top: .5rem
+}
+
+.lp-search-token:hover,
+.vault-market-dropdown-item:hover {
+  background-color: #111113
+}
+
+.lp-search-token-star {
+  border-radius: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 2px;
+  transition: all.2s ease
+}
+
+.lp-search-token-star:hover {
+  background-color: #2a2a2f;
+  transform: scale(1.1)
+}
+
+.lp-search-token-star.favorited {
+  color: #aaaecf
+}
+
+.lp-token-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0
+}
+
+.lp-favorite-close-button {
+  align-items: center;
+  background-color: #0e0e0f;
+  border: 1px solid #1c1c1f;
+  border-radius: 50%;
+  color: #fff9;
+  cursor: pointer;
+  display: none;
+  font-size: 12px;
+  height: 16px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  position: absolute;
+  right: -5px;
+  top: -5px;
+  width: 16px;
+  z-index: 1
+}
+
+.lp-favorite-close-button:hover {
+  background-color: #131315;
+  color: #fff
+}
+
+.lp-trending-header {
+  align-items: center;
+  display: flex;
+  max-width: 100%;
+  padding-top: .3rem
+}
+
+.lp-trending-title {
+  color: #ffffff62;
+  font-size: .75rem;
+  font-weight: 400;
+  min-width: 130px;
+  padding-left: .5rem;
+  text-transform: uppercase
+}
+
+.lp-trending-line {
+  background-color: rgba(255, 255, 255, .2);
+  height: 1px;
+  width: 100%
+}
+
+.lp-search-token-favorites {
+  align-items: center;
+  background-color: #151518;
+  border-radius: 12px;
+  display: flex;
+  min-width: auto;
+  padding: 2px 4px;
+  position: relative
+}
+
+.lp-search-token-favorites:hover {
+  background-color: #1f1f23;
+  cursor: pointer
+}
+
+.lp-supply-tooltip-wrapper {
+  cursor: pointer;
+  display: inline-block;
+  position: relative
+}
+
+.lp-supply-tooltip {
+  animation: zoomFadeInUp.2s ease forwards;
+  backdrop-filter: blur(10px);
+  background-color: #0c0c0e;
+  border: 1px solid #131316;
+  border-radius: 8px;
+  bottom: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+  display: none;
+  left: -250%;
+  padding: 4px 8px;
+  position: absolute;
+  width: 250px;
+  z-index: 15
+}
+
+.lp-supply-tooltip-wrapper:hover .lp-supply-tooltip {
+  display: block
+}
+
+.lp-supply-tooltip-header {
+  align-items: baseline;
+  color: #87f8b2;
+  display: flex;
+  font-size: .8rem;
+  font-weight: 500;
+  gap: .3rem;
+  margin-bottom: .75rem
+}
+
+.lp-supply-tooltip-body {
+  display: flex;
+  gap: .75rem
+}
+
+.lp-supply-chart,
+.vault-detail-deposit-btn svg,
+.vault-detail-withdraw-btn svg {
+  flex-shrink: 0
+}
+
+.lp-supply-tooltip-metrics {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font-size: .75rem;
+  gap: .4rem;
+  justify-content: center
+}
+
+.lp-supply-tooltip-row {
+  display: flex;
+  justify-content: space-between
+}
+
+.lp-supply-tooltip-title-top {
+  color: rgba(255, 255, 255, .6);
+  font-size: .75rem;
+  letter-spacing: -.3px
+}
+
+.lp-supply-tooltip-top-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: .5rem;
+  padding: 0 5px
+}
+
+.lp-supply-tooltip-body-bottom {
+  align-items: center;
+  color: #ffffffa4;
+  display: flex;
+  font-size: .8rem;
+  min-width: 100%
+}
+
+.lp-risk-text {
+  min-width: 125px
+}
+
+.lp-supply-tooltip-body-bottom-line {
+  background-color: #ffffff4f;
+  height: 1px;
+  width: 100%
+}
+
+.lp-supply-row-detail {
+  color: #ffffff63;
+  font-size: .75rem
+}
+
+.lp-supply-row-value {
+  color: #ffffffef;
+  font-size: .75rem
+}
+
+.lp-overview-charts {
+  display: flex;
+  gap: 1rem;
+  width: 100%
+}
+
+.lp-overview-chart {
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 300px;
+  padding: 1rem;
+  width: 50%
+}
+
+.lp-overview-chart h4 {
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: 8px
+}
+
+.lp-trade-info-rectangle {
+  border-radius: 8px
+}
+
+.lp-verified-badge {
+  filter: brightness(0) saturate(120%) invert(83%) sepia(11%) saturate(527%) hue-rotate(194deg) brightness(95%) contrast(92%);
+  height: 18px;
+  margin-left: -2px;
+  width: 18px
+}
+
+.lp-verified-badge-detail {
+  height: 20px;
+  margin-left: 6px;
+  width: 20px
+}
+
+
+.lp-filter-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: .5rem;
+  width: 100%;
+}
+
+.add-liquidity-button:hover:not(:disabled),
+.create-vault-button:hover:not(:disabled),
+.deposit-button:hover:not(:disabled),
+.create-button.enabled:hover:not(:disabled),
+.save-button:hover:not(:disabled),
+.vault-deposit-btn:hover:not(:disabled),
+.vault-confirm-button:hover:not(:disabled),
+.vault-detail-deposit-btn:hover:not(:disabled) {
+  filter: brightness(1.1)
+}
+
+.add-liquidity-container {
+  color: #fff;
+  margin-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.add-liquidity-breadcrumb {
+  align-items: center;
+  color: #e0e8fd90;
+  display: flex;
+  font-size: .9rem;
+  gap: .5rem
+}
+
+.breadcrumb-link {
+  align-items: center;
+  background: 0 0;
+  border: none;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  font-size: .9rem;
+  text-decoration: none;
+  transition: color .2s ease
+}
+
+.add-liquidity-header,
+.performance-header,
+.vault-action-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem
+}
+
+.add-liquidity-header h1 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 300;
+  margin: 0
+}
+
+.reset-button {
+  align-items: center;
+  background: 0 0;
+  border: 1px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-size: .9rem;
+  gap: .5rem;
+  padding: .25rem 1rem;
+  transition: background-color.2s ease
+}
+
+.reset-button:hover {
+  background-color: #ffffff0a
+}
+
+.add-liquidity-main {
+  display: flex;
+  gap: 3rem
+}
+
+.steps-sidebar {
+  flex-shrink: 0;
+  width: 300px
+}
+
+.step {
+  align-items: center;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem
+}
+
+.step.active {
+  background-color: rgba(201, 194, 243, .133);
+  border-color: #aaaecfa2;
+  box-shadow: 0 0 0 2px rgba(170, 174, 207, .3);
+  color: #d8dcff
+}
+
+.step-number {
+  align-items: center;
+  border: 1.5px solid #2a2a2f;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  flex-shrink: 0;
+  font-weight: 600;
+  height: 32px;
+  justify-content: center;
+  width: 32px
+}
+
+.step-content h3 {
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: -.5px
+}
+
+.step-content p {
+  color: #e0e8fd90;
+  font-size: .8rem;
+  letter-spacing: -.3px;
+  line-height: 1.4;
+  margin: 0
+}
+
+.add-liquidity-form {
+  border: 1px solid rgba(179, 184, 249, .1);
+  border-radius: 12px;
+  flex: 1;
+  padding: 1rem
+}
+
+.form-section h2 {
+  color: #fff;
+  font-size: 1.3rem;
+  letter-spacing: -.5px
+}
+
+.section-description {
+  color: #e0e8fd90;
+  font-size: .9rem;
+  letter-spacing: -.3px;
+  line-height: 1;
+  margin-bottom: 1rem;
+  margin-top: .2rem
+}
+
+.token-pair-selection {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem
+}
+
+.lp-token-dropdown-wrapper {
+  flex: 1;
+  position: relative
+}
+
+.lp-token-dropdown {
+  align-items: center;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-size: 1rem;
+  justify-content: space-between;
+  letter-spacing: -.5px;
+  padding: .5rem .75rem;
+  transition: all.2s ease;
+  width: 100%
+}
+
+.lp-token-dropdown:hover {
+  border-color: rgba(179, 184, 249, .15)
+}
+
+.lp-token-dropdown.choose-token {
+  background-color: #fff;
+  border-color: #ddd;
+  color: #000
+}
+
+.create-vault-token-option {
+  align-items: center;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  gap: .5rem;
+  padding: 0.5rem 1rem;
+  transition: background-color.2s ease
+}
+
+.create-vault-token-option:hover {
+  background-color: #161619
+}
+
+.lp-button-balance-error,
+.create-button:disabled,
+.create-vault-button.disabled,
+.vault-deposit-btn.disabled,
+.vault-withdraw-btn.disabled,
+.vault-confirm-button.disabled,
+.vault-detail-deposit-btn.disabled,
+.vault-detail-withdraw-btn.disabled,
+.save-button.disabled {
+  cursor: not-allowed;
+  opacity: .5
+}
+
+@media(max-width:820px) {
+  .add-liquidity-container {
+    padding: 1rem
+  }
+
+  .add-liquidity-header h1 {
+    font-size: 2rem
+  }
+
+  .add-liquidity-main {
+    flex-direction: column;
+    gap: 2rem
+  }
+
+  .steps-sidebar {
+    width: 100%
+  }
+
+  .token-pair-selection {
+    flex-direction: column
+  }
+}
+
+.fee-tier-options {
+  display: flex;
+  gap: 12px
+}
+
+.fee-tier-option {
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+  transition: all.2s ease
+}
+
+.fee-tier-option:hover,
+.type-option:hover {
+  background-color: rgba(170, 174, 207, .05);
+  border-color: #aaaecf
+}
+
+.fee-tier-percentage {
+  color: #d8dcff;
+  font-size: 18px;
+  margin-left: 3px;
+  min-width: 60px;
+  text-shadow: 0 0 2px 2px#d8dcff;
+  transform: scaleX(1.03)
+}
+
+.fee-tier-description {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px
+}
+
+.fee-tier-title {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  margin-top: 8px
+}
+
+.fee-tier-subtitle {
+  color: #e0e8fd90;
+  font-size: 12px;
+  letter-spacing: -.3px;
+  line-height: 1
+}
+
+.fee-tier-select {
+  color: #aaaecf;
+  font-size: 20px;
+  margin-left: 16px
+}
+
+.lp-token-icon-wrapper {
+  align-items: center;
+  display: flex;
+  gap: 6px
+}
+
+.liquidity-token-icon,
+.market-icon {
+  border-radius: 50%;
+  height: 24px;
+  width: 24px
+}
+
+.deposit-amounts-section {
+  margin-bottom: 0.5rem;
+}
+
+.deposit-input-group label {
+  color: #e0e8fd90;
+  display: block;
+  font-size: .8rem;
+  letter-spacing: -.3px;
+  margin-bottom: .5rem
+}
+
+.deposit-amount-input {
+  background: 0 0;
+  border: none;
+  color: #fff;
+  flex: 1;
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: -.5px;
+  min-width: 0;
+  outline: 0;
+  padding: 0;
+  padding-left: 10px;
+  padding-top: 5px
+}
+
+.deposit-token-badge {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  gap: .25rem;
+  margin-left: .5rem;
+  margin-top: .5rem
+}
+
+.lp-deposit-usd-value {
+  color: #e3e8fd79;
+  font-size: .85rem
+}
+
+.lp-deposit-balance-wrapper {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 12px 6px;
+  width: 100%
+}
+
+.deposit-token-icon,
+.vault-token-icon,
+.vault-holding-icon,
+.vault-trade-icon {
+  border: 1px solid #131317;
+  border-radius: 50%;
+  height: 24px;
+  width: 24px
+}
+
+.deposit-token-badge span,
+.vault-form-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: -.3px
+}
+
+.deposit-balance {
+  align-items: center;
+  color: #e0e8fd90;
+  display: flex;
+  font-size: .75rem;
+  gap: 5px;
+  letter-spacing: -.3px
+}
+
+.deposit-balance-value,
+.table-col {
+  align-items: center;
+  display: flex;
+  font-size: .8rem
+}
+
+.step:not(.active) {
+  opacity: .6
+}
+
+.step:not(.active) .step-number {
+  background-color: transparent;
+  color: #e0e8fd90
+}
+
+.step:not(.active) .step-content h3,
+.contract-label,
+.leader-label,
+.token-search svg {
+  color: #e0e8fd90
+}
+
+.step:not(.active) .step-content p {
+  color: #ffffff54
+}
+
+.lp-input-container-balance-error {
+  animation: lp-pulse-error 2s infinite;
+  background-color: #ff575709;
+  border: 1px solid #ff57576f !important;
+  box-shadow: 0 0 5px rgba(255, 87, 87, .2)
+}
+
+.lp-input-balance-error,
+.lp-usd-value-balance-error,
+.vault-pnl-negative {
+  color: rgb(235, 112, 112);
+}
+
+.vault-tabs {
+  display: flex;
+  height: 33px;
+  overflow: hidden;
+  text-wrap: nowrap;
+  gap: 12px;
+}
+
+.vault-tab {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: #e0e8fd90;
+  font-size: 1.2rem;
+  font-weight: 300;
+  cursor: pointer;
+  transition: color .3s ease;
+  white-space: nowrap;
+  text-align: center;
+  height: 30px;
+  letter-spacing: -0.5px;
+}
+
+.vault-tab:hover,
+.chart-type-btn:hover,
+.tab-btn:hover {
+  color: #fff
+}
+
+.vault-tab.active{
+  color: #fff;
+}
+
+.chart-type-btn.active {
+  color: #fff;
+  background-color: #161618;
+}
+
+.vault-deposit-form,
+.vault-withdraw-form,
+.vault-strategy-detail,
+.vault-data-table,
+.form-input,
+.form-group,
+.balances-tab {
+  width: 100%
+}
+
+.vault-form-description {
+  color: #e0e8fd90;
+  font-size: .75rem;
+  letter-spacing: -.2px;
+  line-height: 1.2;
+  margin-bottom: 1rem
+}
+
+.withdraw-section {
+  margin-bottom: 1rem
+}
+
+.withdraw-preview {
+  margin: 0 0.25rem;
+}
+
+.add-liquidity-breadcrumb .breadcrumb-link,
+.breadcrumb-link {
+  align-items: center;
+  background: 0 0;
+  border: none;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  font-size: .9rem;
+  text-decoration: none;
+  transition: color.2s ease
+}
+
+@media(max-width:1024px) {
+  .vault-detail-layout {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .vault-strategy-sticky-bar {
+    padding-top: 5px;
+    align-items: flex-start;
+    flex-direction: column
+  }
+
+  .vault-strategy-metrics {
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: flex-start;
+    width: 100%
+  }
+
+  .vault-detail-action-buttons {
+    margin-top: .5rem
+  }
+
+  .vault-strategy-types-rectangle {
+    flex-wrap: wrap
+  }
+
+  .vault-data-table-header,
+  .vault-data-table-row {
+    grid-template-columns: repeat(3, 1fr)
+  }
+
+  .vault-holdings-header,
+  .vault-holdings-row {
+    grid-template-columns: 2fr 1fr 1fr
+  }
+
+  .vault-holdings-header .vault-holdings-col-header:last-child,
+  .vault-holdings-row .vault-holdings-col:last-child {
+    display: none
+  }
+}
+
+@media(max-width:650px) {
+  .vaults-filters {
+    flex-direction: column;
+    gap: .5rem
+  }
+
+  .vault-tabs {
+    width: 100%
+  }
+
+  .filter-controls {
+    gap: .5rem;
+    width: 100%
+  }
+
+  .vaults-search-container {
+    min-width: 0 !important;
+    width: 100%
+  }
+}
+
+@media(max-width:400px) {
+  .filter-controls {
+    flex-direction: column;
+    gap: .5rem !important
+  }
+
+  .filter-button {
+    text-align: center;
+    width: 100%
+  }
+
+  .type-filters {
+    width: 100%
+  }
+}
+
+.page-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 40px;
+  max-width: 1100px;
+  width: 100%
+}
+
+.page-toggle {
+  background-color: rgba(6, 6, 6, .8);
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 12px;
+  display: flex;
+  gap: 4px;
+  height: 40px;
+  overflow: hidden;
+  position: relative
+}
+
+.page-toggle::before {
+  background-color: rgba(201, 194, 243, .05);
+  border-radius: 8px;
+  content: '';
+  height: calc(100% - 8px);
+  left: 4px;
+  position: absolute;
+  top: 4px;
+  transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+  width: calc(50% - 4px);
+  z-index: 1
+}
+
+.page-toggle-tab {
+  background: 0 0;
+  border: none;
+  color: #e0e8fd90;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 400;
+  height: 36px;
+  letter-spacing: -.3px;
+  min-width: 160px;
+  padding: 0 1.5rem;
+  position: relative;
+  text-align: center;
+  transition: color .3s ease;
+  white-space: nowrap;
+  z-index: 2
+}
+
+.vaults-header {
+  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+}
+
+.vaults-stats {
+  align-items: center;
+  display: flex;
+  gap: 3rem
+}
+
+.vault-stat {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column
+}
+
+.create-vault-button {
+  align-items: center;
+  background: linear-gradient(135deg, #aaaecf 0, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
+  font-size: .85rem;
+  font-weight: 500;
+  gap: .5rem;
+  height: 34px;
+  letter-spacing: -.5px;
+  padding: .5rem .75rem;
+  position: absolute;
+  right: 0;
+  top: -80px;
+  transition: all .2s ease;
+  white-space: nowrap;
+}
+
+.vaults-filters {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: .5rem;
+  width: 100%;
+  padding: 0 5px;
+}
+
+.vaults-search-container {
+  align-items: center;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 20px;
+  display: flex;
+  gap: .3rem;
+  height: 32px;
+  min-width: 240px;
+  padding: 0 .5rem;
+  transition: all.2s ease
+}
+
+.vaults-search-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  flex: 1;
+  font-size: .8rem;
+  min-width: 0;
+  outline: 0;
+}
+
+.vaults-list {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.vault-row {
+  transition: background-color .2s ease;
+  cursor: pointer;
+  margin-bottom: 2px;
+  padding: .2rem;
+  min-width: 780px;
+  align-items: center;
+  display: flex;
+  border-radius: 4px;
+}
+
+.vault-row:last-child,
+.vault-market-dropdown-item:last-child,
+.vault-holdings-row:last-child,
+.vault-management-option:last-child,
+.time-range-option:last-child {
+  border-bottom: none
+}
+
+.col {
+  align-items: center;
+  display: flex;
+  flex: 1
+}
+
+.vault-type-col,
+.vault-apy-col,
+.vault-age-col {
+  flex: .8
+}
+
+.vault-name-col,
+.vault-curator-col,
+.vault-leader-col {
+  flex: 1.2
+}
+
+.vault-name-container {
+  align-items: center;
+  display: flex;
+  gap: .3rem;
+  width: 100%
+}
+
+.vault-name {
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 400;
+  letter-spacing: -.3px;
+  margin: 0
+}
+
+.vault-description {
+  color: #e0e8fd90;
+  font-size: .8rem;
+  letter-spacing: -.2px;
+  line-height: 1.3;
+  margin: 0
+}
+
+.creator-badge {
+  align-items: center;
+  background: rgba(170, 174, 207, .1);
+  border-radius: 12px;
+  color: #aaaecf;
+  display: inline-flex;
+  font-size: .65rem;
+  font-weight: 500;
+  justify-content: center;
+  letter-spacing: -.2px;
+  padding: 2px 8px;
+  width: -moz-fit-content;
+  width: fit-content
+}
+
+.vault-type-badge {
+  align-items: center;
+  display: inline-flex;
+  font-size: .85rem;
+  justify-content: center;
+  letter-spacing: -.3px
+}
+
+.vault-tokens {
+  align-items: flex-start;
+  display: flex
+}
+
+.quote-token,
+.deposit-token-info {
+  align-items: center;
+  display: flex;
+  gap: .3rem
+}
+
+.quote-label,
+.position-balance {
+  color: #e0e8fd90;
+  font-size: .8rem;
+  letter-spacing: -.3px
+}
+
+.tradable-token-icon {
+  border: 1.5px solid #131317;
+  border-radius: 50%;
+  height: 20px;
+  margin-left: -6px;
+  position: relative;
+  width: 20px
+}
+
+.tradable-token-icon:first-child,
+.vault-skeleton-token-icon:first-child {
+  margin-left: 0
+}
+
+.more-tokens {
+  color: #e0e8fd90;
+  font-size: .7rem;
+  letter-spacing: -.2px;
+  margin-left: .5rem
+}
+
+.apy-value {
+  color: #eaebf2;
+  font-size: .9rem;
+  font-weight:300
+}
+
+.deposits-value {
+  color: #eaebf2;
+  font-size: .9rem;
+  font-weight: 300;
+}
+
+.curator-name {
+  color: #fff;
+  font-size: .8rem;
+  letter-spacing: -.3px
+}
+
+.edit-button,
+.share-button {
+  align-items: center;
+  background: 0 0;
+  border: 1px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  transition: all.2s ease;
+  width: 32px
+}
+
+.edit-button:hover,
+.share-button:hover {
+  background-color: #ffffff0a;
+  border-color: #aaaecf;
+  color: #fff
+}
+
+.deposit-button {
+  background: linear-gradient(135deg, #aaaecf 0, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  color: #000;
+  cursor: pointer;
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: -.3px;
+  padding: 6px 12px;
+  transition: all.2s ease
+}
+
+.modal-content {
+  background-color: #060606;
+  border: 1px solid rgba(179, 184, 249, .15);
+  border-radius: 6px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
+  max-height: 90vh;
+  max-width: 500px;
+  min-width: 350px;
+  overflow-y: auto;
+  width: 100%
+}
+
+.modal-header {
+  align-items: center;
+  border-bottom: 1px solid rgba(179, 184, 249, .15);
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 15px
+}
+
+.modal-header h2 {
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: -.3px;
+  margin: 0
+}
+
+.modal-body {
+  padding: 0rem 1rem 0rem 1rem;
+}
+
+.form-group {
+  margin-top: 1rem;
+}
+
+.form-group label {
+  color: #fff;
+  display: block;
+  font-size: .85rem;
+  letter-spacing: -.3px;
+  margin-bottom: .5rem
+}
+
+.form-input,
+.form-textarea {
+  background: 0 0;
+  border: 1px solid rgba(179, 184, 249, .15);
+  border-radius: 4px;
+  color: #fff;
+  font-size: .85rem;
+  letter-spacing: -.3px;
+  padding: .25rem;
+  padding-left: .5rem;
+  transition: all.2s ease;
+  width: 100%
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.time-range-select-button:focus {
+  outline: none;
+}
+
+.form-group small {
+  color: #e0e8fd90;
+  display: block;
+  font-size: .75rem;
+  letter-spacing: -.2px;
+  margin-top: .25rem
+}
+
+.vault-type-selector,
+.vault-strategy-overview {
+  display: flex;
+}
+
+.type-option {
+  background: 0 0;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1rem;
+  text-align: left;
+  transition: all.2s ease
+}
+
+.type-title {
+  color: #fff;
+  font-size: .9rem;
+  letter-spacing: -.3px;
+  margin-bottom: .25rem
+}
+
+.type-desc {
+  color: #e0e8fd90;
+  font-size: .75rem;
+  letter-spacing: -.2px
+}
+
+.deposit-info {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: .25rem
+}
+
+.vault-requirements h4 {
+  color: #fff;
+  font-size: .9rem;
+  letter-spacing: -.3px;
+  margin: 0 0 .75rem
+}
+
+.vault-requirements li {
+  color: #e0e8fd90;
+  font-size: .75rem;
+  letter-spacing: -.2px;
+  line-height: 1.3;
+  margin-bottom: .5rem
+}
+
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding: 1rem;
+}
+
+.vault-cancel-button {
+  background: 0 0;
+  border: 1px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: .85rem;
+  letter-spacing: -.3px;
+  padding: .5rem 1rem;
+  transition: all.2s ease
+}
+
+.vault-cancel-button:hover {
+  background-color: #ffffff0a;
+  border-color: #aaaecf
+}
+
+.create-button,
+.save-button {
+  background: linear-gradient(135deg, #aaaecf 0, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  color: #000;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 500;
+  letter-spacing: -.5px;
+  height: 32px;
+  padding: .3rem 1rem;
+  transition: all.2s ease;
+  width: 100%
+}
+
+.save-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.create-button:disabled {
+  cursor: not-allowed;
+  opacity: .5
+}
+
+.vault-strategy-detail {
+  width: 100%
+}
+
+.vault-strategy-sticky-bar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0
+}
+
+.vault-strategy-content {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+}
+
+.copy-address-btn {
+  background: 0 0;
+  border: none;
+  border-radius: 4px;
+  color: #e0e8fd90;
+  cursor: pointer;
+  padding: 0;
+  transition: all .2s ease
+}
+
+.copy-address-btn:hover {
+  background-color: #ffffff0a;
+  color: #fff
+}
+
+.vault-strategy-metrics {
+  align-items: center;
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem
+}
+
+.vault-metric {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  text-align: right
+}
+
+.vault-metric-label {
+  color: #e0e8fd90;
+  font-size: .75rem;
+  margin-bottom: .25rem;
+  letter-spacing: -0.3px;
+}
+
+.vault-metric-value {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 300
+}
+
+.metric-positive {
+  color: #d8dcff
+}
+
+.vault-strategy-description {
+  border-radius: 8px;
+  max-width: 400px;
+  min-width: 350px;
+  padding: 1rem
+}
+
+.description-header {
+  display: flex;
+  flex-direction: column;
+  font-size: .8rem;
+  margin-bottom: .25rem
+}
+
+.description-text {
+  color: #fff;
+  font-size: .75rem;
+  line-height: 1.2;
+  margin-bottom: .7rem
+}
+
+.twitter-link-description {
+  align-items: center;
+  color: #e0e8fd90;
+  display: inline-flex;
+  font-size: .8rem;
+  gap: .5rem;
+  text-decoration: none;
+  transition: color.2s ease
+}
+
+.vault-strategy-performance {
+  border-left: 1px solid rgba(179, 184, 249, .1);
+  padding: 1rem;
+  width: 100%
+}
+
+.chart-controls {
+  display: flex;
+  justify-content: space-between;
+  width: 100%
+}
+
+.chart-type-toggle {
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 20px;
+  display: flex;
+  overflow: hidden
+}
+
+.chart-type-btn {
+  background: 0 0;
+  border: none;
+  border-radius: 20px;
+  color: #e0e8fd90;
+  cursor: pointer;
+  font-size: .75rem;
+  margin: 3px;
+  padding: .1rem .75rem;
+  transition: all.2s ease
+}
+
+.time-range-select {
+  background: 0 0;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: .75rem;
+  padding: .25rem .5rem
+}
+
+.time-range-select:focus {
+  border-color: #aaaecf;
+  outline: 0
+}
+
+.performance-chart {
+  height: 230px;
+  padding: 0 .5rem
+}
+
+.vault-strategy-tabs {
+  border-top: 1px solid rgba(179, 184, 249, .1);
+  overflow: hidden
+}
+
+.tab-buttons {
+  background-color: rgba(6, 6, 6, .4);
+  border-bottom: 1px solid rgba(179, 184, 249, .1);
+  display: flex;
+  overflow-x: auto
+}
+
+.tab-btn {
+  background: 0 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #e0e8fd90;
+  cursor: pointer;
+  font-size: .8rem;
+  padding: 1rem 1.5rem;
+  transition: all.2s ease;
+  white-space: nowrap
+}
+
+.tab-btn.active {
+  background-color: rgba(201, 194, 243, .05);
+  border-bottom-color: #aaaecf;
+  color: #fff
+}
+
+.tab-content {
+  min-height: 400px;
+  padding: 1.5rem
+}
+
+.balances-overview {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+}
+
+.balance-item {
+  align-items: center;
+  background-color: rgba(170, 174, 207, .02);
+  border: 1px solid rgba(179, 184, 249, .05);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem
+}
+
+.balance-value {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 400
+}
+
+.depositors-table,
+.deposits-table,
+.positions-table,
+.trades-table {
+  border-collapse: collapse;
+  width: 100%
+}
+
+.table-header {
+  background-color: rgba(6, 6, 6, .4);
+  border-bottom: 1px solid rgba(179, 184, 249, .1);
+  color: #e0e8fd90;
+  display: grid;
+  font-size: .75rem;
+  font-weight: 300;
+  gap: 1rem;
+  grid-template-columns: repeat(9, 1fr);
+  padding: .75rem
+}
+
+.table-row {
+  border-bottom: 1px solid rgba(179, 184, 249, .05);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(9, 1fr);
+  padding: 1rem .75rem;
+  transition: background-color.2s ease
+}
+
+.table-row:hover {
+  background-color: #ffffff02
+}
+
+.coin-icon,
+.token-icon-small,
+.market-icon-small {
+  border-radius: 50%;
+  height: 20px;
+  width: 20px
+}
+
+.coin-symbol {
+  color: #fff;
+  font-weight: 500
+}
+
+.leverage,
+.vault-leverage {
+  background: rgba(255, 193, 7, .1);
+  border-radius: 4px;
+  color: #ffc107;
+  font-size: .7rem;
+  margin-left: .5rem;
+  padding: 2px 6px
+}
+
+.pnl.positive,
+.snapshot-change.positive,
+.vault-stat-item .stat-value.positive,
+.status-success {
+  color: #50f08d
+}
+
+.pnl.negative,
+.snapshot-change.negative,
+.vault-management-option.vault-close-option,
+.status-error {
+  color: rgb(235, 112, 112)
+}
+
+.margin-type {
+  background: rgba(170, 174, 207, .1);
+  border-radius: 4px;
+  color: #aaaecf;
+  font-size: .7rem;
+  padding: 2px 8px
+}
+
+@media(max-width:1020px) {
+  .filter-controls {
+    justify-content: space-between
+  }
+
+  .vault-strategy-sticky-bar {
+    align-items: flex-start;
+    flex-direction: column
+  }
+
+  .vault-strategy-metrics {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%
+  }
+
+  .chart-controls {
+    align-items: stretch;
+    flex-direction: column;
+    gap: .5rem
+  }
+
+  .tab-buttons {
+    flex-wrap: wrap
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: repeat(4, 1fr)
+  }
+
+  .vaults-page-container {
+    padding-bottom: 40px
+  }
+}
+
+.leader-token-name {
+  color: #ffffff8e;
+  font-size: .85rem;
+  letter-spacing: -.3px;
+  font-weight: 300;
+}
+
+.vault-snapshot {
+  align-items: center;
+  border-radius: 8px;
+  display: flex;
+  gap: .75rem;
+  transition: background-color.2s ease
+}
+
+.vault-snapshot:hover {
+  background-color: rgba(255, 255, 255, .02)
+}
+
+.snapshot-chart {
+  flex-shrink: 0;
+  height: 32px;
+  width: 80px
+}
+
+.snapshot-stats {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 2px
+}
+
+.snapshot-change {
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: -.3px
+}
+
+.col.vault-snapshot-col {
+  justify-content: flex-end
+}
+
+.age-value{  
+  color: #ffffffaf;
+  font-size: .8rem;
+  letter-spacing: -.3px;
+  font-weight: 300;
+}
+
+.vault-market-dropdown-container {
+  margin-bottom: 1rem;
+  position: relative
+}
+
+.vault-market-dropdown-container.open .vault-market-arrow {
+  transform: rotate(180deg)
+}
+
+.vault-market-selected-display {
+  align-items: center;
+  background-color: transparent;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  padding: .75rem;
+  transition: all.2s ease
+}
+
+.vault-market-selected-display:hover {
+  border-color: rgba(179, 184, 249, .2)
+}
+
+.vault-market-selected-info,
+.vault-market-item-info {
+  align-items: center;
+  display: flex;
+  gap: .75rem
+}
+
+.vault-market-icon {
+  border: 1.5px solid #131317;
+  border-radius: 50%;
+  height: 28px;
+  width: 28px
+}
+
+.vault-market-name,
+.pair-name,
+.token-symbol {
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 400;
+  letter-spacing: -.3px
+}
+
+.vault-market-placeholder {
+  color: #e0e8fd90;
+  font-size: .9rem;
+  font-weight: 400
+}
+
+.vault-market-arrow {
+  color: #e0e8fd90;
+  flex-shrink: 0;
+  height: 18px;
+  transition: transform.2s ease;
+  width: 18px
+}
+
+.vault-market-dropdown-list {
+  background-color: #060606;
+  border: 1.5px solid #0f0f11;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+  left: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 100
+}
+
+.vault-market-dropdown-item {
+  align-items: center;
+  border-bottom: 1px solid rgba(179, 184, 249, .05);
+  cursor: pointer;
+  display: flex;
+  padding: .75rem;
+  transition: all.2s ease
+}
+
+.vault-market-dropdown-item.selected {
+  background-color: rgba(170, 174, 207, .1);
+  color: #aaaecf
+}
+
+.vault-market-info-text {
+  background-color: rgba(170, 174, 207, .02);
+  border: 1px solid rgba(179, 184, 249, .05);
+  border-radius: 8px;
+  padding: 1rem
+}
+
+.vault-market-info-text p {
+  color: #e0e8fd90;
+  font-size: .85rem;
+  letter-spacing: -.2px;
+  line-height: 1.4;
+  margin: 0
+}
+
+.vault-deposit-info {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  margin-top: .5rem
+}
+
+.vault-deposit-info small {
+  color: #e0e8fd90;
+  display: block;
+  font-size: .75rem;
+  letter-spacing: -.2px
+}
+
+.vault-socials-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: .75rem
+}
+
+.vault-social-label {
+  color: #fff;
+  font-size: .8rem;
+  letter-spacing: -.3px;
+  margin-bottom: .5rem
+}
+
+.optional-text {
+  color: #e0e8fd90;
+  font-size: .75rem;
+  font-weight: 300
+}
+
+.form-group .vault-socials-grid .form-input:focus {
+  border-color: #aaaecf;
+  box-shadow: 0 0 0 2px rgba(170, 174, 207, .3);
+  outline: 0
+}
+
+.form-group .vault-socials-grid .form-input::-moz-placeholder {
+  color: #ffffff4d
+}
+
+.form-group .vault-socials-grid .form-input::placeholder {
+  color: #ffffff4d
+}
+
+.vaults-page-container {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 1100px;
+  padding-bottom: 20px;
+  width: 100%;
+}
+
+.page-toggle[data-active=vaults]::before {
+  transform: translateX(100%)
+}
+
+.page-toggle-tab:hover {
+  color: #fff
+}
+
+.page-toggle-tab.active {
+  color: #fff
+}
+
+.page-toggle-tab:focus {
+  outline: 0
+}
+
+.create-vault-button.disabled {
+  cursor: not-allowed;
+  opacity: .5
+}
+
+.create-vault-button.disabled:hover {
+  filter: none
+}
+
+.type-filters {
+  align-items: center;
+  display: flex;
+  gap: .5rem
+}
+
+.filter-button {
+  align-items: center;
+  background: 0 0;
+  background-color: rgba(162, 168, 232, 0.035);
+  border-radius: 20px;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  font-size: .85rem;
+  height: 32px;
+  justify-content: center;
+  padding: .5rem .75rem;
+  transition: all.3s ease;
+  white-space: nowrap
+}
+
+.filter-button:hover {
+  color: #fff
+}
+
+.filter-button.active {
+  background-color: #7375a931;
+  color:#d8dcff;
+}
+
+.vaults-list-header {
+  display: flex;
+  padding: .5rem .4rem;
+  background-color: transparent;
+  color: #e0e8fd90;
+  font-size: .75rem;
+  letter-spacing: -.3px;
+  font-weight: 300;
+  min-width: 780px;
+  flex: 1;
+}
+
+.vault-row:hover {
+  background-color: #2d2d3124
+}
+
+.vault-row:last-child {
+  border-bottom: none
+}
+
+.vault-name-col .vault-leader-col .vault-type-col .vault-tokens-col .vault-apy-col .vault-deposits-col .vault-your-deposits-col .vault-age-col .vault-actions-col {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: .3rem;
+}
+
+.vault-actions-col{
+  justify-content: flex-end
+}
+
+.vault-action-buttons-col {
+  flex: 1.5;
+  justify-content: flex-end
+}
+
+.quote-token {
+  align-items: center;
+  display: flex;
+  gap: .3rem
+}
+
+.tradable-tokens {
+  align-items: center;
+  display: flex;
+  position: relative
+}
+
+.tradable-token-icon:first-child {
+  margin-left: 0
+}
+
+.age-value {
+  color: #ffffffaf;
+  font-size: .8rem;
+  letter-spacing: -.3px
+}
+
+.vault-action-buttons {
+  align-items: center;
+  display: flex;
+  gap: .5rem
+}
+
+.vault-deposit-btn,
+.vault-withdraw-btn {
+  background: linear-gradient(135deg, #aaaecf 0, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  color: #000;
+  cursor: pointer;
+  font-size: .75rem;
+  letter-spacing: -.3px;
+  min-width: 70px;
+  padding: 6px 12px;
+  transition: all.2s ease;
+  white-space: nowrap
+}
+
+.vault-withdraw-btn {
+  background: 0 0;
+  border: 1px solid rgba(179, 184, 249, .3);
+  box-shadow: none;
+  color: #aaaecf
+}
+
+.vault-withdraw-btn:hover,
+.vault-detail-withdraw-btn:hover {
+  background-color: rgba(170, 174, 207, .1);
+  border-color: #aaaecf
+}
+
+.vault-action-modal {
+  max-width: 400px;
+  width: 90%
+}
+
+.vault-action-info {
+  background-color: rgba(170, 174, 207, .02);
+  border: 1px solid rgba(179, 184, 249, .05);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  padding: 1rem
+}
+
+.vault-action-header h3 {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: -.3px;
+  margin: 0
+}
+
+.vault-action-type {
+  background: rgba(170, 174, 207, .1);
+  border-radius: 8px;
+  color: #aaaecf;
+  font-size: .75rem;
+  letter-spacing: -.2px;
+  padding: 4px 8px
+}
+
+.vault-action-stats {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr)
+}
+
+.vault-stat-item {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  text-align: center
+}
+
+.vault-stat-item .stat-label {
+  color: #e0e8fd90;
+  font-size: .75rem;
+  letter-spacing: -.2px;
+  margin-bottom: .25rem
+}
+
+.vault-stat-item .stat-value {
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 400;
+  letter-spacing: -.3px
+}
+
+.vault-input-container {
+  align-items: center;
+  background: 0 0;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  display: flex;
+  position: relative;
+  transition: all.2s ease
+}
+
+.vault-amount-input {
+  background: 0 0;
+  border: none;
+  color: #fff;
+  flex: 1;
+  font-size: 1.2rem;
+  font-weight: 300;
+  letter-spacing: -.3px;
+  outline: 0;
+  padding: .5rem .75rem
+}
+
+.vault-input-token {
+  align-items: center;
+  color: #e0e8fd90;
+  display: flex;
+  font-size: .85rem;
+  gap: .25rem;
+  letter-spacing: -.3px;
+  padding: .5rem .75rem
+}
+
+.vault-balance-info span {
+  align-items: center;
+  display: flex
+}
+
+.vault-balance-info {
+  align-items: center;
+  color: #e0e8fd90;
+  display: flex;
+  font-size: .75rem;
+  justify-content: space-between;
+  margin-top: .5rem
+}
+
+.vault-max-button {
+  border-radius: 4px;
+  color: #aaaecf;
+  cursor: pointer;
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: -.3px;
+  transition: all.2s ease
+}
+
+.preview-row {
+  align-items: center;
+  color: #e0e8fd90;
+  display: flex;
+  font-size: .85rem;
+  justify-content: space-between;
+  margin-bottom: .5rem
+}
+
+.preview-row.total {
+  border-top: 1px solid rgba(179, 184, 249, .1);
+  color: #fff;
+  font-weight: 500;
+  margin-top: .5rem;
+  padding-top: .5rem
+}
+
+.preview-row span:last-child,
+.breadcrumb-current {
+  color: #fff;
+  font-weight: 400
+}
+
+.vault-withdraw-warning {
+  align-items: flex-start;
+  background-color: rgba(255, 193, 7, .1);
+  border: 1px solid rgba(255, 193, 7, .2);
+  border-radius: 8px;
+  color: #ffc107;
+  display: flex;
+  font-size: .75rem;
+  gap: .5rem;
+  line-height: 1.4;
+  margin-top: 1rem;
+  padding: .75rem
+}
+
+.vault-withdraw-warning svg {
+  flex-shrink: 0;
+  margin-top: 1px
+}
+
+.vault-confirm-button {
+  align-items: center;
+  background: linear-gradient(135deg, #aaaecf 0, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  font-size: .9rem;
+  font-weight: 500;
+  justify-content: center;
+  letter-spacing: -.5px;
+  padding: .3rem 1rem;
+  transition: all.2s ease;
+  width: 100%;
+  height: 30px;
+}
+
+.vault-confirm-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.button-content {
+  align-items: center;
+  display: flex;
+  gap: .5rem;
+  justify-content: center
+}
+
+.vault-strategy-breadcrumb-container {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.breadcrumb-link:hover {
+  color: #fff
+}
+
+.breadcrumb-current {
+  color: #fff;
+  font-weight: 400
+}
+
+.vault-detail-action-buttons {
+  align-items: center;
+  display: flex;
+  gap: .75rem
+}
+
+.vault-detail-deposit-btn,
+.vault-detail-withdraw-btn {
+  align-items: center;
+  background: linear-gradient(135deg, #aaaecf 0, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  font-size: .85rem;
+  font-weight: 500;
+  gap: .5rem;
+  height: 30px;
+  letter-spacing: -.3px;
+  padding: .3rem 1rem;
+  transition: all.2s ease;
+  white-space: nowrap
+}
+
+.vault-detail-deposit-btn.disabled svg,
+.vault-detail-withdraw-btn.disabled svg,
+.deposit-token-amount-before {
+  opacity: .5
+}
+
+.vault-strategy-header {
+  padding-bottom: 0.5rem;
+  position: relative
+}
+
+.vault-strategy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vault-strategy-name {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -1px;
+  margin-top: -0.25rem;
+}
+
+.vault-strategy-contract {
+  align-items: center;
+  color: #e0e8fd90;
+  display: flex;
+  font-size: .8rem;
+  gap: .3rem
+}
+
+.contract-label {
+  color: #e0e8fd90
+}
+
+.contract-address {
+  color: #fff;
+  font-size: .75rem
+}
+
+
+@media (max-width:768px) {
+
+  .vault-strategy-description {
+    border-radius: 8px;
+    width: 100%;
+    max-width: none;
+    min-width: auto;
+    padding: 1rem;
+  }
+  .vault-strategy-name {
+    font-size: 1.2rem
+  }
+
+  .vault-strategy-contract {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .25rem
+  }
+
+  .vault-strategy-sticky-bar {
+    margin-top: 1rem;
+  }
+
+  .vault-strategy-overview {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .add-liquidity-button {
+    font-size: .8rem;
+    padding: .45rem .7rem;
+    top: -85px;
+  }
+}
+
+
+
+@media (max-width:480px) {
+  .vault-detail-action-buttons {
+    flex-direction: column;
+    gap: .5rem
+  }
+
+  .vault-detail-deposit-btn,
+  .vault-detail-withdraw-btn {
+    width: 100%
+  }
+
+  .add-liquidity-breadcrumb {
+    font-size: .8rem
+  }
+
+  .vault-strategy-breadcrumb-container {
+    padding: .75rem 0
+  }
+
+  .vault-strategy-type {
+    font-size: .7rem;
+    padding: .5rem .75rem
+  }
+
+  .vault-data-col,
+  .vault-holdings-col {
+    font-size: .75rem
+  }
+
+  .vault-tab-content {
+    padding: .75rem
+  }
+}
+
+.vault-strategy-tabs-container {
+  background-color: rgba(6, 6, 6, .4);
+  border-bottom: 1px solid rgba(179, 184, 249, .1);
+  position: relative
+}
+
+.vault-strategy-types-rectangle {
+  display: flex;
+  position: relative;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none
+}
+
+.vault-strategy-type {
+  background: 0 0;
+  color: #e0e8fd73;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 300;
+  padding: 8px 20px;
+  text-align: center;
+  text-decoration: none;
+  transition: opacity.2s, color.3s, text-shadow.3s;
+  white-space: nowrap
+}
+
+.vault-strategy-type:hover {
+  opacity: .7
+}
+
+.vault-strategy-type.active {
+  color: #aaaecf;
+  opacity: 1;
+  transition: color.2s, opacity.2s
+}
+
+.vault-strategy-sliding-indicator {
+  background-color: #aaaecf;
+  border-top-left-radius: 1px;
+  border-top-right-radius: 1px;
+  bottom: 0;
+  height: 1.5px;
+  position: absolute;
+  transition: left.2s ease, width.2s ease
+}
+
+.vault-tab-content {
+  display: flex;
+  min-height: 400px
+}
+
+.vault-holdings-table,
+.vault-depositors-table,
+.vaults-dh-table {
+  overflow: hidden
+}
+
+.vault-holdings-header,
+.vault-depositors-header,
+.vault-dh-header,
+.vault-oo-header {
+  background-color: transparent;
+  color: #e0e8fd90;
+  display: grid;
+  font-size: .75rem;
+  font-weight: 300;
+  gap: 1rem;
+  letter-spacing: -.3px;
+  padding: .5rem 1rem;
+  padding-bottom: .25rem
+}
+
+.vault-holdings-col-header,
+.vault-depositors-col-header,
+.vault-dh-col-header,
+.vault-oo-col-header,
+.vault-data-col-header {
+  text-align: left;
+  color: #e0e8fd73;
+}
+
+.vault-holdings-row,
+.vault-depositors-row,
+.vault-dh-row,
+.vault-oo-row {
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  font-size: .8rem;
+  font-weight: 300;
+  gap: 1rem;
+  height: 30px;
+  margin-bottom: 2px;
+  padding: .2rem 1rem;
+  transition: background-color.2s ease
+}
+
+.vault-holdings-col,
+.vault-depositors-col,
+.vault-dh-col,
+.vault-oo-col {
+  align-items: center;
+  display: flex;
+  padding: .2rem 0
+}
+
+.vault-dh{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.9rem;
+  color: #e0e3f473;
+}
+
+.vault-depositors{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.9rem;
+  color: #e0e3f473;
+}
+
+.vault-holdings-header,
+.vault-holdings-row {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.vault-depositors-header,
+.vault-depositors-row {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.vault-dh-header,
+.vault-dh-row {
+  grid-template-columns: 1fr 1fr 1fr 1fr .11fr;
+}
+
+.vault-oo-header,
+.vault-oo-row {
+  grid-template-columns: 0.5fr 1fr 0.5fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.vault-data-table-header {
+  background-color: transparent;
+  color: #e0e8fd90;
+  display: grid;
+  font-size: .75rem;
+  font-weight: 300;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  letter-spacing: -.3px;
+  padding: .5rem 1rem;
+  padding-bottom: .25rem
+}
+
+.vault-data-table-row {
+  border-radius: 4px;
+  cursor: pointer;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  height: 30px;
+  margin-bottom: 2px;
+  padding: .2rem .8rem;
+  transition: background-color.2s ease
+}
+
+.vault-data-col {
+  align-items: center;
+  color: #fff;
+  display: flex;
+  font-size: .8rem;
+  font-weight: 300;
+  padding: .2rem 0
+}
+
+.vault-time-cell {
+  align-items: center;
+  color: #ffffff84;
+  display: flex;
+  font-size: .75rem;
+  font-weight: 300;
+  gap: .5rem;
+  letter-spacing: .5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
+}
+
+.vault-external-link {
+  color: #aaaecf;
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity.2s ease
+}
+
+.vault-external-link:hover {
+  opacity: 1
+}
+
+.vault-status-badge {
+  border-radius: 4px;
+  font-size: .7rem;
+  padding: 2px 8px
+}
+
+.vault-status-badge.completed {
+  background: rgba(80, 240, 141, .1);
+  color: #50f08d
+}
+
+.vault-deposit-positive {
+  color: #65ed92 !important
+}
+
+.vault-withdrawal-negative {
+  color: rgb(240 103 103) !important
+}
+
+.vault-trade-side {
+  border-radius: 4px;
+  font-size: .75rem;
+  padding: 2px 6px;
+  text-transform: uppercase
+}
+
+.vault-trade-side.buy {
+  color: #65ed92
+}
+
+.vault-trade-side.sell {
+  color: rgb(240 103 103)
+}
+
+.vault-depositor-label {
+  color: #fff;
+  font-size: .8rem
+}
+
+.vault-leader-badge {
+  background: rgba(170, 174, 207, .1);
+  border-radius: 12px;
+  color: #aaaecf;
+  font-size: .7rem;
+  padding: 2px 8px;
+}
+
+.vault-pnl-positive {
+  color: #50f08d !important
+}
+
+@media(max-width:350px) {
+  .lp-overview-charts {
+    flex-direction: column;
+    gap: 1rem
+  }
+
+  .lp-overview-chart {
+    min-height: 200px;
+    width: 100%
+  }
+}
+
+@media(max-width:850px) {
+  .lp-vaults-grid {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    overflow-y: visible
+  }
+
+  .lp-rectangle {
+    height: auto;
+    max-height: none;
+    overflow: visible
+  }
+}
+
+@media(max-width:450px) {
+  .vaults-header {
+    margin-bottom: 1rem
+  }
+}
+
+@media(max-width:600px) {
+  .add-liquidity-button {
+    justify-content: center;
+    margin-top: .5rem;
+    max-width: 127.56px
+  }
+}
+
+.token-selector-label {
+  color: #fff;
+  display: block;
+  font-size: .875rem;
+  margin-bottom: .5rem
+}
+
+.token-selector-input {
+  padding-right: 80px;
+  width: 100%
+}
+
+.selected-token-indicator {
+  align-items: center;
+  display: flex;
+  gap: .5rem;
+  left: 15px;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.token-dropdown-button {
+  align-items: center;
+  background: none;
+  border: none;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%)
+}
+
+.create-vault-token-dropdown {
+  background: rgb(6, 6, 6);
+  border: 1px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
+  left: 0;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow: hidden;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  scrollbar-color: rgba(170, 174, 207, .2) transparent;
+  scrollbar-width: thin;
+  top: 100%;
+  z-index: 1000;
+}
+
+.token-search {
+  align-items: center;
+  border-bottom: 1px solid #333;
+  display: flex;
+  gap: .5rem;
+  padding: 12px
+}
+
+.token-search-input {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #fff;
+  flex: 1;
+  font-size: 14px;
+  outline: none;
+  padding: 8px 12px
+}
+
+.token-search-input:focus {
+  border-color: #aaaecf
+}
+
+.token-list {
+  max-height: 240px;
+  overflow-y: auto
+}
+
+.no-vaults-message {
+  color: #e0e8fd90;
+  padding: 3rem 1rem;
+  text-align: center
+}
+
+.no-vaults-message p {
+  font-size: .85rem;
+  margin: 0
+}
+
+.form-row {
+  display: flex;
+  gap: .5rem;
+  width: 100%
+}
+
+.vault-data-tab {
+  align-items: center;
+  color: rgb(255, 255, 255, .6);
+  display: flex;
+  font-size: .85rem;
+  justify-content: center;
+  width: 100%
+}
+
+:root {
+  --vault-skeleton-bg: rgba(189, 189, 235, 0.08);
+  --vault-skeleton-shimmer: rgba(226, 230, 247, 0.1)
+}
+
+@keyframes vault-shimmer {
+  0% {
+    transform: translateX(-100%)
+  }
+
+  100% {
+    transform: translateX(100%)
+  }
+}
+
+.vault-row.vault-loading {
+  background: transparent;
+  cursor: default;
+  height: 40px;
+  pointer-events: none
+}
+
+.vault-row.vault-loading:hover {
+  background: transparent
+}
+
+.vault-row.vault-loading * {
+  visibility: hidden
+}
+
+.vault-skeleton {
+  background: var(--vault-skeleton-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  visibility: visible !important
+}
+
+.vault-skeleton::before {
+  animation: vault-shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, var(--vault-skeleton-shimmer), transparent);
+  content: '';
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%
+}
+
+.vault-skeleton-name {
+  border-radius: 4px;
+  height: 16px;
+  width: 120px
+}
+
+.vault-skeleton-leader {
+  border-radius: 4px;
+  height: 14px;
+  width: 80px
+}
+
+.vault-skeleton-type {
+  border-radius: 12px;
+  height: 20px;
+  width: 60px
+}
+
+.vault-skeleton-token-icon {
+  border-radius: 50%;
+  height: 20px;
+  margin-left: -6px;
+  width: 20px
+}
+
+.vault-skeleton-value {
+  border-radius: 4px;
+  height: 14px;
+  width: 70px
+}
+
+.vault-skeleton-status {
+  border-radius: 8px;
+  height: 16px;
+  width: 50px
+}
+
+.vault-skeleton-chart {
+  border-radius: 4px;
+  height: 32px;
+  width: 80px
+}
+
+.vault-row.vault-loading .vault-name-container {
+  height: 20px;
+  position: relative
+}
+
+.vault-row.vault-loading .vault-tokens {
+  align-items: center;
+  display: flex;
+  gap: 0;
+  position: relative
+}
+
+.vault-row.vault-loading .vault-skeleton {
+  z-index: 2
+}
+
+.vault-row.vault-loading .vault-skeleton:nth-child(1)::before {
+  animation-delay: 0s
+}
+
+.vault-row.vault-loading .vault-skeleton:nth-child(2)::before {
+  animation-delay: .1s
+}
+
+.vault-row.vault-loading .vault-skeleton:nth-child(3)::before {
+  animation-delay: .2s
+}
+
+.vault-row.vault-loading .vault-skeleton:nth-child(4)::before {
+  animation-delay: .3s
+}
+
+.vault-row.vault-loading .vault-skeleton:nth-child(5)::before {
+  animation-delay: .4s
+}
+
+.vault-management-dropdown {
+  display: inline-block;
+  position: relative
+}
+
+.vault-management-trigger {
+  align-items: center;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  color: rgb(212, 212, 216);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.85rem;
+  gap: 0.25rem;
+  height: 31px;
+  letter-spacing: -0.3px;
+  padding: .3rem .75rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.vault-management-menu {
+  backdrop-filter: blur(10px);
+  background-color: rgb(0, 0, 0);
+  border: 1px solid rgb(163 164 185 / 20%);
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.vault-management-menu.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.vault-management-option {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-size: .85rem;
+  letter-spacing: -.3px;
+  margin: 4px;
+  padding: .5rem .75rem;
+  text-align: left;
+  transition: background-color.2s ease;
+  width: calc(100% - 8px);
+}
+
+.vault-management-option:hover,
+.time-range-option:hover {
+  background: rgba(255, 255, 255, .1)
+}
+
+.vault-management-option:focus,
+.time-range-option:focus {
+  background: rgba(255, 255, 255, .1);
+  outline: none
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px)
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0)
+  }
+}
+
+.withdraw-section-title {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  margin-bottom: 1rem
+}
+
+
+
+.withdraw-amount-section {
+  margin-bottom: .5rem;
+}
+
+.withdraw-percentage-input-container {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+  width: 100%;
+}
+
+.withdraw-percentage-display {
+  align-items: baseline;
+  display: inline-flex
+}
+
+.withdraw-percentage-input {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 3rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  max-width: none;
+  outline: 0;
+  text-align: right;
+  width: auto;
+}
+
+.percentage-buttons {
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center
+}
+
+.percentage-btn {
+  align-items: center;
+  background: none;
+  border: 1.5px solid rgba(151, 157, 237, 0.1);
+  border-radius: 20px;
+  color: #e0e8fd90;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.8rem;
+  font-weight: 400;
+  height: 32px;
+  justify-content: center;
+  letter-spacing: -0.3px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.percentage-btn:hover {
+  border-color: rgba(151, 157, 237, 0.15);
+  color: #fff;
+}
+
+.percentage-btn.active {
+  background-color: rgba(201, 194, 243, 0.05);
+  border-color: #aaaecf;
+  box-shadow: 0 0 0 2px rgba(170, 174, 207, 0.3);
+  color: #d8dcff;
+}
+
+.position-overview {
+  background-color: rgba(170, 174, 207, .02);
+  border: 1px solid rgba(179, 184, 249, .1);
+  border-radius: 8px;
+  padding: 1rem;
+  padding-bottom: 0
+}
+
+.position-header {
+  align-items: center;
+  border-bottom: 1px solid rgba(179, 184, 249, .1);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: .75rem
+}
+
+.token-positions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem
+}
+
+.token-position {
+  align-items: center;
+  display: flex;
+  justify-content: space-between
+}
+
+.token-position-icon {
+  border: 1px solid #131317;
+  border-radius: 50%;
+  height: 24px;
+  width: 24px
+}
+
+.token-amount {
+  align-items: center;
+  color: #fff;
+  display: flex;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: -0.3px
+}
+
+.preview-title {
+  color: #e0e8fd90;
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  margin-bottom: 0.25rem
+}
+
+.withdraw-token-item {
+  align-items: center;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between
+}
+
+.withdraw-token-icon {
+  border: 1px solid #131317;
+  border-radius: 50%;
+  height: 17px;
+  width: 17px
+}
+
+.status-warning {
+  color: #ffc107
+}
+
+.pair-name {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+}
+
+.position-balance {
+  color: #e0e8fd90;
+  font-size: 0.8rem;
+  letter-spacing: -0.3px;
+}
+
+.deposit-token-info {
+  align-items: center;
+  display: flex;
+  gap: 0.3rem;
+
+}
+
+.token-symbol {
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+}
+
+.withdraw-token-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.status-success {
+  color: #50f08d;
+}
+
+.status-error {
+  color: rgb(235, 112, 112);
+}
+
+
+.modal-close-icon {
+  height: 18px;
+  opacity: .6;
+  width: 18px
+}
+
+.market-selector-input-wrapper {
+  align-items: center;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 6px;
+  display: flex;
+  position: relative;
+}
+
+.market-selector-input {
+  border: none;
+  cursor: pointer;
+  padding-right: 40px
+}
+
+.selected-market-indicator {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+  position: absolute;
+  right: 30px
+}
+
+.market-dropdown-button {
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  right: 8px
+}
+
+.market-dropdown {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  left: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000
+}
+
+.market-search {
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 8px;
+  padding: 12px
+}
+
+.market-search-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  flex: 1;
+  padding: 8px
+}
+
+.market-list {
+  max-height: 200px;
+  overflow-y: auto
+}
+
+.market-option {
+  align-items: center;
+  background-color: black;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  padding: 12px
+}
+
+.market-change {
+  text-align: right
+}
+
+.market-change .positive {
+  color: rgb(111, 255, 111);
+  font-size: .8rem
+}
+
+.market-change .negative {
+  color: rgb(255 108 108);
+  font-size: .9rem
+}
+
+.market-selector-form-input {
+  background: none;
+  cursor: pointer;
+  font-size: .8rem;
+  outline: none;
+  padding: 4px 0;
+  padding-left: 8px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none
+}
+
+.time-range-select-button {
+  align-items: center;
+  background: none;
+  border: 1.5px solid rgba(179, 184, 249, .1);
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-size: .75rem;
+  gap: .5rem;
+  padding: .25rem .75rem;
+  transition: all.2s ease;
+  white-space: nowrap
+}
+
+.time-range-select-button:hover {
+  border-color: rgba(179, 184, 249, .2)
+}
+
+.time-range-dropdown-portal {
+  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, .5);
+  border: 1px solid rgb(163, 164, 185, .2);
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+  min-width: 120px;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.time-range-dropdown-portal.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.time-range-option {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-size: .75rem;
+  letter-spacing: -.3px;
+  margin: 4px;
+  padding: .5rem .75rem;
+  text-align: left;
+  transition: background-color.2s ease;
+  width: calc(100% - 8px)
+}
+
+.time-range-option.active {
+  background: rgba(170, 174, 207, .1);
+  color: #aaaecf
+}
+
+.withdraw-percentage-symbol {
+  font-size: 3rem;
+  font-weight: 300;
+  line-height: 1;
+  margin-left: 0.25rem;
+}
+
+.create-vault-token-icon {
+  border: 1px solid #131317;
+  border-radius: 50%;
+  height: 25px;
+  margin-left: -6px;
+  width: 25px
+}
+
+.vault-oo{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #dde0f379;
+  font-size: 0.85rem;
+  font-weight: 300;
+}
+
+.create-vault-progress-container {
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.create-vault-progress-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.create-vault-progress-step {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .5rem 1rem;
+  border-radius: 5px;
+  background-color: rgba(170, 174, 207, 0.02);
+  border: 1.5px solid rgba(103, 107, 166, 0.05);
+  transition: all 0.3s ease;
+}
+
+.create-vault-progress-step.active {
+    color: #d8dcff;
+    background-color: rgba(201, 194, 243, .05);
+    border-color: #aaaecf;
+    box-shadow: 0 0 0 2px rgba(170, 174, 207, .3);
+}
+
+.create-vault-progress-step.completed {
+  border-color: #575d9323;
+}
+
+.step-progress-indicator {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: rgba(170, 174, 207, 0.05);
+  border: 1.5px solid rgba(170, 174, 207, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.create-vault-progress-step.active .step-progress-indicator {
+    color: #d8dcff;
+    background-color: rgba(201, 194, 243, .05);
+    border-color: #aaaecf;
+    box-shadow: 0 0 0 2px rgba(170, 174, 207, .3);
+}
+
+.create-vault-progress-step.completed .step-progress-indicator {
+  background-color: #a3aae856;
+  border-color: #d8dcff;
+  color: #d8dcff;
+}
+
+@keyframes pulse-indicator {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(170, 174, 207, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(170, 174, 207, 0.8);
+  }
+}
+
+.step-progress-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.step-progress-title {
+  font-size: 0.85rem;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.step-progress-description {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: -0.2px;
+  margin-top: -3px;
+}
+
+.create-vault-progress-step.active .step-progress-description {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.step-progress-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(170, 174, 207, 0.2);
+  border-top-color: #aaaecf;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
+.create-vault-success-message h3 {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.create-vault-success-message p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: -0.3px;
+}
+
+.create-vault-error {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: rgba(235, 112, 112, 0.1);
+  border: 1px solid rgba(235, 112, 112, 0.3);
+  border-radius: 8px;
+  color: rgb(235, 112, 112);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.create-vault-error svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.create-vault-error span {
+  flex: 1;
+}
+
+.save-button.success {
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+
+
+.vault-dh-table,
+.vault-depositors-table,
+.vaults-dh-table{
+  width: 100%;
+}
+
+.time-range-select-button svg,
+.vault-management-trigger svg {
+  transition: transform 0.2s ease;
+}
+
+.time-range-select-button svg.open,
+.vault-management-trigger svg.open {
+  transform: rotate(180deg);
+}
+
+
+
+.vault-depositors p,
+.vault-dh p{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

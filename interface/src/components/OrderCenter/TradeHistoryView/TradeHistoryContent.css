@@ -1,0 +1,28 @@
+.trade-history-oc-header {
+  align-items: center;
+  background: rgb(6,6,6);
+  color: #e0e3f473;
+  cursor: pointer;
+  display: grid;
+  font-size: 0.85rem;
+  grid-template-columns:
+    40px minmax(120px, 1fr) minmax(125px, 1.1fr) minmax(100px, 1fr)
+    minmax(90px, 0.9fr) minmax(125px, 1fr) minmax(100px, 0.3fr);
+  justify-content: flex-start;
+  height: 32px;
+  min-height: 32px;  
+  min-width: 700px;
+  padding: 1px 0 0 0;
+  position: sticky;
+  text-align: left;
+  text-wrap: nowrap;
+  top: 0;
+  user-select: none;
+  z-index: 2;
+  margin-bottom: -4px;
+}
+
+.trade-history-oc-header > * {
+  position: relative;
+  z-index: 1;
+}

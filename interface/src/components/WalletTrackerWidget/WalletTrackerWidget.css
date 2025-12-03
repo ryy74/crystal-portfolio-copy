@@ -1,0 +1,1591 @@
+.wtw-container {
+  position: fixed;
+  background: rgb(8, 8, 8);
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 4px;
+  width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  z-index: 10;
+  min-width: 520px;
+}
+
+.wtw-container.dragging {
+  cursor: move;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  filter: blur(0.5px);
+  opacity: 0.8;
+  transform: scale(1.02);
+  transition: none;
+}
+
+.wtw-container.resizing {
+  transition: none;
+}
+
+.wtw-container.snapped {
+  transition: all 0.3s ease;
+  z-index: 0;
+}
+
+.wtw-container.snapped-left {
+  border-radius: 0 4px 0 0;
+}
+
+.wtw-container.snapped-right {
+  border-radius: 4px 0 0 0;
+}
+
+.wtw-filters-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 5px;
+  padding-right: 15px;
+  padding-bottom: 0;
+  user-select: none;
+  cursor: move;
+  min-height: 42px;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+  max-height: 42px;
+}
+
+.wtw-filters-title {
+  color: #ffffff;
+  font-size: 1rem;
+  letter-spacing: -0.3px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.wtw-filters-close-button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wtw-filters-close-button:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.wtw-widget-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wtw-open-new-tab-button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 15px;
+  margin-left: 10px;
+  height: 17px;
+  border-left: 1px solid rgba(179, 184, 249, 0.15);
+}
+
+.wtw-open-new-tab-button:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.wtw-link-icon {
+  width: 17px;
+  height: 17px;
+  filter: brightness(0) saturate(100%) invert(68%) sepia(11%) saturate(27%) hue-rotate(190deg) brightness(106%) contrast(94%);
+  cursor: pointer;
+}
+
+.wtw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 10px;
+  min-height: 40px;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+  flex-wrap: wrap;
+  row-gap: 10px;
+  position: relative;
+}
+
+.wtw-tabs {
+  display: flex;
+  gap: 5px;
+  border-radius: 8px;
+  flex: 0 1 auto;
+}
+
+.wtw-tab {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 7px 8px;
+  transition: all 0.2s;
+  letter-spacing: -0.5px;
+  border-bottom: 1.5px solid transparent;
+  white-space: nowrap;
+}
+
+.wtw-tab.active {
+  border-color: #d8dcff;
+  color: #d8dcff;
+}
+
+.wtw-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  flex: 0 1 auto;
+  width: 100%;
+  gap: 12px;
+}
+
+.wtw-search-bar {
+  padding: 12px 0px;
+  width: 100%;
+}
+
+.wtw-search {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.wtw-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #8b8989;
+  z-index: 1;
+}
+
+.wtw-search-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 12px;
+  padding: 8px 12px 8px 32px;
+  color: #fff;
+  font-size: 0.75rem;
+  outline: none;
+  transition: border-color 0.2s;
+  letter-spacing: -0.3px;
+  height: 25px;
+}
+
+
+.wtw-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.wtw-header-button {
+  background: transparent;
+  color: #7f808d;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.3px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 20px;
+}
+
+
+.wtw-header-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wtw-add-button {
+  background: linear-gradient(135deg, #aaaecf 0%, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  color: #0f0f12;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+  display: flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.3px;
+  height: 25px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.wtw-add-button:hover {
+  filter: brightness(1.1);
+}
+
+.wtw-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: rgb(6, 6, 6);
+}
+
+.wtw-wallet-manager {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: rgb(6, 6, 6);
+  width: 100%;
+  min-width: 520px;
+}
+
+.wtw-wallets-header {
+  display: grid;
+  grid-template-columns: .4fr 2.2fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 6px 15px;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+  position: sticky;
+  top: 0;
+  background: rgb(6, 6, 6);
+  z-index: 1;
+  width: 100%;
+  gap: 16px;
+}
+
+
+.wtw-wallet-header-cell {
+  color: #e0e3f473;
+  font-size: 0.75rem;
+  letter-spacing: -0.3px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  gap: 0px !important;
+  padding: 0;
+}
+
+.wtw-wallet-header-cell.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.wtw-wallet-created {
+  display: flex;
+  align-items: center;
+}
+
+.wtw-wallet-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: grab;
+}
+
+.wtw-wallet-profile {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.wtw-wallet-balance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wtw-wallet-last-active {
+  display: flex;
+  align-items: center;
+}
+
+.wtw-wallet-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.wtw-wallets-container {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(170, 174, 207, 0.2) transparent;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  user-select: none;
+}
+
+.wtw-wallets-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wtw-wallets-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wtw-wallets-container::-webkit-scrollbar-thumb {
+  background: rgba(170, 174, 207, 0.2);
+  border-radius: 4px;
+}
+
+.wtw-wallet-item {
+  display: grid;
+  grid-template-columns: .4fr 2.2fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 8px 15px;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 520px;
+  width: 100%;
+  gap: 16px;
+}
+
+.wtw-wallet-created-date {
+  display: block;
+  font-size: 0.75rem;
+  color: #a5a5b1;
+}
+
+.wtw-wallet-name-edit-icon {
+  color: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  width: 0;
+  transition: opacity 0.2s ease, width 0.2s ease;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.wtw-wallet-name-display:hover .wtw-wallet-name-edit-icon {
+  opacity: 1;
+  width: 12px;
+  margin-left: 4px;
+}
+
+
+.wtw-wallet-name-container {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  margin-left: 3px;
+}
+
+.wtw-wallet-name-display {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 0;
+  overflow: visible;
+}
+
+.wtw-wallet-name {
+  color: #fff;
+  font-size: 0.85rem;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.wtw-wallet-name-edit-icon {
+  color: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  width: 0;
+  transition: opacity 0.2s ease, width 0.2s ease;
+  flex-shrink: 0;
+  overflow: hidden;
+  margin-left: 0;
+}
+
+.wtw-wallet-address {
+  color: #e0e3f473;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: inherit;
+  letter-spacing: -0.2px;
+  flex-shrink: 1;
+  min-width: 0;
+  margin-left: 5px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.wtw-wallet-address:hover {
+  color: #d8dcff;
+}
+
+
+
+
+
+.wtw-copy-address {
+  width: 12px;
+  height: 12px;
+}
+
+.wtw-wallet-name-input {
+  background: none;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.3);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 300;
+  outline: none;
+  letter-spacing: -0.3px;
+}
+
+.wtw-balance-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.wtw-wallet-balance span {
+  color: #dee1f2;
+  font-size: 0.8rem;
+  letter-spacing: -0.3px;
+}
+
+.wtw-wallet-last-active {
+  color: #e0e3f473;
+  font-size: 0.75rem;
+  letter-spacing: -0.3px;
+}
+
+.wtw-wallet-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+
+
+.wtw-wallet-action-btn .wtw-action-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) saturate(100%) invert(52%) sepia(9%) saturate(325%) hue-rotate(193deg) brightness(89%) contrast(92%);
+}
+
+.wtw-wallet-action-btn:hover .wtw-action-icon {
+  filter: brightness(0) saturate(100%) invert(70%) sepia(79%) saturate(2227%) hue-rotate(311deg) brightness(89%) contrast(107%);
+}
+
+
+
+.wtw-wallet-action-btn .wtw-action-icon-svg {
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) saturate(100%) invert(52%) sepia(9%) saturate(325%) hue-rotate(193deg) brightness(89%) contrast(92%);
+}
+
+.wtw-empty-state {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wtw-empty-content {
+  text-align: center;
+}
+
+.wtw-empty-content h4 {
+  color: #e0e3f473;
+  font-size: .85rem;
+  margin: 0 0 2px;
+  letter-spacing: -0.3px;
+}
+
+.wtw-empty-content p {
+  color: #e0e3f473;
+  font-size: 0.8rem;
+  margin: 0 0 10px;
+  line-height: 1.4;
+  letter-spacing: -0.3px;
+}
+
+.wtw-cta-button {
+  background: linear-gradient(135deg, #aaaecf 0%, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  border: none;
+  border-radius: 8px;
+  color: #0f0f12;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.3px;
+  box-shadow: inset 0 1px 1px rgb(255 255 255/35%), inset 0 -1px 1px rgb(0 0 0/55%), 0 2px 8px rgb(170 174 207/10%);
+}
+
+.wtw-cta-button:hover {
+  filter: brightness(1.1);
+}
+
+/* Delete Confirmation Dialog */
+.wtw-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wtw-confirm-dialog {
+  background: rgb(6, 6, 6);
+  border: 1px solid rgba(179, 184, 249, 0.15);
+  border-radius: 6px;
+  padding: 24px;
+  width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.wtw-confirm-dialog h3 {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  margin: 0 0 8px 0;
+}
+
+.wtw-confirm-dialog p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: -0.3px;
+  margin: 0 0 20px 0;
+}
+
+.wtw-confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.wtw-confirm-btn {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 400;
+  padding: 8px 16px;
+  transition: all 0.2s;
+  letter-spacing: -0.3px;
+}
+
+.wtw-cancel {
+  background: transparent;
+  border: 1px solid rgba(179, 184, 249, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.wtw-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wtw-delete {
+  background: rgb(220, 38, 38);
+  color: #fff;
+}
+
+.wtw-delete:hover {
+  background: rgb(239, 68, 68);
+}
+
+/* Animations */
+@keyframes wtw-fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+.wtw-live-trades {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wtw-detail-trades-table {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wtw-detail-trades-table-header,
+.wtw-detail-trades-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+  padding: 6px 15px;
+  position: sticky;
+  top: 0;
+  background: rgb(6, 6, 6);
+  z-index: 1;
+  min-width: 520px;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.wtw-detail-trades-header-cell {
+  padding: 0;
+  color: #e0e3f473;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wtw-detail-trades-header-cell.wtw-sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.wtw-detail-trades-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(170, 174, 207, 0.2) transparent;
+}
+
+.wtw-detail-trades-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.wtw-detail-trades-body::-webkit-scrollbar-track {
+  background: rgba(179, 184, 249, 0.05);
+}
+
+.wtw-detail-trades-body::-webkit-scrollbar-thumb {
+  background: rgba(170, 174, 207, 0.2);
+  border-radius: 3px;
+}
+
+.wtw-detail-trades-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(170, 174, 207, 0.3);
+}
+
+.wtw-detail-trades-row {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 8px 15px;
+  min-width: 520px;
+  width: 100%;
+  height: 38px;
+}
+
+.wtw-detail-trades-row:hover {
+  background: rgba(179, 184, 249, 0.03);
+}
+
+.wtw-detail-trades-row:last-child {
+  border-bottom: none;
+}
+
+.wtw-detail-trades-col {
+  padding: 0;
+  font-size: 0.8rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+
+.wtw-detail-trades-time,
+.wtw-detail-trades-header-cell:nth-child(1) {
+  min-width: 30px;
+  flex: 0 0 30px;
+}
+
+.wtw-detail-trades-account,
+.wtw-detail-trades-header-cell.wtw-detail-trades-account {
+  min-width: 110px;
+  flex: 1.4;
+}
+
+.wtw-detail-trades-col:nth-child(3),
+.wtw-detail-trades-header-cell:nth-child(3) {
+  min-width: 120px;
+  flex: 1.5;
+}
+
+.wtw-detail-trades-col:nth-child(4),
+.wtw-detail-trades-header-cell:nth-child(4) {
+  min-width: 90px;
+  flex: 1.2;
+}
+
+.wtw-detail-trades-col:nth-child(5),
+.wtw-detail-trades-header-cell:nth-child(5) {
+  min-width: 60px;
+  flex: .3;
+  justify-content: flex-end;
+}
+
+
+.wtw-detail-trades-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wtw-detail-trades-address {
+  color: #fff;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
+  margin-left: 3px;
+}
+
+.wtw-detail-trades-address.sell {
+  color: rgb(235, 112, 112);
+}
+
+.wtw-detail-trades-address.buy {
+  color: rgb(67, 254, 154);
+}
+
+.wtw-detail-trades-amount {
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.wtw-detail-trades-amount.wtw-amount-buy {
+  color: rgb(67, 254, 154);
+}
+
+.wtw-detail-trades-amount.wtw-amount-sell {
+  color: rgb(235, 112, 112);
+}
+
+.wtw-asset-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid #b6bbea53;
+}
+
+.wtw-asset-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wtw-asset-details:hover .wtw-asset-ticker {
+  text-decoration: underline;
+}
+
+
+.wtw-asset-ticker {
+  font-size: 0.85rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.5px;
+  max-width: 70px;
+}
+
+.wtw-settings-image {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) saturate(100%) invert(53%) sepia(10%) saturate(351%) hue-rotate(198deg) brightness(93%) contrast(87%);
+}
+
+.wtw-filter-image {
+  width: 17px;
+  height: 17px;
+  filter: brightness(0) saturate(100%) invert(53%) sepia(10%) saturate(351%) hue-rotate(198deg) brightness(93%) contrast(87%);
+}
+
+
+.wtw-combined-flash-input {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 12px;
+  padding: 0 8px;
+  height: 25px;
+  transition: border-color 0.2s;
+}
+
+.wtw-combined-flash-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.wtw-combined-flash-btn:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.wtw-combined-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: .85rem;
+  outline: none;
+  width: 40px;
+  padding: 0 4px;
+  letter-spacing: -0.3px;
+  transform: scaleX(1.05);
+}
+
+.wtw-combined-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.wtw-combined-mon-icon {
+  width: 14px;
+  height: 14px;
+  margin-left: 2px;
+}
+
+/* Monitor Tab */
+.wtw-monitor {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 15px;
+}
+
+.wtw-monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(170, 174, 207, 0.2) transparent;
+}
+
+.wtw-monitor-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.wtw-monitor-grid::-webkit-scrollbar-track {
+  background: rgba(179, 184, 249, 0.05);
+}
+
+.wtw-monitor-grid::-webkit-scrollbar-thumb {
+  background: rgba(170, 174, 207, 0.2);
+  border-radius: 3px;
+}
+
+.wtw-monitor-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(170, 174, 207, 0.3);
+}
+
+.wtw-monitor-card {
+  background: rgba(179, 184, 249, 0.03);
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.wtw-monitor-card:hover {
+  background: rgba(179, 184, 249, 0.05);
+  border-color: rgba(179, 184, 249, 0.2);
+  transform: translateY(-2px);
+}
+
+.wtw-monitor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.wtw-monitor-token-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.wtw-monitor-token-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wtw-monitor-token-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wtw-monitor-token-name {
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wtw-monitor-token-symbol {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: -0.2px;
+}
+
+.wtw-monitor-wallet-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(179, 184, 249, 0.1);
+  padding: 4px 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.wtw-monitor-wallet-emoji {
+  font-size: 0.85rem;
+}
+
+.wtw-monitor-wallet-name {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: -0.2px;
+  max-width: 60px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wtw-monitor-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wtw-monitor-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wtw-monitor-stat-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: -0.2px;
+}
+
+.wtw-monitor-stat-value {
+  font-size: 0.8rem;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wtw-monitor-mon-icon {
+  width: 12px;
+  height: 12px;
+}
+
+
+/* Add Wallet Modal */
+.wtw-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: wtw-fadeIn 0.2s ease-out;
+}
+
+.wtw-modal {
+  background: rgb(8, 8, 8);
+  border: 1px solid rgba(179, 184, 249, 0.15);
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.wtw-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+}
+
+.wtw-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+}
+
+.wtw-modal-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.wtw-modal-close:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.wtw-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wtw-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wtw-form-group label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  letter-spacing: -0.2px;
+}
+
+.wtw-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(179, 184, 249, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.wtw-input:focus {
+  border-color: #aaaecf;
+  box-shadow: 0 0 0 2px rgba(170, 174, 207, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wtw-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.wtw-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(179, 184, 249, 0.1);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.wtw-modal-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  letter-spacing: -0.2px;
+}
+
+.wtw-modal-btn.wtw-cancel {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(179, 184, 249, 0.2);
+}
+
+.wtw-modal-btn.wtw-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(179, 184, 249, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.wtw-modal-btn.wtw-primary {
+  background: linear-gradient(135deg, #aaaecf 0%, #9a9ec7 25%, #8b8eb8 50%, #7f82ac 75%, #7f82a1 100%);
+  color: rgb(8, 8, 8);
+}
+
+.wtw-modal-btn.wtw-primary:hover {
+  filter: brightness(1.1);
+}
+
+.wtw-modal-btn.wtw-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: brightness(0.9);
+}
+
+.wtw-modal-btn.wtw-primary:disabled:hover {
+  filter: brightness(0.9);
+}
+
+/* Tooltip Styles */
+.wtw-tooltip-container {
+  display: inline-block;
+  position: relative;
+}
+
+.wtw-tooltip {
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  letter-spacing: -0.2px;
+  border: 1px solid rgba(179, 184, 249, 0.2);
+}
+
+.wtw-tooltip-content {
+  position: relative;
+  z-index: 1;
+}
+
+.wtw-tooltip.wtw-fade-popup {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.wtw-tooltip.wtw-fade-popup.wtw-visible {
+  opacity: 1;
+}
+
+.wtw-tooltip::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.wtw-tooltip.wtw-tooltip-top::before {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px 5px 0 5px;
+  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+.wtw-tooltip.wtw-tooltip-bottom::before {
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-color: transparent transparent rgba(0, 0, 0, 0.9) transparent;
+}
+
+.wtw-tooltip.wtw-tooltip-left::before {
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 0 5px 5px;
+  border-color: transparent transparent transparent rgba(0, 0, 0, 0.9);
+}
+
+.wtw-tooltip.wtw-tooltip-right::before {
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 5px 5px 0;
+  border-color: transparent rgba(0, 0, 0, 0.9) transparent transparent;
+}
+
+/* Resize Handles */
+.wtw-resize-handle {
+  position: absolute;
+  background: transparent;
+  z-index: 100;
+}
+
+.wtw-resize-handle.top-left {
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nw-resize;
+}
+
+.wtw-resize-handle.top-right {
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: ne-resize;
+}
+
+.wtw-resize-handle.bottom-left {
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: sw-resize;
+}
+
+.wtw-resize-handle.bottom-right {
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: se-resize;
+}
+
+.wtw-resize-handle.top {
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 5px;
+  cursor: n-resize;
+}
+
+.wtw-resize-handle.bottom {
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 5px;
+  cursor: s-resize;
+}
+
+.wtw-resize-handle.left {
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  cursor: w-resize;
+}
+
+.wtw-resize-handle.right {
+  right: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  cursor: e-resize;
+}
+
+.wtw-resize-handle.snapped-resize {
+  width: 3px;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.wtw-resize-handle.snapped-resize:hover {
+  background: #d8dcff;
+}
+
+.wtw-resize-handle.left.snapped-resize {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  cursor: ew-resize;
+}
+
+.wtw-resize-handle.right.snapped-resize {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: ew-resize;
+}
+
+/* Snap Zone Overlays */
+.wtw-snap-zone-overlay {
+  position: fixed;
+  top: 53px;
+  height: calc(100vh - 53px);
+  width: 400px;
+  background: rgba(179, 184, 249, 0.1);
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.wtw-snap-zone-overlay.left {
+  left: 50px;
+}
+
+.wtw-snap-zone-overlay.right {
+  right: 0;
+}
+
+.wtw-snap-zone-overlay.active {
+  opacity: 1;
+}
+
+
+.wtw-wallet-last-active-time {
+  color: #a5a5b1;
+}
+
+.wtw-wallet-emoji-avatar {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  line-height: 1;
+}
+
+.wtw-wallet-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+
+
+
+
+.wtw-wallet-remove {
+  display: flex;
+  justify-content: flex-end;
+  color: rgb(235, 112, 112);
+}
+
+
+
+.wtw-import-button,
+.wtw-export-button {
+  background: rgba(179, 184, 249, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.3px;
+  padding: 2px 8px;
+}
+
+
+.wtw-market-cap-value {
+  color: #e3e4f0bd;
+  font-weight: 300;
+}
+
+
+.wtw-launchpad-logo {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: black;
+  border-radius: 50%;
+  border: 1px solid #aaaecf;
+  padding: 1px;
+  bottom: -3px;
+  right: -3px;
+}
+
+.wtw-trade-quickbuy-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #aaaecf;
+  border: none;
+  border-radius: 20px;
+  padding: 3px 8px;
+  height: 26px;
+  color: #0f0f12;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.wtw-trade-quickbuy-btn:hover {
+  filter: brightness(1.1);
+}
+
+.wtw-trade-quickbuy-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wtw-trade-quickbuy-btn.loading {
+  pointer-events: none;
+}
+
+.wtw-quickbuy-icon {
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) saturate(100%) invert(6%) sepia(5%) saturate(1638%) hue-rotate(202deg) brightness(97%) contrast(91%);
+}
+
+.wtw-quickbuy-spinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid #0f0f12;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: wtw-spin 0.6s linear infinite;
+}
+
+@keyframes wtw-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+.wtw-trades-pause-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaaecf;
+  opacity: 1;
+}
+
+.wtw-detail-trades-header-cell.wtw-detail-trades-time {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wtw-detail-trades-body {
+  position: relative;
+  user-select: none;
+}
+
+
+.wtw-image-preview {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.2s ease;
+  will-change: opacity;
+  z-index: 9999 !important;
+}
+
+.wtw-image-preview.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.wtw-preview-image {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: block;
+  height: 220px;
+  object-fit: cover;
+  width: 220px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.wtw-master-notification-toggle {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.wtw-master-notification-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wtw-master-notification-btn svg {
+  pointer-events: none;
+}

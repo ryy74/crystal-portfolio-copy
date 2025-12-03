@@ -1,0 +1,26 @@
+.order-section {
+  display: flex;
+}
+
+.portfolio-balance-wrapper {
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 1020px) {
+  .order-section {
+    flex-direction: column;
+  }
+  
+  .portfolio-balance-wrapper,
+  .portfolio-order-center-wrapper {
+    flex: 1;
+  }
+}
+
+
+.portfolio-content {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 100%;
+}

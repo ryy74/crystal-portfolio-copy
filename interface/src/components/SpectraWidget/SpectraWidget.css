@@ -1,0 +1,2403 @@
+.spectra-widget {
+  background: rgb(6, 6, 6);
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 14px;
+  position: fixed;
+  transition: opacity 0.2s ease;
+  user-select: none;
+  width: 480px;
+  height: 700px;
+  z-index: 10;
+  min-width: 430px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.spectra-widget.dragging {
+  cursor: move;
+  filter: blur(0.5px);
+  opacity: 0.8;
+  transform: scale(1.02);
+  transition: none;
+}
+
+.spectra-widget.resizing {
+  transition: none;
+}
+
+.spectra-widget.snapped {
+  border-top: none;
+  border-bottom: none;
+  border-radius: 0;
+  z-index: 0;
+}
+
+.spectra-widget.snapped-left {
+  border-left: none;
+}
+
+.spectra-widget.snapped-right {
+  border-right: none;
+}
+
+.spectra-widget-header {
+  border-radius: 8px 8px 0 0;
+  flex-shrink: 0;
+}
+
+.spectra-filters-header {
+  align-items: center;
+  cursor: move;
+  display: flex;
+  justify-content: space-between;
+  padding-right: 15px;
+  user-select: none;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+}
+
+.spectra-filters-header:active {
+  cursor: move;
+}
+
+.spectra-filters-title {
+  color: #ffffff;
+  font-size: 1rem;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.spectra-filters-close-button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  filter: brightness(0.7);
+  transition: all 0.2s ease;
+}
+
+.spectra-filters-close-button:hover {
+  filter: brightness(0.9);
+}
+
+.spectra-status-tabs {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  letter-spacing: -0.3px;
+  padding: 8px 16px;
+  padding-bottom: 0;
+}
+
+.spectra-status-tab {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.95rem;
+  gap: 6px;
+  letter-spacing: -0.5px;
+  padding: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.spectra-status-tab.active {
+  border-color: #d8dcff;
+  color: #d8dcff;
+}
+
+/* Content */
+.spectra-widget-content {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.spectra-markets-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 206, 238, 0.2) transparent;
+}
+
+.spectra-markets-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.spectra-markets-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.spectra-markets-container::-webkit-scrollbar-thumb {
+  background: rgba(179, 184, 249, 0.2);
+  border-radius: 3px;
+}
+
+.spectra-markets-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(179, 184, 249, 0.3);
+}
+
+/* Market Row - Based on explorer-token-row */
+.spectra-market-row {
+  align-items: flex-start;
+  background: transparent;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  padding: .75rem;
+  padding-bottom: 0.5rem;
+  position: relative;
+  transition: all 0.2s ease;
+  width: 100%;
+  overflow: visible;
+}
+
+.spectra-market-row:hover {
+  background-color: rgb(17, 17, 21);
+}
+
+.spectra-market-row:last-child {
+  border-bottom: none;
+}
+
+.spectra-market-left {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  margin-top: -2px;
+}
+
+.spectra-market-image-container {
+  align-items: center;
+  background: conic-gradient(from 0deg,
+      #aaaecf 0deg,
+      #aaaecf var(--progress-angle, 0deg),
+      rgba(157, 169, 240, 0.2) var(--progress-angle, 0deg),
+      rgba(157, 169, 240, 0.2) 360deg);
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  height: 73px;
+  justify-content: center;
+  position: relative;
+  transition: --progress-angle 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 73px;
+  flex-shrink: 0;
+}
+
+.spectra-market-image-container.no-progress-ring {
+  background: none;
+}
+
+.spectra-market-image-container.graduated {
+  background: none;
+}
+
+.spectra-progress-line {
+  width: 73px;
+  height: 2px;
+  background: rgba(157, 169, 240, 0.2);
+  border-radius: 1px;
+  margin-top: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.spectra-progress-line-fill {
+  height: 100%;
+  width: var(--progress-percentage, 0%);
+  background: var(--progress-color, #aaaecf);
+  border-radius: 1px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.spectra-progress-spacer {
+  align-items: center;
+  background: rgb(6, 6, 6);
+  box-shadow: 0 0 0 1px rgb(6, 6, 6);
+  border-radius: 4px;
+  display: flex;
+  height: 69px;
+  justify-content: center;
+  width: 69px;
+}
+
+.spectra-market-image-wrapper,
+.spectra-image-wrapper {
+  align-items: center;
+  border-radius: 3px;
+  display: flex;
+  height: 67px;
+  justify-content: center;
+  width: 67px;
+  overflow: hidden;
+  position: relative;
+}
+
+
+.spectra-market-image-container.circle-mode,
+.spectra-market-image-wrapper.circle-mode,
+.spectra-image-wrapper.circle-mode {
+  border-radius: 50%;
+}
+
+.spectra-market-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.spectra-market-image.circle-mode {
+  border-radius: 50%;
+}
+
+.spectra-market-letter {
+  width: 100%;
+  height: 100%;
+  background-color: rgb(6, 6, 6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 200;
+  color: #ffffff;
+  letter-spacing: 0;
+  border-radius: 4px;
+}
+
+.spectra-market-letter.circle-mode {
+  border-radius: 50%;
+}
+
+.spectra-progress-spacer.circle-mode {
+  border-radius: 50%;
+}
+
+.spectra-image-overlay.circle-mode {
+  border-radius: 50%;
+}
+
+.spectra-launchpad-logo {
+  width: 10px;
+}
+
+.spectra-launchpad-logo-container {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  width: 17px;
+  height: 17px;
+  border-radius: 20px;
+  border: 1px solid #aaaecf;
+  bottom: -7px;
+  right: -5px;
+}
+
+.spectra-market-image-container.graduated .spectra-launchpad-logo-container {
+  border-color: #ffd700 !important;
+}
+
+.spectra-market-image-container.graduated .spectra-launchpad-logo {
+  filter: brightness(0) saturate(100%) invert(98%) sepia(29%) saturate(4263%) hue-rotate(311deg) brightness(117%) contrast(86%) !important;
+}
+
+
+.spectra-contract-address {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.7rem;
+  margin-top: 4px;
+  font-weight: 300;
+  letter-spacing: -0.3px;
+}
+
+/* Market Details */
+.spectra-market-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-left: .75rem;
+  min-width: 0;
+  position: relative;
+}
+
+.spectra-detail-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.spectra-top-row {
+  display: flex;
+  height: 18px;
+  justify-content: space-between;
+}
+
+.spectra-second-row {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.spectra-price-section {
+  align-items: center;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.spectra-time-created {
+  color: #d8dbf5;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  margin-right: 5px;
+}
+
+.spectra-market-info {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
+  height: 15px;
+  min-width: 0;
+}
+
+.spectra-market-symbol {
+  color: #ffffff;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.spectra-market-name-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.spectra-market-name {
+  color: rgba(237, 236, 252, 0.4);
+  font-size: 1rem;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+
+.spectra-market-name-copy-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+
+}
+
+ .spectra-market-name-copy-container:hover .spectra-market-name{
+  color: #d8dbf5;
+}
+.spectra-market-name-copy-container:hover .explorer-copy-btn svg {
+  color: #d8dbf5;
+}
+
+
+.spectra-additional-data {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.spectra-stat-item {
+  align-items: center;
+  display: flex;
+  gap: 3px;
+}
+
+.spectra-traders-icon,
+.spectra-pro-traders-icon {
+  align-items: center;
+  color: #7f808d;
+  cursor: pointer;
+  display: flex;
+  height: 18px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 18px;
+}
+
+.spectra-stat-value,
+.spectra-pro-stat-value {
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.spectra-holdings-section {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  height: 25px;
+  margin-top: 28px;
+}
+
+.spectra-holding-item {
+  align-items: center;
+  border: 1px solid rgba(179, 184, 249, 0.08);
+  border-radius: 20px;
+  display: flex;
+  font-size: 0.7rem;
+  gap: 3px;
+  padding: 2px 8px;
+}
+
+.spectra-holding-icon,
+.spectra-sniper-icon {
+  flex-shrink: 0;
+}
+
+.spectra-holding-value {
+  color: rgb(67, 254, 154);
+  font-size: 0.7rem;
+  letter-spacing: -0.3px;
+}
+
+/* Market Right Section */
+.spectra-market-right-section {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.spectra-third-row {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: 1rem;
+  z-index: 2;
+}
+
+.spectra-metrics-container {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding-left: 5px;
+  background-color: rgb(6, 6, 6);
+  box-shadow: 0 0 10px 4px rgb(6, 6, 6);
+  margin-bottom: 4px;
+}
+
+.spectra-volume {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  height: 20px;
+}
+
+.spectra-market-cap {
+  align-items: center;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 500;
+  gap: 4px;
+  height: 20px;
+}
+
+.spectra-third-row-section {
+  display: flex;
+  gap: 5px;
+  height: 15px;
+  background-color: rgb(6, 6, 6);
+  box-shadow: 0 0 10px 4px rgb(6, 6, 6);
+}
+
+.spectra-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.spectra-tx-bar {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  width: 80px;
+}
+
+.spectra-mc-label {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.5;
+}
+
+.spectra-mc-value {
+  color: #d8dcff !important;
+  font-size: 0.8rem;
+}
+
+.spectra-fee-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.spectra-fee-total {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.spectra-tx-header {
+  align-items: center;
+  display: flex;
+  gap: 3px;
+}
+
+.spectra-tx-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.spectra-tx-total {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.spectra-tx-visual-bar {
+  border-radius: 1px;
+  display: flex;
+  height: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.spectra-tx-buy-portion {
+  background-color: rgb(67, 254, 154);
+  height: 100%;
+}
+
+.spectra-tx-sell-portion {
+  background-color: #f77f7d;
+  height: 100%;
+}
+
+.spectra-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.spectra-empty-state p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.spectra-resize-handle {
+  position: absolute;
+  background: transparent;
+  z-index: 100;
+}
+
+.spectra-resize-handle.top-left {
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nw-resize;
+}
+
+.spectra-resize-handle.top-right {
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: ne-resize;
+}
+
+.spectra-resize-handle.bottom-left {
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: sw-resize;
+}
+
+.spectra-resize-handle.bottom-right {
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: se-resize;
+}
+
+.spectra-resize-handle.top {
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 5px;
+  cursor: n-resize;
+}
+
+.spectra-resize-handle.bottom {
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 5px;
+  cursor: s-resize;
+}
+
+.spectra-resize-handle.left {
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  cursor: w-resize;
+}
+
+.spectra-resize-handle.right {
+  right: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  cursor: e-resize;
+}
+
+.spectra-resize-handle.snapped-resize {
+  width: 3px;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.spectra-resize-handle.snapped-resize{
+  background: transparent;
+}
+
+.spectra-resize-handle.snapped-resize:hover {
+  background: #d8dcff;
+}
+
+.spectra-resize-handle.left.snapped-resize {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  cursor: ew-resize;
+}
+
+.spectra-resize-handle.right.snapped-resize {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: ew-resize;
+}
+
+.spectra-snap-zone-overlay {
+  position: fixed;
+  top: 53px;
+  height: calc(100vh - 53px);
+  width: 400px;
+  background: rgba(179, 184, 249, 0.1);
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.spectra-snap-zone-overlay.left {
+  left: 50px;
+}
+
+.spectra-snap-zone-overlay.right {
+  right: 0;
+}
+
+.spectra-snap-zone-overlay.active {
+  opacity: 1;
+}
+
+/* Social link buttons */
+.spectra-avatar-btn {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  filter: brightness(0) saturate(100%) invert(66%) sepia(59%) saturate(337%) hue-rotate(175deg) brightness(103%) contrast(94%);
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.spectra-avatar-icon {
+  height: 20px;
+  width: 20px;
+}
+
+.spectra-tweet-icon {
+  height: 16px;
+  width: 16px;
+}
+
+.spectra-community-icon {
+  height: 18px;
+  width: 18px;
+}
+
+.spectra-discord-btn,
+.spectra-website-btn {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  height: 20px;
+  filter: brightness(0) saturate(100%) invert(99%) sepia(77%) saturate(520%) hue-rotate(177deg) brightness(90%) contrast(94%);
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 20px;
+  opacity: 0.7;
+}
+
+.spectra-discord-btn {
+  height: 18px;
+  width: 18px;
+}
+
+.spectra-telegram-btn:hover,
+.spectra-avatar-btn:hover,
+.spectra-website-btn:hover,
+.spectra-discord-btn:hover {
+  opacity: 1;
+  filter: brightness(0) saturate(100%) invert(83%) sepia(11%) saturate(527%) hue-rotate(194deg) brightness(95%) contrast(92%) opacity(1);
+}
+
+.spectra-telegram-btn {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  filter: brightness(0) saturate(100%) invert(99%) sepia(77%) saturate(520%) hue-rotate(177deg) brightness(90%) contrast(94%);
+  height: 18px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 18px;
+  opacity: 0.7;
+}
+
+.spectra-dev-migrations-container {
+  align-items: center;
+  display: flex;
+  gap: 1px;
+}
+
+.spectra-dev-migrations {
+  font-size: 0.8rem;
+}
+
+.spectra-dev-migrations-slash {
+  font-size: 0.8rem;
+}
+
+.spectra-graduated-icon {
+  align-items: center;
+  color: #7f808d;
+  cursor: pointer;
+  display: flex;
+  height: 15px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 15px;
+}
+
+/* Tooltip */
+.spectra-tooltip {
+  background: rgb(6, 6, 6);
+  border: 1px solid #b5bcf81f;
+  border-radius: 3px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: #ffffffcf;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: -0.3px;
+  opacity: 0;
+  padding: 0.15rem 0.35rem;
+  pointer-events: none;
+  transition: opacity 0.15s ease-in-out;
+  white-space: nowrap;
+}
+
+.spectra-tooltip.spectra-visible {
+  opacity: 1;
+}
+
+.spectra-tooltip.spectra-leaving {
+  opacity: 0;
+}
+
+.spectra-token-actions {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 11;
+}
+
+.spectra-hide-button,
+.spectra-blacklist-button {
+  align-items: center;
+  background: rgba(15, 15, 15);
+  border: 1px solid rgba(226, 228, 248, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  height: 26px;
+  justify-content: center;
+  opacity: 0;
+  padding: 4px;
+  transition: all 0.2s ease;
+  width: 26px;
+  color: #8e8f9e;
+}
+
+.spectra-market-row:hover .spectra-hide-button,
+.spectra-market-row:hover .spectra-blacklist-button {
+  opacity: 1;
+}
+
+.spectra-hide-button:hover,
+.spectra-blacklist-button:hover {
+  color: #d8dcff;
+  background: rgba(0, 0, 0, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.spectra-blacklist-dev-icon {
+  color: inherit;
+  height: 16px;
+  width: 16px;
+}
+
+.spectra-hide-button.strikethrough::after,
+.spectra-blacklist-button.strikethrough::after {
+  content: '';
+  position: absolute;
+  width: 70%;
+  height: 1.5px;
+  background: #b1b2c8;
+  transform: rotate(45deg);
+  pointer-events: none;
+  box-shadow: 0 0 4px black;
+}
+
+.spectra-hide-button.strikethrough:hover::after,
+.spectra-blacklist-button.strikethrough:hover::after {
+  background: #d8dcff;
+}
+
+/* Quick Buy Button */
+.spectra-quick-buy-btn {
+  align-items: center;
+  background: #aaaecf;
+  border: none;
+  border-radius: 8px;
+  color: #0f0f12;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.7rem;
+  font-weight: 700;
+  gap: 2px;
+  justify-content: center;
+  letter-spacing: -0.5px;
+  margin-top: 0.5rem;
+  padding: 0.2rem .35rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.spectra-quick-buy-btn:hover {
+  filter: brightness(1.1);
+}
+
+.spectra-quick-buy-btn:disabled {
+  cursor: not-allowed;
+}
+
+.spectra-quick-buy-btn:disabled:hover {
+  filter: brightness(1);
+}
+
+.spectra-quick-buy-icon {
+  height: 15px;
+  width: 15px;
+}
+
+
+.edit-spectra-quick-buy-icon{
+  filter: invert(1) brightness(0) saturate(100%) invert(28%) sepia(24%) saturate(349%) hue-rotate(210deg) brightness(91%) contrast(88%);
+  height: 15px;
+  width: 15px;
+}
+
+.spectra-quickbuy-loading-spinner {
+  border: 1.5px solid rgb(6, 6, 6);
+  border-radius: 50%;
+  border-top: 1.5px solid transparent;
+  height: 14px;
+  margin: 1.5px;
+  position: absolute;
+  width: 14px;
+}
+
+.spectra-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.spectra-market-image-container:hover .spectra-image-overlay {
+  opacity: 1;
+}
+
+.spectra-camera-icon {
+  width: 30px;
+  height: 30px;
+  filter: brightness(0) saturate(100%) invert(83%) sepia(11%) saturate(527%) hue-rotate(194deg) brightness(95%) contrast(92%) opacity(1);
+}
+
+.spectra-image-preview {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.2s ease;
+  will-change: opacity;
+  z-index: 9999 !important;
+}
+
+.spectra-image-preview.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.spectra-preview-image {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: block;
+  height: 220px;
+  object-fit: cover;
+  width: 220px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.spectra-preview-placeholder {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  width: 220px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Column Header - from TokenExplorer */
+.spectra-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+}
+
+.spectra-column-title-section {
+  display: flex;
+  align-items: center;
+}
+
+.spectra-pause-icon {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.spectra-pause-icon.visible {
+  opacity: 1;
+}
+
+.spectra-column-title-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.spectra-quickbuy-container {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 28px;
+  padding: 0 0.5rem;
+  padding-right: 0.15rem;
+  border: 1px solid rgba(179, 184, 249, 0.12);
+  border-radius: 20px;
+  position: relative;
+}
+
+.spectra-quick-buy-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.spectra-quickbuy-input {
+  background: transparent;
+  border: none;
+  color: #ffffffcf;
+  flex: 1;
+  font-size: 0.85rem;
+  letter-spacing: -0.3px;
+  min-width: 0;
+  outline: none;
+  transform: scaleX(1.1);
+  width: 30px;
+}
+
+.spectra-quickbuy-input::-moz-placeholder {
+  color: #ffffff4d;
+}
+
+.spectra-quickbuy-input::placeholder {
+  color: #ffffff4d;
+}
+
+.spectra-monad-icon {
+  height: 15px;
+  width: 15px;
+}
+
+.spectra-preset-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  padding-left: 2px;
+  border-left: 1px solid rgba(179, 184, 249, 0.12);
+}
+
+.spectra-preset-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 1.5px 3px;
+  font-size: 0.8rem;
+  color: #7f808d;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.spectra-preset-pill:last-child {
+  border-radius: 0 20px 20px 0px;
+  margin-right: 0;
+  padding-right: 5px;
+}
+
+.spectra-preset-pill:hover {
+  background-color: #7f808d17;
+}
+
+.spectra-preset-pill.active {
+  color: #d8dcff;
+}
+
+.spectra-preset-pill.active:hover {
+  background-color: #9fa5f525;
+}
+
+/* Filters Button */
+.spectra-filters-button-wrapper {
+  position: relative;
+}
+
+.spectra-filters-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(179, 184, 249, 0.12);
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 28px;
+}
+
+.spectra-filters-button:hover {
+  background-color: rgba(179, 184, 249, 0.05);
+  border-color: rgba(179, 184, 249, 0.2);
+}
+
+.spectra-filters-button img {
+  width: 14px;
+  height: 14px;
+  filter: brightness(0) saturate(100%) invert(99%) sepia(77%) saturate(520%) hue-rotate(177deg) brightness(90%) contrast(94%);
+}
+
+.spectra-filters-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: rgb(8, 8, 8);
+  border: 1px solid rgba(179, 184, 249, 0.15);
+  border-radius: 6px;
+  width: 380px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+
+.spectra-filters-dropdown-content {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(179, 184, 249, 0.2) transparent;
+}
+
+.spectra-filters-dropdown-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.spectra-filters-dropdown-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spectra-filters-dropdown-content::-webkit-scrollbar-thumb {
+  background: rgba(179, 184, 249, 0.2);
+  border-radius: 3px;
+}
+
+.spectra-filters-section-block {
+  margin-bottom: 20px;
+}
+
+.spectra-filters-section-block:last-child {
+  margin-bottom: 0;
+}
+
+.spectra-filters-section-title {
+  display: block;
+  color: #ffffff7b;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+
+.spectra-filters-button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.spectra-filters-button-row-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.spectra-filter-size-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 4px;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 65px;
+}
+
+.spectra-filter-size-button:hover {
+  background-color: rgba(179, 184, 249, 0.05);
+  border-color: rgba(179, 184, 249, 0.2);
+}
+
+.spectra-filter-size-button.active {
+  border: 1px solid #aaaecf;
+  color: #d8dcff;
+  background-color: #7c88e820;
+  box-shadow: 0 0 8px rgba(170, 174, 207, 0.4);
+}
+
+.spectra-filter-button-label {
+  color: #ffffffd5;
+  font-size: 0.8rem;
+  font-weight: 300;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.spectra-filter-button-sublabel {
+  color: #ffffff7b;
+  font-size: 0.7rem;
+  font-weight: 300;
+  letter-spacing: -0.2px;
+}
+
+.spectra-filter-button-icon {
+  color: #ffffffd5;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.spectra-filters-tabs-row {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 4px;
+  padding: 4px;
+  overflow: hidden;
+}
+
+.spectra-filter-tab-pill {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #e0e8fd90;
+  font-size: 0.75rem;
+  font-weight: 300;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 6px 12px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.spectra-filter-tab-pill:hover {
+  color: #fff;
+}
+
+.spectra-filter-tab-pill.active {
+  color: #fff;
+}
+
+.spectra-filters-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spectra-filters-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 4px;
+  padding: 10px 12px;
+  color: #ffffffd5;
+  font-size: 0.8rem;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: -0.3px;
+}
+
+.spectra-filters-toggle-row:hover {
+  background-color: rgba(179, 184, 249, 0.05);
+  border-color: rgba(179, 184, 249, 0.2);
+}
+
+.spectra-filters-toggle-row svg {
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.spectra-filter-custom-button {
+  background: transparent;
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 4px;
+  color: #ffffffd5;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 300;
+  padding: 10px 8px;
+  transition: all 0.2s ease;
+  text-align: center;
+  letter-spacing: -0.3px;
+}
+
+.spectra-filter-custom-button:hover {
+  background-color: rgba(179, 184, 249, 0.05);
+  border-color: rgba(179, 184, 249, 0.2);
+}
+
+.spectra-filter-custom-button.active {
+  background: rgb(170 174 207 / 8%);
+  border-color: #aaaecf66;
+  box-shadow: 0 0 0 1px rgba(170, 174, 207, 0.6);
+  color: #d8dcff;
+}
+
+/* Metrics Tab Styles */
+.spectra-filters-range-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.spectra-filter-range-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40, 44, 62, 0.5);
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 8px;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 85px;
+  position: relative;
+}
+
+.spectra-filter-range-box:hover {
+  background-color: rgba(179, 184, 249, 0.05);
+  border-color: rgba(179, 184, 249, 0.2);
+}
+
+.spectra-filter-range-box.active {
+  background: rgba(50, 54, 74, 0.7);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+}
+
+.spectra-filter-color-square {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.spectra-filter-range-label {
+  color: #ffffffd5;
+  font-size: 0.9rem;
+  font-weight: 300;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.spectra-filter-range-label-with-select {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.spectra-filter-range-label-with-select span {
+  color: #ffffffd5;
+  font-size: 0.9rem;
+  font-weight: 300;
+  letter-spacing: -0.3px;
+}
+
+.spectra-filter-time-select {
+  background: rgba(30, 34, 48, 0.8);
+  border: 1px solid rgba(179, 184, 249, 0.15);
+  border-radius: 3px;
+  color: #ffffff7b;
+  font-size: 0.7rem;
+  font-weight: 300;
+  padding: 2px 4px;
+  cursor: pointer;
+  outline: none;
+}
+
+.spectra-filter-reset-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: rgba(255, 255, 255, 0.3);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.spectra-filter-reset-icon:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.spectra-filter-range-sublabel {
+  color: #ffffff4d;
+  font-size: 0.7rem;
+  font-weight: 300;
+  letter-spacing: -0.2px;
+}
+
+/* Extras Tab Styles */
+.spectra-filters-button-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.spectra-filter-layout-button {
+  background: transparent;
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  border-radius: 6px;
+  color: rgba(99, 102, 241, 0.9);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 400;
+  padding: 12px 8px;
+  transition: all 0.2s ease;
+  text-align: center;
+  letter-spacing: -0.3px;
+  min-height: 50px;
+}
+
+.spectra-filter-layout-button:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.6);
+}
+
+.spectra-filter-layout-button.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.7);
+  color: rgba(99, 102, 241, 1);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3);
+}
+
+.spectra-filters-behavior-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spectra-filter-behavior-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(40, 44, 62, 0.5);
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 6px;
+  color: #ffffffd5;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 300;
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+  letter-spacing: -0.3px;
+}
+
+.spectra-filter-behavior-button:hover {
+  background-color: rgba(179, 184, 249, 0.05);
+  border-color: rgba(179, 184, 249, 0.2);
+}
+
+.spectra-filter-behavior-button.active {
+  background: rgba(50, 54, 74, 0.7);
+  border-color: rgba(170, 174, 207, 0.4);
+  box-shadow: 0 0 0 1px rgba(170, 174, 207, 0.3);
+}
+
+.spectra-filter-behavior-button svg {
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+.spectra-filter-toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.spectra-toggle-input {
+  display: none;
+}
+
+.spectra-toggle-label {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  background-color: rgba(60, 64, 88, 0.5);
+  border: 1px solid rgba(179, 184, 249, 0.15);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.spectra-toggle-label::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.spectra-toggle-input:checked+.spectra-toggle-label {
+  background-color: rgba(170, 174, 207, 0.4);
+  border-color: rgba(170, 174, 207, 0.6);
+}
+
+.spectra-toggle-input:checked+.spectra-toggle-label::after {
+  transform: translateX(22px);
+}
+
+
+
+.display-list-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.link-icon {
+  width: 17px;
+  height: 17px;
+  filter: brightness(0) saturate(100%) invert(68%) sepia(11%) saturate(27%) hue-rotate(190deg) brightness(106%) contrast(94%);
+  cursor: pointer;
+}
+
+.spectra-display-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  padding: 2px 5px;
+  filter: brightness(0) saturate(100%) invert(68%) sepia(11%) saturate(27%) hue-rotate(190deg) brightness(106%) contrast(94%);
+}
+
+.spectra-display-dropdown-trigger:hover {
+  background-color: rgba(179, 184, 249, 0.1);
+
+
+}
+
+.spectra-widget-header-right{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.spectra-divider{
+  height: 17px;
+  width: 1px;
+  background-color: rgba(186, 186, 216, 0.15);
+}
+
+.spectra-token-search{
+  display: flex;
+  border-radius: 20px;
+  background: none;
+  outline: none;
+  border: 1px solid rgba(179, 184, 249, 0.12);
+  padding: 2px 12px;
+  letter-spacing: -0.3px;
+  font-size: 0.8rem;
+}
+
+.spectra-header-second-row{
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px
+}
+
+.spectra-twitter-username {
+  color:#87c0f0;
+  font-size: 0.75rem;
+  letter-spacing: -0.2px;
+  padding: 2px 0;
+  width: max-content;
+  margin-bottom: -28px;
+}
+.spectra-twitter-username:hover {
+  text-decoration: underline ;
+  cursor: pointer;
+}
+
+
+
+.spectra-second-row-right{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spectra-quick-buy-btn {
+  align-items: center;
+  background: #aaaecf;
+  border: none;
+  border-radius: 8px;
+  color: #0f0f12;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.7rem;
+  font-weight: 700;
+  gap: 2px;
+  justify-content: center;
+  letter-spacing: -0.5px;
+  margin-top: 0.5rem;
+  padding: 0.2rem .35rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.spectra-quick-buy-btn:hover {
+  filter: brightness(1.1);
+}
+
+.spectra-quick-buy-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.spectra-quick-buy-btn:disabled:hover {
+  filter: brightness(1);
+}
+
+.spectra-quick-buy-btn.size-small {
+  font-size: 0.8rem;
+  gap: 2px;
+  padding: 0.2rem 0.35rem;
+  border-radius: 20px;
+  margin-top: 20px;
+  height: 25px;
+  width: 75px;
+}
+
+.spectra-quick-buy-btn.size-small .spectra-quick-buy-icon {
+  height: 15px;
+  width: 15px;
+}
+
+.spectra-quick-buy-btn.size-small:hover {
+  filter: brightness(1.1);
+}
+
+.spectra-quick-buy-btn.size-large {
+  border-radius: 20px;
+  font-size: 0.8rem;
+  gap: 4px;
+  margin-top: 1rem;
+  padding: 0.3rem 0.5rem;
+  width: 85px;
+  height: 29px;
+}
+
+.spectra-quick-buy-btn.size-large .spectra-quick-buy-icon {
+  height: 18px;
+  width: 18px;
+}
+
+.spectra-quick-buy-btn.size-large:hover {
+  filter: brightness(1.1);
+}
+
+.spectra-quick-buy-btn.size-mega {
+  border-radius: 4px;
+  font-size: 0.8rem;
+  padding: 0.75rem 3.5rem;
+  width: 180px;
+  height: 43px;
+  white-space: nowrap;
+}
+
+.spectra-quick-buy-btn.size-mega .spectra-quick-buy-icon {
+  height: 15px;
+  width: 15px;
+}
+
+.spectra-quick-buy-btn.size-mega:hover {
+  filter: brightness(1.1);
+}
+
+.spectra-quick-buy-btn.size-ultra {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: #d8dbf5;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.spectra-quick-buy-btn.size-ultra .spectra-quick-buy-icon {
+  filter: brightness(0) saturate(100%) invert(83%) sepia(11%) saturate(527%) hue-rotate(194deg) brightness(95%) contrast(92%);
+  height: 14px;
+  width: 14px;
+}
+
+/* Style Variations */
+.spectra-quick-buy-btn.style-grey {
+  background: rgb(34, 34, 38);
+  box-shadow: none;
+  color: #ffffffcc;
+  font-weight: 500;
+}
+
+.spectra-quick-buy-btn.style-grey:hover {
+  filter: brightness(1.2);
+}
+
+.spectra-quick-buy-btn.style-grey .spectra-quick-buy-icon {
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
+.spectra-quick-buy-btn.style-grey .spectra-quickbuy-loading-spinner {
+  border: 1.5px solid #dedfeb;
+  border-top: 1.5px solid transparent;
+}
+
+.spectra-quickbuy-loading-spinner {
+  animation: spectraQuickbuySpin 1s linear infinite;
+  border: 1.5px solid rgb(6, 6, 6);
+  border-radius: 50%;
+  border-top: 1.5px solid transparent;
+  height: 14px;
+  margin: 1.5px;
+  position: absolute;
+  width: 14px;
+}
+
+.spectra-quick-buy-btn.size-small .spectra-quickbuy-loading-spinner {
+  height: 12px;
+  width: 12px;
+}
+
+.spectra-quick-buy-btn.size-large .spectra-quickbuy-loading-spinner {
+  height: 14px;
+  width: 14px;
+}
+
+.spectra-quick-buy-btn.size-mega .spectra-quickbuy-loading-spinner {
+  height: 14px;
+  width: 14px;
+}
+
+.spectra-quick-buy-btn.size-ultra .spectra-quickbuy-loading-spinner {
+  border-color: #d8dcff;
+  border-top-color: transparent;
+  height: 14px;
+  width: 14px;
+}
+
+@keyframes spectraQuickbuySpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== METRICS CONTAINER STYLING (Replace existing) ===== */
+
+.spectra-metrics-container {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding-left: 5px;
+  background-color: rgb(6, 6, 6);
+  box-shadow: 0 0 10px 4px rgb(6, 6, 6);
+  margin-bottom: 4px;
+}
+
+.spectra-market-cap {
+  align-items: center;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 500;
+  gap: 4px;
+  height: 20px;
+}
+
+.spectra-volume {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  height: 20px;
+}
+
+.spectra-mc-label,
+.mc-label {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.5;
+}
+
+.spectra-mc-value{
+  color: #d8dcff !important;
+  font-size: 0.8rem;
+}
+
+.spectra-third-row.metrics-size-small .spectra-metrics-container {
+  gap: 8px;
+}
+
+.spectra-third-row.metrics-size-small .spectra-market-cap,
+.spectra-third-row.metrics-size-small .spectra-volume {
+  gap: 3px;
+  font-size: 0.85rem;
+}
+
+.spectra-third-row.metrics-size-small .spectra-mc-label,
+.spectra-third-row.metrics-size-small .mc-label {
+  font-size: 0.7rem;
+}
+
+.spectra-third-row.metrics-size-small .spectra-mc-value,
+.spectra-third-row.metrics-size-small .mc-value {
+  font-size: 0.85rem;
+}
+
+.spectra-third-row.metrics-size-large .spectra-metrics-container {
+  gap: 12px;
+}
+
+.spectra-third-row.metrics-size-large .spectra-market-cap,
+.spectra-third-row.metrics-size-large .spectra-volume {
+  gap: 5px;
+  font-size: 1rem;
+}
+
+.spectra-third-row.metrics-size-large .spectra-mc-label,
+.spectra-third-row.metrics-size-large .mc-label {
+  font-size: 0.9rem;
+}
+
+.spectra-third-row.metrics-size-large .spectra-mc-value,
+.spectra-third-row.metrics-size-large .mc-value {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* ===== THIRD ROW LAYOUT MODES (Replace existing) ===== */
+
+.spectra-third-row {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: 1rem;
+  z-index: 2;
+}
+
+.spectra-third-row.large-quickbuy-mode {
+  gap: 2px;
+}
+
+.spectra-third-row.large-quickbuy-mode .spectra-metrics-container,
+.spectra-third-row.mega-quickbuy-mode .spectra-metrics-container,
+.spectra-third-row.ultra-quickbuy-mode .spectra-metrics-container {
+  align-items: center;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.spectra-third-row.mega-quickbuy-mode {
+  gap: 2px;
+}
+
+.spectra-third-row.ultra-quickbuy-mode {
+  align-items: flex-end;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0;
+  bottom: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: all 0.3s ease;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  width: clamp(100px, 27%, 170px);
+}
+
+.spectra-third-row.ultra-quickbuy-mode.disabled {
+  cursor: not-allowed;
+}
+
+.spectra-third-row.ultra-quickbuy-mode:hover {
+  background:
+    radial-gradient(150px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.08) 0%,
+      rgba(170, 174, 207, 0.04) 40%,
+      rgba(170, 174, 207, 0.01) 70%,
+      transparent 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.139);
+}
+
+.spectra-third-row.ultra-quickbuy-mode .spectra-metrics-container {
+  align-items: center;
+  flex-direction: row;
+  font-size: 0.85rem;
+}
+
+.spectra-third-row.ultra-quickbuy-mode .mc-label {
+  font-size: 0.7rem;
+}
+
+.spectra-third-row.ultra-quickbuy-mode:hover .spectra-quick-buy-btn.size-ultra {
+  color: #d8dbf5;
+}
+
+.spectra-third-row.ultra-quickbuy-mode:hover .spectra-quick-buy-btn.size-ultra .spectra-quick-buy-icon {
+  filter: brightness(0) saturate(100%) invert(93%) sepia(8%) saturate(1486%) hue-rotate(194deg) brightness(99%) contrast(96%);
+}
+
+/* Ultra Style Variations */
+.spectra-third-row.ultra-glowing {
+  transition: all 0.3s ease;
+}
+
+.spectra-third-row.ultra-glowing:hover {
+  background:
+    radial-gradient(200px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.15) 0%,
+      rgba(170, 174, 207, 0.08) 40%,
+      rgba(170, 174, 207, 0.03) 70%,
+      transparent 100%);
+  box-shadow:
+    inset 0 0 20px rgba(170, 174, 207, 0.1),
+    0 0 30px rgba(170, 174, 207, 0.05);
+}
+
+.spectra-third-row.ultra-glowing .spectra-quick-buy-btn.size-ultra {
+  text-shadow: 0 0 15px rgba(216, 219, 245, 0.4);
+  transition: all 0.3s ease;
+}
+
+.spectra-third-row.ultra-glowing:hover .spectra-quick-buy-btn.size-ultra {
+  color: #ffffff;
+  text-shadow: 0 0 25px rgba(216, 219, 245, 0.6);
+}
+
+.spectra-third-row.ultra-border {
+  background:
+    radial-gradient(150px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.05) 0%,
+      transparent 70%);
+  border: 1px solid #c7cbee;
+  box-shadow: inset 0 0 0 1px rgba(216, 219, 245, .7);
+  border-radius: 4px;
+  margin: 2px 0;
+  transition: all 0.3s ease;
+}
+
+.spectra-third-row.ultra-border:hover {
+  background:
+    radial-gradient(150px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.05) 0%,
+      transparent 70%);
+  border-color: #d8dbf5;
+}
+
+.spectra-third-row.ultra-glowing.ultra-border:hover {
+  background:
+    radial-gradient(200px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.15) 0%,
+      rgba(170, 174, 207, 0.08) 40%,
+      rgba(170, 174, 207, 0.03) 70%,
+      transparent 100%);
+  border-color: #d8dbf5 !important;
+  box-shadow:
+    0 0 20px rgba(216, 219, 245, 0.4),
+    inset 0 0 25px rgba(170, 174, 207, 0.1),
+    0 0 30px rgba(170, 174, 207, 0.08);
+}
+
+.spectra-quick-buy-btn.ultra-text-grey {
+  color: #9ca3af !important;
+  text-shadow: 0 0 10px #9ca3af !important;
+}
+
+.spectra-third-row.ultra-text-grey:hover .spectra-quick-buy-btn.size-ultra {
+  color: #d1d5db !important;
+  text-shadow: 0 0 15px #d1d5db !important;
+}
+
+.spectra-third-row.ultra-glowing.ultra-text-grey:hover .spectra-quick-buy-btn.size-ultra {
+  color: #f3f4f6 !important;
+  text-shadow: 0 0 25px rgba(209, 213, 219, 0.6) !important;
+}
+
+@media(max-width: 1450px) {
+  .spectra-quick-buy-btn.size-small,
+  .spectra-quick-buy-btn.size-large,
+  .spectra-quick-buy-btn.size-mega {
+    display: none;
+  }
+
+  .spectra-market-row:hover .spectra-quick-buy-btn.size-small,
+  .spectra-market-row:hover .spectra-quick-buy-btn.size-large,
+  .spectra-market-row:hover .spectra-quick-buy-btn.size-mega {
+    display: flex;
+  }
+
+  .spectra-quick-buy-btn.size-ultra {
+    display: flex;
+  }
+}
+
+.spectra-market-row:hover .spectra-metrics-container,
+.spectra-market-row:hover .spectra-third-row-section {
+  background-color: rgb(17, 17, 21);
+  box-shadow: 0 0 10px 4px rgb(17, 17, 21);
+}
+
+.spectra-actions-section{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.spectra-actions-section.ultra-mode{
+ margin-top: 25px;
+}
+
+.spectra-widget {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.spectra-widget.dragging {
+  pointer-events: none; 
+}
+
+.spectra-widget.dragging * {
+  pointer-events: none;
+}
+
+.spectra-market-row.colored-row {
+  transition: background-color 0.3s ease;
+}
+
+.spectra-market-row.colored-row.bonding-0-25 {
+  background-color: rgba(238, 91, 91, 0.08);
+}
+
+.spectra-market-row.colored-row.bonding-25-50 {
+  background-color: rgba(245, 158, 11, 0.08);
+}
+
+.spectra-market-row.colored-row.bonding-50-75 {
+  background-color: rgba(234, 179, 8, 0.08);
+}
+
+.spectra-market-row.colored-row.bonding-75-100 {
+  background-color: rgba(67, 225, 125, 0.08);
+}
+
+.spectra-market-row.colored-row.bonding-0-25:hover {
+  background-color: rgba(238, 91, 91, 0.12);
+}
+
+.spectra-market-row.colored-row.bonding-25-50:hover {
+  background-color: rgba(245, 158, 11, 0.12);
+}
+
+.spectra-market-row.colored-row.bonding-50-75:hover {
+  background-color: rgba(234, 179, 8, 0.12);
+}
+
+.spectra-market-row.colored-row.bonding-75-100:hover {
+  background-color: rgba(67, 225, 125, 0.12);
+}
+
+.spectra-market-row.graduated {
+  background-color: transparent;
+}
+.spectra-market-row.metric-colored .spectra-mc-value {
+  transition: color 0.2s ease;
+}
+
+.spectra-market-row.market-cap-range1 .spectra-market-cap .spectra-mc-value {
+  color: var(--metric-market-cap-range1, #d8dcff) !important;
+}
+
+.spectra-market-row.market-cap-range2 .spectra-market-cap .spectra-mc-value {
+  color: var(--metric-market-cap-range2, #eab308) !important;
+}
+
+.spectra-market-row.market-cap-range3 .spectra-market-cap .spectra-mc-value {
+  color: var(--metric-market-cap-range3, #14b8a6) !important;
+}
+
+.spectra-market-row.volume-range1 .spectra-volume .spectra-mc-value {
+  color: var(--metric-volume-range1, #ffffff) !important;
+}
+
+.spectra-market-row.volume-range2 .spectra-volume .spectra-mc-value {
+  color: var(--metric-volume-range2, #ffffff) !important;
+}
+
+.spectra-market-row.volume-range3 .spectra-volume .spectra-mc-value {
+  color: var(--metric-volume-range3, #ffffff) !important;
+}
+
+.spectra-market-row.holders-range1 .spectra-stat-value {
+  color: var(--metric-holders-range1, #ffffff) !important;
+}
+
+.spectra-market-row.holders-range2 .spectra-stat-value {
+  color: var(--metric-holders-range2, #ffffff) !important;
+}
+
+.spectra-market-row.holders-range3 .spectra-stat-value {
+  color: var(--metric-holders-range3, #ffffff) !important;
+}
+
+.spectra-second-ultra-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: clamp(100px, 27%, 170px);
+  display: flex;
+  align-items: flex-end;
+  padding: 0.75rem;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0;
+  transition: all 0.3s ease;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+}
+
+.spectra-second-ultra-container.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.spectra-second-ultra-container:hover {
+  background: radial-gradient(150px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.08) 0%,
+      rgba(170, 174, 207, 0.04) 40%,
+      rgba(170, 174, 207, 0.01) 70%,
+      transparent 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.139);
+}
+
+.spectra-second-ultra-container.ultra-glowing:hover {
+  background: radial-gradient(200px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.15) 0%,
+      rgba(170, 174, 207, 0.08) 40%,
+      rgba(170, 174, 207, 0.03) 70%,
+      transparent 100%);
+  box-shadow: inset 0 0 20px rgba(170, 174, 207, 0.1),
+    0 0 30px rgba(170, 174, 207, 0.05);
+}
+
+.spectra-second-ultra-container.ultra-border {
+  background: radial-gradient(150px circle at var(--mouse-x) var(--mouse-y),
+      rgba(170, 174, 207, 0.05) 0%,
+      transparent 70%);
+  border: 1px solid #c7cbee;
+  box-shadow: inset 0 0 0 1px rgba(216, 219, 245, .7);
+  border-radius: 4px;
+  margin: 2px 0;
+}
+
+.spectra-second-ultra-container.ultra-border:hover {
+  border-color: #d8dbf5;
+}
+
+.spectra-second-ultra-container .spectra-quick-buy-btn.size-ultra {
+  pointer-events: none;
+}
+
+.spectra-second-ultra-container:hover .spectra-quick-buy-btn.size-ultra {
+  color: #d8dbf5;
+}
+
+.spectra-second-ultra-container:hover .spectra-quick-buy-btn.size-ultra .spectra-quick-buy-icon {
+  filter: brightness(0) saturate(100%) invert(93%) sepia(8%) saturate(1486%) hue-rotate(194deg) brightness(99%) contrast(96%);
+}
+
+.spectra-ultra-quickbuy-icon {
+  width: 64px;
+  height: 64px;
+}
+
+.spectra-ultra-quickbuy-loading-spinner {
+  animation: spectraQuickbuySpin 1s linear infinite;
+  border-radius: 50%;
+  height: 14px;
+  width: 14px;
+}
+
+.spectra-third-row.ultra-dual-buttons {
+  width: clamp(100px, 27%, 170px);
+  right: clamp(100px, 27%, 170px);
+}
+
+.spectra-quick-buy-btn.second-button {
+  background: var(--second-quickbuy-color, #606BCC);
+  position: relative;
+}
+
+.spectra-quick-buy-btn.second-button:hover {
+  filter: brightness(1.1);
+}
+
+.spectra-quick-buy-btn.second-button.style-grey {
+  background: rgb(34, 34, 38);
+}
+
+.spectra-quick-buy-btn.second-button .spectra-quickbuy-loading-spinner {
+  border-color: var(--second-quickbuy-color, #606BCC);
+  border-top-color: transparent;
+}
+
+.spectra-quick-buy-btn.second-button.style-grey .spectra-quickbuy-loading-spinner {
+  border-color: #dedfeb;
+  border-top-color: transparent;
+}
+
+
+.spectra-market-row.hidden-token {
+  opacity: 0.5;
+  pointer-events: all;
+  position: relative;
+}
+
+.spectra-market-row.hidden-token:hover {
+  opacity: 0.7;
+}
+
+.column-pause-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  flex-shrink: 0;
+}
+
+.column-pause-icon.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.column-pause-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.spectra-second-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+
+
+.spectra-market-row.nadfun-token .spectra-launchpad-logo-container {
+  border-color: #AD5FFB;
+}
+
+.spectra-market-row.nadfun-token .spectra-market-image-container {
+  background: conic-gradient(from 135deg,
+    #AD5FFB 0deg,
+    #AD5FFB var(--progress-angle),
+    rgba(173, 95, 251, 0.2) var(--progress-angle),
+    rgba(173, 95, 251, 0.2) 360deg);
+}
+
+.spectra-market-row.nadfun-token .spectra-progress-line-fill {
+  background: #AD5FFB;
+}
+
+.spectra-market-row.nadfun-token .spectra-progress-line {
+  background: rgba(173, 95, 251, 0.2);
+}
+
+
+
+.spectra-market-row.nadfun-token .spectra-market-image-container.graduated {
+  background: conic-gradient(from 135deg,
+      #ffd700 0deg,
+      #ffed4e 90deg,
+      #ffc107 180deg,
+      #ff8f00 270deg,
+      #ffd700 360deg);
+}
+
+
+
+

@@ -1,0 +1,138 @@
+.min-size-filter-container {
+  position: relative;
+  margin-left: 8px;
+}
+
+.min-size-filter-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 23px;
+  opacity: 0.6;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.min-size-filter-button:hover {
+  opacity: 0.8;
+}
+
+.min-size-filter-dots {
+  width: 20px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.min-size-filter-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: -9px;
+  background: rgb(6,6,6);
+  border-bottom-left-radius: 8px;
+  width: 240px;
+  z-index: 4;
+  padding: 2px 12px;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+  border-left:  1px solid rgba(179, 184, 249, 0.1);
+}
+
+
+.market-type-filter-section{
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.06);
+
+}
+.only-filter-section {
+  margin-bottom: 10px;
+  padding-top: 8px;
+}
+
+.filter-section-header {
+  color: #ffffff98;
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding-bottom: 5px;
+}
+.min-size-filter-section-header {
+  color: #ffffff98;
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding-bottom: 5px;
+}
+
+.filter-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.filter-dropdown-wrapper {
+  margin-top: -3px;
+}
+
+.filter-section-divider {
+  height: 1.5px;
+  background-color: rgba(255, 255, 255, 0.05);
+  margin: 10px 0;
+}
+
+.min-size-input-container {
+  width: 100%;
+}
+
+.min-size-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.min-size-input {
+  width: 100%;
+  background: #0f0f1272;
+  border: 1px solid rgb(170 174 207 / 8%);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.min-size-input:focus {
+  border: 1px solid rgb(170 174 207 / 10%);
+}
+
+.min-size-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.min-size-currency {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff98;
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+
+.min-size-toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+.min-size-toggle-label {
+  color: #ffffff71;
+  font-size: 0.7rem;
+  font-weight: 300;
+  user-select: none;
+}
+
+.oc-filters {
+  display: flex;
+  align-items: center;
+}
+

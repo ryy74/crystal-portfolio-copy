@@ -1,0 +1,21 @@
+.sort-arrow-container {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  margin-left: 1px;
+  margin-top: 2px;
+  outline: none;
+  user-select: none;
+}
+
+.sort-arrow-icon {
+  color: #6a6c71;
+}
+
+.sort-arrow-icon.asc {
+  transform: rotate(0deg);
+}
+
+.sort-arrow-icon.desc {
+  transform: rotate(180deg);
+}

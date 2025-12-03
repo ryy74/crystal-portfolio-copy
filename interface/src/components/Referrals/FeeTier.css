@@ -1,0 +1,285 @@
+.fee-tier-section {
+  background: rgb(6, 6, 6);
+  border-radius: 20px;
+  padding: 20px 25px;
+  border: 1.5px solid rgba(17, 17, 18, 0.671);
+  margin: 16px 0;
+}
+
+.fee-tier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.fee-tier-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.fee-tier-badge-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tier-nav-button {
+  background: rgba(170, 174, 207, 0.1);
+  border: 1px solid rgba(170, 174, 207, 0.2);
+  border-radius: 4px;
+  color: #aaaecf;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.tier-nav-button:hover {
+  background: rgba(170, 174, 207, 0.2);
+  border-color: rgba(170, 174, 207, 0.3);
+}
+
+.fee-tier-progress-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.fee-tier-next-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.fee-tier-next-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.fee-tier-next-name {
+  font-weight: 500;
+  background: linear-gradient(135deg, #aaaecf 0%, #7f82a1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fee-tier-next-name.tier-silver {
+  background: linear-gradient(135deg, #D4D4D4 0%, #7A7A7A 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fee-tier-next-name.tier-gold {
+  background: linear-gradient(135deg, #F5D576 0%, #CC8400 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fee-tier-next-name.tier-diamond {
+  background: linear-gradient(135deg, #aaaecf 0%, #7f82a1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fee-tier-next-name.tier-netherite {
+  background: linear-gradient(135deg, #6B6B6B 0%, #4A4A4A 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fee-tier-next-name.tier-enchanted-netherite {
+  background: linear-gradient(135deg, #9D4EDD 0%, #7B2CBF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.referrals-fee-tier-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.fee-tier-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  color: #000;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.fee-tier-badge-name {
+  letter-spacing: -0.5px;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.view-schedule-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(170, 174, 207, 0.1);
+  border-radius: 20px;
+  color: #d8dcff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.9rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.fee-tier-volume-value {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.fee-tier-progress {
+  margin-bottom: 0.5rem;
+}
+
+.fee-tier-progress-bar {
+  flex: 1;
+  height: 10px;
+  background: rgba(179, 184, 249, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fee-tier-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.fee-tier-progress-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  text-align: right;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+  margin-right: 5px;
+}
+
+.fee-tier-progress-text:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.fee-tier-mon-icon {
+  width: 11px;
+  height: 11px;
+  margin-right: 3px;
+  display: inline-block;
+  vertical-align: baseline;
+  position: relative;
+  top: 1px;
+}
+
+/* Max Tier Message */
+.fee-tier-max-message {
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(170, 174, 207, 0.1) 0%, rgba(127, 130, 161, 0.05) 100%);
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.fee-tier-max-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0;
+}
+
+.fee-tier-benefits {
+  display: flex;
+  gap: 1rem;
+}
+
+.fee-tier-benefit-card {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.fee-tier-benefit-label {
+  color: #a8a9b9;
+  font-size: 0.85rem;
+}
+
+.fee-tier-benefit-value {
+  font-size: .85rem;
+}
+
+.fee-tier-requirements {
+  margin-top: 1.5rem;
+}
+
+.fee-tier-requirements-title {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+}
+
+.fee-tier-requirements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fee-tier-requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  opacity: 0.5;
+  transition: all 0.2s;
+}
+
+.fee-tier-requirement-item.achieved {
+  opacity: 1;
+  border-color: rgba(170, 174, 207, 0.2);
+  background: rgba(170, 174, 207, 0.05);
+}
+
+
+.fee-tier-requirement-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.fee-tier-requirement-benefits {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
+  font-weight: 300;
+}

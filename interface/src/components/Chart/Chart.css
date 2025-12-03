@@ -1,0 +1,25 @@
+.chartwrapper {
+  background: rgb(6,6,6);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+  z-index: 1;
+}
+
+.chart-options {
+  align-items: center;
+  display: flex;
+  height: 25px;
+  justify-content: space-between;
+  margin-top: 5px;
+  padding: 0px 10px;
+  position: relative;
+  z-index: 1;
+}
+
+body:has(.markets-dropdown-content.visible) .advanced-chart-container,
+body:has(.perps-markets-dropdown-content.visible) .advanced-chart-container {
+  pointer-events: none;
+}

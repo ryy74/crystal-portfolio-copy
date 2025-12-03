@@ -1,0 +1,13072 @@
+// import libraries
+import {
+  getBlockNumber,
+  readContracts,
+  waitForTransactionReceipt,
+} from '@wagmi/core';
+import React, {
+  KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
+import { TransactionExecutionError, encodeFunctionData, maxUint256 } from 'viem';
+import { useReadContracts } from 'wagmi';
+import { useLanguage } from './contexts/LanguageContext';
+import getAddress from './utils/getAddress.ts';
+import { config } from './wagmi.ts';
+import {
+  useLogout,
+  useSmartAccountClient,
+  useSendUserOperation,
+  useAlchemyAccountContext,
+  useUser,
+  AuthCard,
+} from "@account-kit/react";
+
+// import css
+import './App.css';
+
+// import scripts
+import approve from './scripts/approve';
+import limitOrder from './scripts/limitOrder';
+import multiBatchOrders from './scripts/multiBatchOrders';
+import sendeth from './scripts/sendeth';
+import sendtokens from './scripts/sendtokens';
+import _swap from './scripts/swap';
+import swapETHForExactTokens from './scripts/swapETHForExactTokens';
+import swapExactETHForTokens from './scripts/swapExactETHForTokens';
+import swapExactTokensForETH from './scripts/swapExactTokensForETH';
+import swapExactTokensForTokens from './scripts/swapExactTokensForTokens';
+import swapTokensForExactETH from './scripts/swapTokensForExactETH';
+import swapTokensForExactTokens from './scripts/swapTokensForExactTokens';
+import unwrapeth from './scripts/unwrapeth';
+import wrapeth from './scripts/wrapeth';
+import stake from './scripts/stake.ts';
+import { fetchLatestPrice } from './utils/getPrice.ts';
+
+// import utils
+import customRound from './utils/customRound';
+import { formatTime } from './utils/formatTime.ts';
+import { getTradeValue } from './utils/getTradeValue.ts';
+import { formatCommas, formatSubscript } from './utils/numberDisplayFormat.ts';
+import { formatDisplay } from './components/OrderCenter/utils/formatDisplay.ts';
+
+// import abis
+import { CrystalDataHelperAbi } from './abis/CrystalDataHelperAbi';
+import { CrystalMarketAbi } from './abis/CrystalMarketAbi';
+import { CrystalRouterAbi } from './abis/CrystalRouterAbi';
+import { CrystalReferralAbi } from './abis/CrystalReferralAbi.ts';
+import { TokenAbi } from './abis/TokenAbi';
+import { shMonadAbi } from './abis/shMonadAbi.ts';
+
+// import types
+import { DataPoint } from './components/Chart/utils/chartDataGenerator.ts';
+
+// import svg graphics
+import tradearrow from './assets/arrow.svg';
+import closebutton from './assets/close_button.png';
+import sendSwitch from './assets/send_arrow.svg';
+import walleticon from './assets/wallet_icon.png';
+import infoicon from './assets/icon.png';
+import mobiletradeswap from './assets/mobile_trade_swap.png';
+import refreshicon from './assets/circulararrow.png';
+import Xicon from './assets/Xicon.svg';
+
+import walletbackpack from './assets/walletbackpack.jpg'
+import walletcoinbase from './assets/walletcoinbase.png'
+import walletconnect from './assets/walletconnect.png'
+import walletinjected from './assets/walletinjected.png'
+import walletmetamask from './assets/walletmetamask.svg'
+import walletphantom from './assets/walletphantom.svg'
+import walletrabby from './assets/walletrabby.png'
+import warningicon from './assets/warning_icon.png'
+import walletsafe from './assets/walletsafe.png'
+import wallettomo from './assets/wallettomo.jpg'
+import wallethaha from './assets/wallethaha.png'
+import crystalxp from './assets/CrystalX.png';
+import part1image from './assets/part1intro.png';
+import topright from './assets/topright.png';
+import veryleft from './assets/veryleft.png';
+import topmiddle from './assets/topmiddle.png';
+import veryright from './assets/veryright.png';
+import topleft from './assets/topleft.png';
+import circleleft from './assets/circleleft.png';
+import lbstand from './assets/lbstand.png';
+import firstPlacePfp from './assets/leaderboard_first.png';
+import secondPlacePfp from './assets/leaderboard_second.png';
+import thirdPlacePfp from './assets/leaderboard_third.png';
+import defaultPfp from './assets/leaderboard_default.png';
+
+//audio
+import stepaudio from './assets/step_audio.mp3';
+import backaudio from './assets/back_audio.mp3';
+
+// import routes
+import Portfolio from './components/Portfolio/Portfolio.tsx';
+import Referrals from './components/Referrals/Referrals.tsx';
+
+// import main app components
+import ChartComponent from './components/Chart/Chart.tsx';
+import TokenInfoPopupContent from './components/Chart/ChartHeader/TokenInfo/TokenInfoPopup/TokenInfoPopupContent.tsx';
+import ChartOrderbookPanel from './components/ChartOrderbookPanel/ChartOrderbookPanel.tsx';
+import Header from './components/Header/Header.tsx';
+import LanguageSelector from './components/Header/LanguageSelector/LanguageSelector';
+import LoadingOverlay from './components/loading/LoadingComponent.tsx';
+import FullScreenOverlay from './components/loading/LoadingScreen.tsx';
+import NavigationProgress from './components/NavigationProgress.tsx';
+import OrderCenter from './components/OrderCenter/OrderCenter.tsx';
+import SortArrow from './components/OrderCenter/SortArrow/SortArrow.tsx';
+import PortfolioContent from './components/Portfolio/BalancesContent/BalancesContent.tsx';
+import PortfolioPopupGraph from './components/Portfolio/PortfolioGraph/PortfolioGraph.tsx';
+import ToggleSwitch from './components/ToggleSwitch/ToggleSwitch.tsx';
+import TooltipLabel from './components/TooltipLabel/TooltipLabel.tsx';
+import TransactionPopupManager from './components/TransactionPopupManager/TransactionPopupManager';
+import MiniChart from './components/Chart/ChartHeader/TokenInfo/MiniChart/MiniChart.tsx';
+import Leaderboard from './components/Leaderboard/Leaderboard.tsx';
+import SimpleOrdersContainer from './components/SimpleOrdersContainer/SimpleOrdersContainer';
+import SidebarNav from './components/SidebarNav/SidebarNav';
+
+// import config
+import { SearchIcon } from 'lucide-react';
+import { usePortfolioData } from './components/Portfolio/PortfolioGraph/usePortfolioData.ts';
+import { settings } from './settings.ts';
+import { useSharedContext } from './contexts/SharedContext.tsx';
+import { QRCodeSVG } from 'qrcode.react';
+import CopyButton from './components/CopyButton/CopyButton.tsx';
+
+function App() {
+  useEffect(() => {
+    if (!localStorage.getItem("noSSR")) {
+      localStorage.setItem("noSSR", "true");
+    }
+  }, []);
+  // constants
+  const { config: alchemyconfig } = useAlchemyAccountContext() as any;
+  const { client, address } = useSmartAccountClient({});
+  const { sendUserOperationAsync: rawSendUserOperationAsync } = useSendUserOperation({
+    client,
+    waitForTxn: true,
+  });
+  const sendUserOperationAsync = useCallback(
+    (params: any) => rawSendUserOperationAsync(params),
+    []
+  );  
+  const user = useUser();
+  const { logout } = useLogout();
+  const { t, language, setLanguage } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { activechain, percentage, setPercentage, favorites } = useSharedContext();
+  const userchain = alchemyconfig?._internal?.wagmiConfig?.state?.connections?.entries()?.next()?.value?.[1]?.chainId || client?.chain?.id
+  const connected = address != undefined
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const HTTP_URL = settings.chainConfig[activechain].httpurl;
+  const eth = settings.chainConfig[activechain].eth as `0x${string}`;
+  const weth = settings.chainConfig[activechain].weth as `0x${string}`;
+  const usdc = settings.chainConfig[activechain].usdc as `0x${string}`;
+  const ethticker = settings.chainConfig[activechain].ethticker;
+  const wethticker = settings.chainConfig[activechain].wethticker;
+  const balancegetter = settings.chainConfig[activechain].balancegetter;
+  const router = settings.chainConfig[activechain].router;
+  const markets: { [key: string]: any } =
+    settings.chainConfig[activechain].markets;
+  const tokendict: { [key: string]: any } =
+    settings.chainConfig[activechain].tokendict;
+  const addresstoMarket: { [key: string]: any } =
+    settings.chainConfig[activechain].addresstomarket;
+  const graph: Record<string, string[]> = (() => {
+    let g: Record<string, string[]> = {};
+    for (const [, market] of Object.entries(markets)) {
+      const baseAddress = market.baseAddress;
+      const quoteAddress = market.quoteAddress;
+
+      if (!g[baseAddress]) g[baseAddress] = [];
+      if (!g[quoteAddress]) g[quoteAddress] = [];
+
+      g[baseAddress].push(quoteAddress);
+      g[quoteAddress].push(baseAddress);
+    }
+    return g;
+  })();
+  const txReceiptResolvers = new Map<string, () => void>();
+  const clearlogo = '/CrystalLogo.png';
+  // get market including multihop
+  const getMarket = (token1: string, token2: string): any => {
+    return (
+      markets[`${tokendict[token1].ticker}${tokendict[token2].ticker}`] ||
+      markets[`${tokendict[token2].ticker}${tokendict[token1].ticker}`] ||
+      (() => {
+        if (
+          (token1 == eth && token2 == weth) ||
+          (token1 == weth && token2 == eth)
+        ) {
+          let market = { ...getMarket(eth, usdc) };
+          market['path'] = [token1, token2];
+          market['fee'] = BigInt(10000);
+          return market;
+        }
+      })() ||
+      (() => {
+        const path = findShortestPath(token1, token2);
+        if (path && path.length > 2) {
+          let fee = BigInt(1);
+          for (let i = 0; i < path.length - 1; i++) {
+            fee *= getMarket(path[i], path[i + 1]).fee;
+          }
+          fee /= BigInt(100000 ** (path.length - 2));
+          if (path.at(-1) != usdc) {
+            return {
+              quoteAsset: getMarket(path.at(-2), path.at(-1)).quoteAsset,
+              baseAsset: getMarket(path.at(-2), path.at(-1)).baseAsset,
+              path: path,
+              quoteAddress: getMarket(path.at(-2), path.at(-1)).quoteAddress,
+              baseAddress: getMarket(path.at(-2), path.at(-1)).baseAddress,
+              quoteDecimals: getMarket(path.at(-2), path.at(-1)).quoteDecimals,
+              baseDecimals: getMarket(path.at(-2), path.at(-1)).baseDecimals,
+              address: getMarket(path.at(-2), path.at(-1)).address,
+              scaleFactor: getMarket(path.at(-2), path.at(-1)).scaleFactor,
+              priceFactor: getMarket(path.at(-2), path.at(-1)).priceFactor,
+              tickSize: getMarket(path.at(-2), path.at(-1)).tickSize,
+              minSize: getMarket(path.at(-2), path.at(-1)).minSize,
+              maxPrice: getMarket(path.at(-2), path.at(-1)).maxPrice,
+              fee: fee,
+              image: getMarket(path.at(-2), path.at(-1)).image,
+              website: getMarket(path.at(-2), path.at(-1)).website,
+            };
+          }
+          return {
+            quoteAsset: getMarket(path.at(0), path.at(1)).quoteAsset,
+            baseAsset: getMarket(path.at(0), path.at(1)).baseAsset,
+            path: path,
+            quoteAddress: getMarket(path.at(0), path.at(1)).quoteAddress,
+            baseAddress: getMarket(path.at(0), path.at(1)).baseAddress,
+            quoteDecimals: getMarket(path.at(0), path.at(1)).quoteDecimals,
+            baseDecimals: getMarket(path.at(0), path.at(1)).baseDecimals,
+            address: getMarket(path.at(0), path.at(1)).address,
+            scaleFactor: getMarket(path.at(0), path.at(1)).scaleFactor,
+            priceFactor: getMarket(path.at(0), path.at(1)).priceFactor,
+            tickSize: getMarket(path.at(0), path.at(1)).tickSize,
+            minSize: getMarket(path.at(0), path.at(1)).minSize,
+            maxPrice: getMarket(path.at(0), path.at(1)).maxPrice,
+            fee: fee,
+            image: getMarket(path.at(0), path.at(1)).image,
+            website: getMarket(path.at(0), path.at(1)).website,
+          };
+        }
+      })()
+    );
+  };
+
+  // find path between two tokens
+  const findShortestPath = (start: string, end: string): any => {
+    const queue: string[][] = [[start]];
+    const visited: Set<string> = new Set();
+
+    while (queue.length > 0) {
+      const path = queue.shift()!;
+      const current = path[path.length - 1];
+      if (current === end) {
+        return path;
+      }
+      if (!visited.has(current)) {
+        visited.add(current);
+        for (const neighbor of graph[current] || []) {
+          if (!visited.has(neighbor)) {
+            queue.push([...path, neighbor]);
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  // state vars
+  const sortConfig = undefined;
+  const [showSendDropdown, setShowSendDropdown] = useState(false);
+  const sendDropdownRef = useRef<HTMLDivElement | null>(null);
+  const sendButtonRef = useRef<HTMLSpanElement | null>(null);
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [selectedDepositToken, setSelectedDepositToken] = useState(() => Object.keys(tokendict)[0]);
+  const [mobileView, setMobileView] = useState('chart');
+  const [showTrade, setShowTrade] = useState(false);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
+  const [selectedConnector, setSelectedConnector] = useState<any>(null);
+  const [totalAccountValue, setTotalAccountValue] = useState<number>(0);
+  const [totalVolume, setTotalVolume] = useState(0);
+  const [copyTooltipVisible, setCopyTooltipVisible] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showHoverTooltip, setShowHoverTooltip] = useState(false);
+  const [currentProText, setCurrentProText] = useState(location.pathname.slice(1) == 'swap' || location.pathname.slice(1) == 'market' || location.pathname.slice(1) == 'limit' ? 'pro' : t(location.pathname.slice(1).toLowerCase()));
+  const [refLink, setRefLink] = useState('');
+  const [totalClaimableFees, setTotalClaimableFees] = useState(0);
+  const [switched, setswitched] = useState(false);
+  const [claimableFees, setClaimableFees] = useState<{ [key: string]: number }>(
+    {},
+  );
+  const [tokenIn, setTokenIn] = useState(() => {
+    if (location.pathname.slice(1) == 'send') {
+      const token = searchParams.get('token');
+      if (token && tokendict[getAddress(token)]) {
+        return getAddress(token);
+      }
+    } else {
+      let token = searchParams.get('tokenIn');
+      if (token && tokendict[getAddress(token)]) {
+        return getAddress(token);
+      } else {
+        token = searchParams.get('tokenOut');
+        if (token) {
+          token = getAddress(token);
+          for (const market in markets) {
+            if (markets[market].baseAddress == token) {
+              return markets[market].quoteAddress;
+            }
+          }
+          for (const market in markets) {
+            if (markets[market].quoteAddress == token) {
+              return markets[market].baseAddress;
+            }
+          }
+        }
+      }
+    }
+    return usdc;
+  });
+  const [tokenOut, setTokenOut] = useState(() => {
+    let tokenIn =
+      location.pathname.slice(1) == 'send'
+        ? searchParams.get('token')
+        : searchParams.get('tokenIn');
+    let tokenOut = searchParams.get('tokenOut');
+    if (tokenIn && tokenOut) {
+      tokenIn = getAddress(tokenIn);
+      tokenOut = getAddress(tokenOut);
+      if (tokendict[tokenIn] && tokendict[tokenOut]) {
+        if (getMarket(tokenIn, tokenOut)) {
+          return tokenOut;
+        } else {
+          const path = findShortestPath(tokenIn, tokenOut);
+          if (path && path.length > 1 && location.pathname.slice(1) == 'swap') {
+            return tokenOut;
+          } else {
+            for (const market in markets) {
+              if (markets[market].baseAddress == tokenIn) {
+                return markets[market].quoteAddress;
+              }
+            }
+            for (const market in markets) {
+              if (markets[market].quoteAddress == tokenIn) {
+                return markets[market].baseAddress;
+              }
+            }
+          }
+        }
+      }
+    } else if (tokenIn) {
+      tokenIn = getAddress(tokenIn);
+      if (tokendict[tokenIn]) {
+        for (const market in markets) {
+          if (markets[market].baseAddress == tokenIn) {
+            return markets[market].quoteAddress;
+          }
+        }
+        for (const market in markets) {
+          if (markets[market].quoteAddress == tokenIn) {
+            return markets[market].baseAddress;
+          }
+        }
+      }
+    } else if (tokenOut) {
+      tokenOut = getAddress(tokenOut);
+      if (tokendict[tokenOut]) {
+        return tokenOut;
+      }
+    }
+    return eth;
+  });
+  const activeMarket = getMarket(tokenIn, tokenOut);
+  const activeMarketKey = (activeMarket.baseAsset + activeMarket.quoteAsset).replace(
+    new RegExp(
+      `^${wethticker}|${wethticker}$`,
+      'g'
+    ),
+    ethticker
+  );
+  const multihop = activeMarket.path.length > 2;
+  const [usedRefLink, setUsedRefLink] = useState('');
+  const [usedRefAddress, setUsedRefAddress] = useState(
+    '0x0000000000000000000000000000000000000000' as `0x${string}`,
+  );
+  const [simpleView, setSimpleView] = useState(() => {
+    const savedSimpleView = localStorage.getItem('crystal_simple_view');
+    return savedSimpleView ? JSON.parse(savedSimpleView) : false;
+  });
+  const [isMarksVisible, setIsMarksVisible] = useState(() => {
+    const saved = localStorage.getItem('crystal_marks_visible');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isOrdersVisible, setIsOrdersVisible] = useState(() => {
+    const saved = localStorage.getItem('crystal_orders_visible');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isOrderbookVisible, setIsOrderbookVisible] = useState(() => {
+    const saved = localStorage.getItem('crystal_orderbook_visible');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isOrderCenterVisible, setIsOrderCenterVisible] = useState(() => {
+    const saved = localStorage.getItem('crystal_ordercenter_visible');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [orderbookWidth, setOrderbookWidth] = useState<number>(() => {
+    const saved = localStorage.getItem('orderbookWidth');
+    return saved ? parseInt(saved, 10) : 300;
+  });
+  const [orderCenterHeight, setOrderCenterHeight] = useState<number>(() => {
+    const savedHeight = localStorage.getItem('orderCenterHeight');
+    if (savedHeight !== null) {
+      const parsedHeight = parseFloat(savedHeight);
+      if (!isNaN(parsedHeight)) {
+        return parsedHeight;
+      }
+    }
+
+    if (window.innerHeight > 1080) return 361.58;
+    if (window.innerHeight > 960) return 320.38;
+    if (window.innerHeight > 840) return 279.18;
+    if (window.innerHeight > 720) return 237.98;
+    return 196.78;
+  });
+  const [showChartOutliers, setShowChartOutliers] = useState(() => {
+    return JSON.parse(localStorage.getItem('crystal_show_chart_outliers') || 'false');
+  });
+  const [isAudioEnabled, setIsAudioEnabled] = useState(() => {
+    return JSON.parse(localStorage.getItem('crystal_audio_notifications') || 'false');
+  });
+  const [orderbookPosition, setOrderbookPosition] = useState(() => {
+    const savedPosition = localStorage.getItem('crystal_orderbook');
+    return savedPosition || 'right';
+  });
+  const [obInterval, setOBInterval] = useState<number>(() => {
+    const stored = localStorage.getItem(
+      `${activeMarket.baseAsset}_ob_interval`,
+    );
+    return stored !== null ? JSON.parse(stored) : 0.1;
+  });
+  const [layoutSettings, setLayoutSettings] = useState(() => {
+    const savedLayout = localStorage.getItem('crystal_layout');
+    return savedLayout || 'default';
+  });
+  const [popup, setpopup] = useState(() => {
+    const done = localStorage.getItem('crystal_has_completed_onboarding123') === 'true';
+    return done ? 0 : 18;
+  });
+  const [slippage, setSlippage] = useState(() => {
+    const saved = localStorage.getItem('crystal_slippage');
+    return saved !== null ? BigInt(saved) : BigInt(9900);
+  });
+  const [slippageString, setSlippageString] = useState(() => {
+    const saved = localStorage.getItem('crystal_slippage_string');
+    return saved !== null ? saved : '1';
+  });
+  const [orderType, setorderType] = useState(() => {
+    const saved = localStorage.getItem('crystal_order_type');
+    return saved !== null ? JSON.parse(saved) : 1;
+  });
+  const [isStake, ] = useState(() => {
+    return false
+  })
+  const [addliquidityonly, setAddLiquidityOnly] = useState(() => {
+    const saved = localStorage.getItem('crystal_add_liquidity_only');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  const [tokenString, settokenString] = useState('');
+  const [amountIn, setamountIn] = useState(() => {
+    const amount = searchParams.get('amountIn');
+    if (amount) {
+      return BigInt(amount);
+    }
+    return BigInt(0);
+  });
+  const [amountOutSwap, setamountOutSwap] = useState(() => {
+    if (location.pathname.slice(1) == 'swap' || location.pathname.slice(1) == 'market') {
+      const amount = searchParams.get('amountOut');
+      if (amount) {
+        setswitched(true);
+        return BigInt(amount);
+      }
+    }
+    return BigInt(0);
+  });
+  const [amountOutLimit, setamountOutLimit] = useState(BigInt(0));
+  const [inputString, setInputString] = useState(() => {
+    const amount = searchParams.get('amountIn');
+    if (amount && Number(amount) > 0) {
+      return customRound(
+        Number(amount) / 10 ** Number(tokendict[tokenIn].decimals),
+        3,
+      )
+        .toString()
+        .replace(/(\.\d*?[1-9])0+$/g, '$1')
+        .replace(/\.0+$/, '');
+    }
+    return '';
+  });
+  const [outputString, setoutputString] = useState(() => {
+    if (location.pathname.slice(1) == 'swap' || location.pathname.slice(1) == 'market') {
+      const amount = searchParams.get('amountOut');
+      if (amount && Number(amount) > 0) {
+        return customRound(
+          Number(amount) / 10 ** Number(tokendict[tokenOut].decimals),
+          3,
+        )
+          .toString()
+          .replace(/(\.\d*?[1-9])0+$/g, '$1')
+          .replace(/\.0+$/, '');
+      }
+    }
+    return '';
+  });
+  const [isComposing, setIsComposing] = useState(false);
+  const [sendInputString, setsendInputString] = useState('');
+  const [limitoutputString, setlimitoutputString] = useState('');
+  const [limitPriceString, setlimitPriceString] = useState('');
+  const [allowance, setallowance] = useState(BigInt(0));
+  const [warning, setwarning] = useState(0);
+  const [showReferralsModal, setShowReferralsModal] = useState(false);
+  const [lowestAsk, setlowestAsk] = useState(BigInt(0));
+  const [highestBid, sethighestBid] = useState(BigInt(0));
+  const [priceImpact, setPriceImpact] = useState('');
+  const [averagePrice, setAveragePrice] = useState('');
+  const [tradeFee, setTradeFee] = useState('');
+  const [stateIsLoading, setStateIsLoading] = useState(true);
+  const [displayValuesLoading, setDisplayValuesLoading] = useState(true);
+  const [portfolioColorValue, setPortfolioColorValue] = useState('#00b894');
+  const [recipient, setrecipient] = useState('');
+  const [limitPrice, setlimitPrice] = useState(BigInt(0));
+  const [limitChase, setlimitChase] = useState(true);
+  const [orders, setorders] = useState<any[]>([]);
+  const [canceledorders, setcanceledorders] = useState<any[]>([]);
+  const [tradehistory, settradehistory] = useState<any[]>([]);
+  const [tradesByMarket, settradesByMarket] = useState<any>({});
+  const [tokenBalances, setTokenBalances] = useState<any>({});
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [mids, setmids] = useState<any>({});
+  const [sliderPercent, setSliderPercent] = useState(0);
+  const [displayMode, setDisplayMode] = useState('token');
+  const [swapButton, setSwapButton] = useState(5);
+  const [swapButtonDisabled, setSwapButtonDisabled] = useState(true);
+  const [limitButton, setLimitButton] = useState(8);
+  const [limitButtonDisabled, setLimitButtonDisabled] = useState(true);
+  const [sendButton, setSendButton] = useState(5);
+  const [sendButtonDisabled, setSendButtonDisabled] = useState(true);
+  const [sendPopupButton, setSendPopupButton] = useState(5);
+  const [sendPopupButtonDisabled, setSendPopupButtonDisabled] = useState(true);
+  const [amountOutScale, setAmountOutScale] = useState(BigInt(0));
+  const [scaleOutputString, setScaleOutputString] = useState('');
+  const [scaleStart, setScaleStart] = useState(BigInt(0));
+  const [scaleStartString, setScaleStartString] = useState('');
+  const [scaleEnd, setScaleEnd] = useState(BigInt(0));
+  const [scaleEndString, setScaleEndString] = useState('');
+  const [scaleOrders, setScaleOrders] = useState(BigInt(0));
+  const [scaleOrdersString, setScaleOrdersString] = useState('');
+  const [scaleSkew, setScaleSkew] = useState(1);
+  const [scaleSkewString, setScaleSkewString] = useState('1.00');
+  const [scaleButton, setScaleButton] = useState(12)
+  const [scaleButtonDisabled, setScaleButtonDisabled] = useState(true)
+  const [isBlurred, setIsBlurred] = useState(false);
+  const [roundedBuyOrders, setRoundedBuyOrders] = useState<Order[]>([]);
+  const [roundedSellOrders, setRoundedSellOrders] = useState<Order[]>([]);
+  const [liquidityBuyOrders, setLiquidityBuyOrders] = useState<[Order[], string]>([[], '']);
+  const [liquiditySellOrders, setLiquiditySellOrders] = useState<[Order[], string]>([[], '']);
+  const [prevOrderData, setPrevOrderData] = useState<any[]>([])
+  const [stateloading, setstateloading] = useState(true);
+  const [tradesloading, settradesloading] = useState(true);
+  const [addressinfoloading, setaddressinfoloading] = useState(true);
+  const [chartDays, setChartDays] = useState<number>(1);
+  const [marketsData, setMarketsData] = useState<any[]>([]);
+  const [advChartData, setChartData] = useState<[DataPoint[], string, boolean]>([[], '', showChartOutliers]);
+  const { chartData, portChartLoading } = usePortfolioData(
+    address,
+    Object.values(tokendict),
+    chartDays,
+    tokenBalances,
+    setTotalAccountValue,
+    marketsData,
+    (popup == 4 && connected) || location.pathname.slice(1) == 'portfolio'
+  );
+  const [isVertDragging, setIsVertDragging] = useState(false);
+  const [trades, setTrades] = useState<
+    [boolean, string, number, string, string][]
+  >([]);
+  const [spreadData, setSpreadData] = useState({});
+  const [priceFactor, setPriceFactor] = useState(0);
+  const [symbolIn, setSymbolIn] = useState('');
+  const [symbolOut, setSymbolOut] = useState('');
+  const [activeSection, setActiveSection] = useState<
+    'orders' | 'tradeHistory' | 'orderHistory' | 'balances'
+  >(() => {
+    const section = localStorage.getItem('crystal_oc_tab');
+    if (sortConfig) {
+      return ['orders', 'tradeHistory', 'orderHistory', 'balances'].includes(
+        String(section),
+      )
+        ? (section as 'orders' | 'tradeHistory' | 'orderHistory' | 'balances')
+        : 'orders';
+    }
+    return ['orders', 'tradeHistory', 'orderHistory'].includes(String(section))
+      ? (section as 'orders' | 'tradeHistory' | 'orderHistory' | 'balances')
+      : 'orders';
+  });
+  const [filter, setFilter] = useState<'all' | 'buy' | 'sell'>(() => {
+    const f = localStorage.getItem('crystal_oc_filter');
+    return ['all', 'buy', 'sell'].includes(String(f))
+      ? (f as 'all' | 'buy' | 'sell')
+      : 'all';
+  });
+  const [onlyThisMarket, setOnlyThisMarket] = useState<boolean>(() => {
+    const only = localStorage.getItem('crystal_only_this_market');
+    return only !== null ? JSON.parse(only) : false;
+  });
+  const [baseInterval, setBaseInterval] = useState<number>(0.1);
+  const [viewMode, setViewMode] = useState<'both' | 'buy' | 'sell'>(() => {
+    const stored = localStorage.getItem('ob_viewmode');
+    return ['both', 'buy', 'sell'].includes(String(stored))
+      ? (stored as 'both' | 'buy' | 'sell')
+      : 'both';
+  });
+  const [obTab, setOBTab] = useState<'orderbook' | 'trades'>(() => {
+    const stored = localStorage.getItem('ob_active_tab');
+
+    if (['orderbook', 'trades'].includes(stored ?? '')) {
+      return stored as 'orderbook' | 'trades';
+    }
+
+    return mobileView === 'trades' ? 'trades' : 'orderbook';
+  });
+  const [amountsQuote, setAmountsQuote] = useState(() => {
+    const stored = localStorage.getItem('ob_amounts_quote');
+
+    return ['Quote', 'Base'].includes(String(stored))
+      ? (stored as string)
+      : 'Quote';
+  });
+  const [_processedLogs, setProcessedLogs] = useState<Set<string>>(new Set());
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const emptyFunction = useCallback(() => { }, []);
+  const memoizedTokenList = useMemo(
+    () => Object.values(tokendict),
+    [tokendict],
+  );
+  const memoizedSortConfig = useMemo(() => ({ column: 'balance', direction: 'desc' }), []);
+
+  // refs
+  const popupref = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const realtimeCallbackRef = useRef<any>({});
+  const initialMousePosRef = useRef(0);
+  const initialHeightRef = useRef(0);
+  const txPending = useRef(false);
+
+  // more constants
+  const languageOptions = [
+    { code: 'EN', name: 'English' },
+    { code: 'ES', name: 'Español' },
+    { code: 'CN', name: '中文（简体）' },
+    { code: 'JP', name: '日本語' },
+    { code: 'KR', name: '한국어' },
+    { code: 'RU', name: 'русский' },
+    { code: 'ID', name: 'Indonesia' },
+    { code: 'VN', name: 'Tiếng Việt'},
+    { code: 'PH', name: 'Filipino' },
+  ];
+
+  const isWrap =
+    (tokenIn == eth && tokenOut == weth) ||
+    (tokenIn == weth && tokenOut == eth);
+
+  const loading =
+    stateloading ||
+    tradesloading ||
+    addressinfoloading;
+
+  const [sendAmountIn, setSendAmountIn] = useState(BigInt(0));
+  const [sendInputAmount, setSendInputAmount] = useState('');
+  const [sendUsdValue, setSendUsdValue] = useState('');
+  const [sendTokenIn, setSendTokenIn] = useState(eth);
+  const [isSigning, setIsSigning] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isOutputBasedScaleOrder, setIsOutputBasedScaleOrder] = useState(false);
+  const [sortField, setSortField] = useState<
+    'volume' | 'price' | 'change' | 'favorites' | null
+  >('volume');
+  const [sortDirection, setSortDirection] = useState<
+    'asc' | 'desc' | undefined
+  >('desc');
+  const { toggleFavorite } = useSharedContext();
+
+  const audio = useMemo(() => {
+    const a = new Audio(stepaudio);
+    a.volume = 1;
+    return a;
+  }, []);
+
+  const sortedMarkets = (marketsData.sort((a, b) => {
+    if (!sortField || !sortDirection) return 0;
+
+    let aValue: number = 0;
+    let bValue: number = 0;
+
+    switch (sortField) {
+      case 'volume':
+        aValue = parseFloat(a.volume.toString().replace(/,/g, ''));
+        bValue = parseFloat(b.volume.toString().replace(/,/g, ''));
+        break;
+      case 'price':
+        aValue = parseFloat(a.currentPrice.toString().replace(/,/g, ''));
+        bValue = parseFloat(b.currentPrice.toString().replace(/,/g, ''));
+        break;
+      case 'change':
+        aValue = parseFloat(a.priceChange.replace(/[+%]/g, ''));
+        bValue = parseFloat(b.priceChange.replace(/[+%]/g, ''));
+        break;
+      case 'favorites':
+        aValue = favorites.includes(a.baseAddress.toLowerCase()) ? 1 : 0;
+        bValue = favorites.includes(b.baseAddress.toLowerCase()) ? 1 : 0;
+        break;
+      default:
+        return 0;
+    }
+
+    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+  }));
+
+  const newTxPopup = useCallback((
+    _transactionHash: any,
+    _currentAction: any,
+    _tokenIn: any,
+    _tokenOut: any,
+    _amountIn: any,
+    _amountOut: any,
+    _price: any = 0,
+    _address: any = '',
+  ) => {
+    setTransactions((prevTransactions) => {
+      const newTransaction = {
+        explorerLink: `${settings.chainConfig[activechain].explorer}/tx/${_transactionHash}`,
+        currentAction: _currentAction,
+        tokenIn: _tokenIn,
+        tokenOut: _tokenOut,
+        amountIn: _amountIn,
+        amountOut: _amountOut,
+        price: _price,
+        address: _address,
+        timestamp: Date.now(),
+        isNew: true,
+        isExiting: false,
+        identifier: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      };
+
+      let updatedTransactions = [...prevTransactions, newTransaction];
+
+      return updatedTransactions;
+    });
+    setIsAudioEnabled((prev: any) => {
+      if (prev) {
+        audio.currentTime = 0;
+        audio.play();
+      }
+      return prev;
+    });
+  }, [activechain, audio]);
+
+  const handleSetChain = useCallback(async () => {
+    return await alchemyconfig?._internal?.wagmiConfig?.state?.connections?.entries()?.next()?.value?.[1]?.connector?.switchChain({ chainId: activechain as any });
+  }, [activechain]);
+
+  const waitForTxReceipt = useCallback(async (hash: `0x${string}`) => {
+    if (!client) {
+      return await Promise.race([
+        waitForTransactionReceipt(config, { hash, pollingInterval: 500 }).then((r) => {
+          txReceiptResolvers.delete(hash);
+          return r.transactionHash;
+        }),
+        new Promise<void>((resolve) => {
+          txReceiptResolvers.set(hash, resolve);
+        }),
+      ]);
+    }
+    return hash
+  }, [client])
+
+  const formatDisplayValue = (
+    rawAmount: bigint,
+    decimals = 18,
+    precision = 3,
+  ) => {
+    const actualAmount = customRound(
+      Number(rawAmount) / 10 ** Number(decimals),
+      precision,
+    );
+
+    if (parseFloat(actualAmount) < 1) {
+      return actualAmount.toString();
+    }
+
+    if (parseFloat(actualAmount) >= 1e12) {
+      return `${(parseFloat(actualAmount) / 1e12).toFixed(2)}T`;
+    } else if (parseFloat(actualAmount) >= 1e9) {
+      return `${(parseFloat(actualAmount) / 1e9).toFixed(2)}B`;
+    } else if (parseFloat(actualAmount) >= 1e6) {
+      return `${(parseFloat(actualAmount) / 1e6).toFixed(2)}M`;
+    }
+
+    return actualAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const formatUSDDisplay = (amount: number) => {
+    if (amount === 0) return '$0.00';
+
+    const absAmount = Math.abs(amount);
+    if (absAmount >= 1e12) {
+      return `$${(amount / 1e12).toFixed(2)}T`;
+    } else if (absAmount >= 1e9) {
+      return `$${(amount / 1e9).toFixed(2)}B`;
+    } else if (absAmount >= 1e6) {
+      return `$${(amount / 1e6).toFixed(2)}M`;
+    }
+
+    if (absAmount >= 1) {
+      return `$${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    }
+
+    if (absAmount < 0.01) {
+      return '<$0.01';
+    }
+    return `$${amount.toFixed(2)}`;
+  };
+
+  const calculateUSDValue = (
+    amount: bigint,
+    trades: any[],
+    tokenAddress: string,
+    market: any,
+  ) => {
+    if (amount === BigInt(0)) return 0;
+    if (tokenAddress == market.quoteAddress && tokenAddress == usdc) {
+      return Number(amount) / 10 ** 6;
+    }
+    else if (tokenAddress == market.quoteAddress) {
+      return Number(amount) * tradesByMarket[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.[0]?.[3]
+        / Number(markets[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.priceFactor) / 10 ** 18;
+    }
+    const latestPrice = fetchLatestPrice(trades, market);
+    if (!latestPrice) return 0;
+    const quotePrice = market.quoteAsset == 'USDC' ? 1 : tradesByMarket[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.[0]?.[3]
+      / Number(markets[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.priceFactor)
+    const usdValue = (Number(amount) * latestPrice * quotePrice / 10 ** Number(tokendict[tokenAddress].decimals));
+    return Number(usdValue);
+  };
+
+  // calculate token value of usd
+  const calculateTokenAmount = (
+    usdValue: string,
+    trades: any[],
+    tokenAddress: string,
+    market: any,
+  ): bigint => {
+    const usdNumeric = parseFloat(usdValue);
+    if (!usdNumeric || usdNumeric == 0) return BigInt(0);
+
+    if (tokenAddress === usdc) {
+      return BigInt(Math.round(usdNumeric * 10 ** 6));
+    }
+
+    const latestPrice = fetchLatestPrice(trades, market);
+    if (!latestPrice) return BigInt(0);
+    const quotePrice = market.quoteAsset == 'USDC' ? 1 : tradesByMarket[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.[0]?.[3]
+      / Number(markets[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.priceFactor)
+    return BigInt(
+      Math.round(
+        (usdNumeric / (latestPrice * quotePrice)) *
+        10 ** Number(tokendict[tokenAddress].decimals),
+      ),
+    );
+  };
+
+  // on market select
+  const onMarketSelect = useCallback((market: { quoteAddress: any; baseAddress: any; }) => {
+    if (!['swap', 'limit', 'send', 'scale', 'market'].includes(location.pathname.slice(1))) {
+      if (simpleView) {
+        navigate('/swap');
+      }
+      else {
+        navigate('/market');
+      }
+    }
+
+    setTokenIn(market.quoteAddress);
+    setTokenOut(market.baseAddress);
+    setswitched(false);
+    setInputString('');
+    setsendInputString('');
+    setamountIn(BigInt(0));
+    setSliderPercent(0);
+    setamountOutLimit(BigInt(0));
+    setlimitoutputString('');
+    setlimitChase(true);
+    setoutputString('');
+    setamountOutSwap(BigInt(0));
+    setAmountOutScale(BigInt(0))
+    setScaleOutputString('')
+    setScaleStart(BigInt(0))
+    setScaleEnd(BigInt(0))
+    setScaleStartString('')
+    setScaleEndString('')
+    const slider = document.querySelector('.balance-amount-slider');
+    const popup = document.querySelector('.slider-percentage-popup');
+    if (slider && popup) {
+      (popup as HTMLElement).style.left = `${15 / 2}px`;
+    }
+  }, [location.pathname, simpleView]);
+
+  // update limit amount
+  const updateLimitAmount = useCallback((price: number, priceFactor: number) => {
+    let newPrice = BigInt(Math.round(price * priceFactor));
+    setlimitPrice(newPrice);
+    setlimitPriceString(price.toFixed(Math.floor(Math.log10(priceFactor))));
+    setlimitChase(false);
+    setamountOutLimit(
+      newPrice != BigInt(0) && amountIn != BigInt(0)
+        ? tokenIn === activeMarket?.baseAddress
+          ? (amountIn * newPrice) / (activeMarket.scaleFactor || BigInt(1))
+          : (amountIn * (activeMarket.scaleFactor || BigInt(1))) / newPrice
+        : BigInt(0),
+    );
+    setlimitoutputString(
+      (newPrice != BigInt(0) && amountIn != BigInt(0)
+        ? tokenIn === activeMarket?.baseAddress
+          ? customRound(
+            Number(
+              (amountIn * newPrice) / (activeMarket.scaleFactor || BigInt(1)),
+            ) /
+            10 ** Number(tokendict[tokenOut].decimals),
+            3,
+          )
+          : customRound(
+            Number(
+              (amountIn * (activeMarket.scaleFactor || BigInt(1))) / newPrice,
+            ) /
+            10 ** Number(tokendict[tokenOut].decimals),
+            3,
+          )
+        : ''
+      ).toString(),
+    );
+  }, [activeMarket?.scaleFactor,
+    activeMarket?.baseAddress,
+    amountIn,
+    tokenIn,
+    tokenOut,
+    tokendict
+  ]);
+
+  // set amount for a token
+  const debouncedSetAmount = (amount: bigint) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    setStateIsLoading(true);
+    debounceTimerRef.current = setTimeout(() => {
+      setamountIn(amount);
+      debounceTimerRef.current = null;
+    }, 300);
+  };
+
+  // set amountout for a token
+  const debouncedSetAmountOut = (amount: bigint) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    setStateIsLoading(true);
+    debounceTimerRef.current = setTimeout(() => {
+      setamountOutSwap(amount);
+      debounceTimerRef.current = null;
+    }, 300);
+  };
+
+  // fetch state
+  const { data, isLoading, dataUpdatedAt, refetch } = useReadContracts({
+    batchSize: 0,
+    contracts: [
+      {
+        abi: CrystalRouterAbi,
+        address: router,
+        functionName: switched == false ? 'getAmountsOut' : 'getAmountsIn',
+        args: [
+          switched == false ? amountIn : amountOutSwap,
+          activeMarket.path[0] == tokenIn
+            ? activeMarket.path
+            : [...activeMarket.path].reverse(),
+        ],
+      },
+      {
+        abi: TokenAbi,
+        address: (tokenIn == eth ? weth : tokenIn) as `0x${string}`,
+        functionName: 'allowance',
+        args: [
+          address as `0x${string}`,
+          getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address,
+        ],
+      },
+      {
+        abi: CrystalDataHelperAbi,
+        address: balancegetter,
+        functionName: 'batchBalanceOf',
+        args: [
+          address as `0x${string}`,
+          Object.values(tokendict).map(
+            (token) => token.address as `0x${string}`,
+          ),
+        ],
+      },
+      {
+        abi: CrystalMarketAbi,
+        address: activeMarket?.address,
+        functionName: 'getPriceLevelsFromMid',
+        args: [BigInt(1000000)],
+      },
+      {
+        abi: CrystalDataHelperAbi,
+        address: balancegetter,
+        functionName: 'getPrices',
+        args: [
+          Array.from(
+            new Set(
+              Object.values(markets).map(
+                (market) => market.address as `0x${string}`
+              )
+            )
+          ),
+        ],
+      },
+      ...(tokenIn == eth && tokendict[tokenOut]?.lst == true
+        ? [
+            {
+              abi: shMonadAbi,
+              address: tokenOut,
+              functionName: 'convertToShares',
+              args: [amountIn],
+            },
+          ]
+        : tokenOut == eth && tokendict[tokenIn]?.lst == true ? [
+          {
+            abi: shMonadAbi,
+            address: tokenIn,
+            functionName: 'convertToAssets',
+            args: [amountIn],
+          },
+        ] : []) as any,
+    ],
+    query: { refetchInterval: ['market', 'limit', 'send', 'scale'].includes(location.pathname.slice(1)) && !simpleView ? 800 : 5000, gcTime: 0 },
+  }) as any;
+
+  // fetch ref data
+  const { data: refData, isLoading: refDataLoading, refetch: refRefetch } = useReadContracts({
+    batchSize: 0,
+    contracts: [
+      {
+        address: settings.chainConfig[activechain].referralManager,
+        abi: CrystalReferralAbi as any,
+        functionName: 'addressToReferrer',
+        args: [address ?? '0x0000000000000000000000000000000000000000'],
+      },
+      ...Array.from(
+        new Set(
+          Object.values(markets).map(
+            (market) => market.address as `0x${string}`
+          )
+        )
+      ).flatMap((marketAddress: any) => ({
+        address: marketAddress as `0x${string}`,
+        abi: CrystalMarketAbi,
+        functionName: 'accumulatedFeeQuote',
+        args: [address ?? undefined],
+      })),
+      ...Array.from(
+        new Set(
+          Object.values(markets).map(
+            (market) => market.address as `0x${string}`
+          )
+        )
+      ).flatMap((marketAddress: any) => ({
+        address: marketAddress as `0x${string}`,
+        abi: CrystalMarketAbi,
+        functionName: 'accumulatedFeeBase',
+        args: [address ?? undefined],
+      })),
+    ],
+    query: { refetchInterval: 10000 },
+  });
+
+  const handleSearchKeyDown = (
+    e: ReactKeyboardEvent<HTMLInputElement>,
+  ): void => {
+    if (e.key === 'Enter' && sortedMarkets.length > 0) {
+      e.preventDefault();
+      const selectedMarket = sortedMarkets[selectedIndex];
+      setSearchQuery('');
+      setpopup(0);
+      onMarketSelect(selectedMarket)
+    } else if (e.key === 'Escape') {
+      setSearchQuery('');
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const newIndex = selectedIndex < sortedMarkets.length - 1 ? selectedIndex + 1 : selectedIndex;
+      setSelectedIndex(newIndex);
+
+      const selectedItem = document.getElementById(`search-market-item-${newIndex}`);
+      if (selectedItem) {
+        selectedItem.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+      }
+
+      refocusSearchInput();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const newIndex = selectedIndex > 0 ? selectedIndex - 1 : 0;
+      setSelectedIndex(newIndex);
+
+      const selectedItem = document.getElementById(`search-market-item-${newIndex}`);
+      if (selectedItem) {
+        selectedItem.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+      }
+
+      refocusSearchInput();
+    }
+  };
+
+  useEffect(() => {
+    if (showSendDropdown) {
+      const handleClick = (event: MouseEvent) => {
+        if (sendButtonRef.current && sendButtonRef.current.contains(event.target as Node)) {
+          return;
+        }
+
+        if (sendDropdownRef.current && !sendDropdownRef.current.contains(event.target as Node)) {
+          setShowSendDropdown(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClick);
+      return () => {
+        document.removeEventListener('mousedown', handleClick);
+      };
+    }
+  }, [showSendDropdown])
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [searchQuery]);
+
+  const refocusSearchInput = () => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  };
+
+  const handleSort = (field: 'volume' | 'price' | 'change' | 'favorites') => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortField(null);
+        setSortDirection(undefined);
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleRefreshQuote = async (e: any) => {
+    e.preventDefault();
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    setStateIsLoading(true);
+    await refetch()
+    setIsRefreshing(false);
+  };
+
+  const setScaleOutput = (
+    amountIn: number,
+    startPrice: number,
+    endPrice: number,
+    numOrders: number,
+    skew: number,
+  ) => {
+    const prices: number[] = Array.from({ length: numOrders }, (_, i) =>
+      Math.round(
+        startPrice +
+        ((endPrice - startPrice) * i) /
+        (numOrders - 1)
+      )
+    );
+
+    let orderSizes: number[];
+    let factorSum: number;
+
+    if (tokenIn == activeMarket.quoteAddress) {
+      factorSum = prices.reduce(
+        (sum, price, i) => sum + price * (1 + ((skew - 1) * i) / (numOrders - 1)),
+        0
+      );
+      const x = (Number(amountIn) * Number(activeMarket.scaleFactor)) / factorSum;
+      orderSizes = Array.from({ length: numOrders }, (_, i) =>
+        Math.round(x * (1 + ((skew - 1) * i) / (numOrders - 1)))
+      );
+    } else {
+      factorSum = Array.from({ length: numOrders }).reduce(
+        (sum: number, _, i) => sum + (1 + ((skew - 1) * i) / (numOrders - 1)),
+        0
+      );
+      const x = Number(amountIn) / factorSum;
+      orderSizes = Array.from({ length: numOrders }, (_, i) =>
+        Math.round(x * (1 + ((skew - 1) * i) / (numOrders - 1)))
+      );
+    }
+    const orderUsdValues: number[] = prices.map((price, i) =>
+      Math.round((price * orderSizes[i]) / Number(activeMarket.scaleFactor)))
+    let totalUsdValue = orderUsdValues.reduce((sum, val) => sum + val, 0);
+    let totalTokenValue = orderSizes.reduce((sum, val) => sum + val, 0);
+    if (tokenIn == activeMarket.quoteAddress) {
+      if (totalUsdValue != amountIn) {
+        orderUsdValues[orderUsdValues.length - 1] += (amountIn - totalUsdValue)
+        totalUsdValue = amountIn
+      }
+      setAmountOutScale(BigInt(totalTokenValue))
+      setScaleOutputString(
+        totalTokenValue
+          /
+          10 ** Number(tokendict[tokenOut].decimals)
+          ? customRound(
+            totalTokenValue
+            /
+            10 ** Number(tokendict[tokenOut].decimals),
+            3,
+          ) : ''
+      );
+    }
+    else {
+      if (totalTokenValue != amountIn) {
+        orderSizes[orderSizes.length - 1] += (amountIn - totalTokenValue)
+        totalTokenValue = amountIn
+      }
+      setAmountOutScale(BigInt(totalUsdValue))
+      setScaleOutputString(
+        totalUsdValue
+          /
+          10 ** Number(tokendict[tokenOut].decimals)
+          ? customRound(
+            totalUsdValue
+            /
+            10 ** Number(tokendict[tokenOut].decimals),
+            3,
+          ) : ''
+      );
+    }
+  }
+
+  const calculateScaleOutput = (
+    amountIn: bigint,
+    startPrice: number,
+    endPrice: number,
+    numOrders: number,
+    skew: number,
+  ) => {
+    const prices: number[] = Array.from({ length: numOrders }, (_, i) =>
+      Math.round(
+        startPrice +
+        ((endPrice - startPrice) * i) /
+        (numOrders - 1)
+      )
+    );
+
+    let orderSizes: bigint[];
+    let factorSum: number;
+
+    if (tokenIn == activeMarket.quoteAddress) {
+      factorSum = prices.reduce(
+        (sum, price, i) => sum + price * (1 + ((skew - 1) * i) / (numOrders - 1)),
+        0
+      );
+      const x = (Number(amountIn) * Number(activeMarket.scaleFactor)) / factorSum;
+      orderSizes = Array.from({ length: numOrders }, (_, i) =>
+        BigInt(Math.round(x * (1 + ((skew - 1) * i) / (numOrders - 1))))
+      );
+    } else {
+      factorSum = Array.from({ length: numOrders }).reduce(
+        (sum: number, _, i) => sum + (1 + ((skew - 1) * i) / (numOrders - 1)),
+        0
+      );
+      const x = Number(amountIn) / factorSum;
+      orderSizes = Array.from({ length: numOrders }, (_, i) =>
+        BigInt(Math.round(x * (1 + ((skew - 1) * i) / (numOrders - 1))))
+      );
+    }
+    const orderUsdValues: bigint[] = prices.map((price, i) =>
+      ((BigInt(price) * orderSizes[i]) / activeMarket.scaleFactor))
+    let totalUsdValue = orderUsdValues.reduce((sum, val) => sum + val, BigInt(0));
+    let totalTokenValue = orderSizes.reduce((sum, val) => sum + val, BigInt(0));
+    if (tokenIn == activeMarket.quoteAddress) {
+      if (totalUsdValue != amountIn) {
+        orderUsdValues[orderUsdValues.length - 1] += amountIn - totalUsdValue
+      }
+    }
+    else {
+      if (totalTokenValue != amountIn) {
+        orderSizes[orderSizes.length - 1] += amountIn - totalTokenValue
+      }
+    }
+    return prices.map((price, i) => [price, orderSizes[i], orderUsdValues[i]])
+  }
+
+  const calculateScaleInput = (
+    desiredOutput: bigint,
+    startPrice: number,
+    endPrice: number,
+    numOrders: number,
+    skew: number,
+  ): bigint => {
+    if (numOrders <= 1) {
+      return 0n;
+    }
+
+    const prices: bigint[] = Array.from({ length: numOrders }, (_, i) =>
+      BigInt(Math.round(startPrice + ((endPrice - startPrice) * i) / (numOrders - 1)))
+    );
+
+    const weights: bigint[] = Array.from({ length: numOrders }, (_, i) =>
+      BigInt(Math.round(1e8 + ((skew - 1) * i * 1e8) / (numOrders - 1)))
+    );
+
+    const S_p = prices.reduce((sum, price, i) => sum + (price * weights[i]), 0n);
+    const S_w = weights.reduce((sum, w) => sum + w, 0n);
+
+    if (S_p === 0n || S_w === 0n || desiredOutput === 0n) {
+      return 0n;
+    }
+
+    let requiredInput: bigint;
+
+    if (tokenIn === activeMarket.quoteAddress) {
+      requiredInput = (desiredOutput * S_p) / (BigInt(activeMarket.scaleFactor) * S_w);
+    } else {
+      requiredInput = (desiredOutput * BigInt(activeMarket.scaleFactor) * S_w) / S_p;
+    }
+
+    return requiredInput;
+  };
+
+  // oc resizers
+  const handleVertMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    initialMousePosRef.current = e.clientY;
+    initialHeightRef.current = orderCenterHeight;
+
+    setIsVertDragging(true);
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  // order processing
+  function processOrders(buyOrdersRaw: any[], sellOrdersRaw: any[]) {
+    const mapOrders = (orderData: bigint[]) => {
+      const orders = orderData
+        .filter(
+          (order) =>
+            (order & BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')) !==
+            BigInt(0),
+        )
+        .map((order) => {
+          const price =
+            Number(order >> BigInt(128)) / Number(activeMarket.priceFactor);
+          const size =
+            Number(order & BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')) /
+            (Number(activeMarket.scaleFactor) *
+              10 ** Number(activeMarket.quoteDecimals));
+          return {
+            price,
+            size,
+            totalSize: 0,
+          };
+        });
+
+      let runningTotal = 0;
+      return orders.map((order) => {
+        runningTotal += order.size;
+        return {
+          ...order,
+          totalSize: runningTotal,
+        };
+      });
+    };
+
+    return {
+      buyOrders: mapOrders(buyOrdersRaw as bigint[]),
+      sellOrders: mapOrders(sellOrdersRaw as bigint[]),
+    };
+  }
+
+  const processOrdersForDisplay = (
+    orders: Order[],
+    amountsQuote: string,
+    latestPrice: number,
+    userOrders: any[],
+    isBuyOrderList: boolean
+  ) => {
+    const priceDecimals = Math.max(
+          0,
+          Math.floor(Math.log10(Number(activeMarket.priceFactor))) +
+          Math.floor(
+            Math.log10(Number(latestPrice))
+          ) + (Math.log10(Number(latestPrice)) < -1 ? Math.log10(Number(latestPrice)) + 1 : 0)
+        )
+
+    const priceMap: { [key: string]: boolean } = {};
+    if (userOrders && userOrders.length > 0 && orders && orders.length > 0) {
+      const filteredUserOrders = userOrders.filter((order) => {
+        return isBuyOrderList == (Number(order[3]) === 1) && String(order[4]) === ((activeMarket.baseAsset == wethticker ? ethticker : activeMarket.baseAsset) + (activeMarket.quoteAsset == wethticker ? ethticker : activeMarket.quoteAsset));
+      });
+
+      filteredUserOrders.forEach((order) => {
+        priceMap[Number(Number(order[0] / Number(activeMarket.priceFactor)).toFixed(
+          Math.floor(Math.log10(Number(activeMarket.priceFactor)))
+        ))] = true;
+      });
+    }
+
+    const roundedOrders = orders.map((order) => {
+      const roundedPrice = Number(Number(order.price).toFixed(
+        Math.floor(Math.log10(Number(activeMarket.priceFactor)))
+      ));
+      const roundedSize =
+        amountsQuote === 'Base'
+          ? Number((order.size / order.price).toFixed(priceDecimals))
+          : Number(order.size.toFixed(2));
+      const roundedTotalSize =
+        amountsQuote === 'Base'
+          ? Number((order.totalSize / order.price).toFixed(priceDecimals))
+          : Number(order.totalSize.toFixed(2));
+
+      const userPrice = priceMap[roundedPrice] === true;
+
+      return {
+        price: roundedPrice,
+        size: roundedSize,
+        totalSize: roundedTotalSize,
+        shouldFlash: false,
+        userPrice,
+      };
+    });
+
+    const defaultOrders = orders.map((order) => ({
+      price: Number(
+        Number(order.price).toFixed(
+          Math.floor(Math.log10(Number(activeMarket.priceFactor))),
+        ),
+      ),
+      size: Number(Number(order.size).toFixed(2)),
+      totalSize: Number(Number(order.totalSize).toFixed(2)),
+    }));
+
+    return { roundedOrders, defaultOrders };
+  };
+
+  // drag resizer
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isVertDragging) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const mouseDeltaY = e.clientY - initialMousePosRef.current;
+      const newHeight = Math.max(
+        234,
+        Math.min(450, initialHeightRef.current - mouseDeltaY),
+      );
+
+      setOrderCenterHeight(newHeight);
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!isVertDragging) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      setIsVertDragging(false);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+
+      const overlay = document.getElementById('global-drag-overlay');
+      if (overlay) {
+        document.body.removeChild(overlay);
+      }
+    };
+
+    if (isVertDragging) {
+      const overlay = document.createElement('div');
+      overlay.id = 'global-drag-overlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.zIndex = '9999';
+      overlay.style.cursor = 'row-resize';
+      document.body.appendChild(overlay);
+
+      window.addEventListener('mousemove', handleMouseMove, { capture: true });
+      window.addEventListener('mouseup', handleMouseUp, { capture: true });
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove, {
+        capture: true,
+      });
+      window.removeEventListener('mouseup', handleMouseUp, { capture: true });
+
+      const overlay = document.getElementById('global-drag-overlay');
+      if (overlay) {
+        document.body.removeChild(overlay);
+      }
+    };
+  }, [isVertDragging]);
+
+  // auto resizer
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerHeight > 1080) {
+        setOrderCenterHeight(361.58);
+      } else if (window.innerHeight > 960) {
+        setOrderCenterHeight(320.38);
+      } else if (window.innerHeight > 840) {
+        setOrderCenterHeight(279.18);
+      } else if (window.innerHeight > 720) {
+        setOrderCenterHeight(237.98);
+      } else {
+        setOrderCenterHeight(196.78);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // dynamic title
+  useEffect(() => {
+    let title = 'Crystal | Decentralized Cryptocurrency Exchange';
+
+    switch (location.pathname) {
+      case '/portfolio':
+        title = 'Portfolio | Crystal';
+        break;
+      case '/referrals':
+        title = 'Referrals | Crystal';
+        break;
+      case '/earn':
+        title = 'Earn | Crystal';
+        break;
+      case '/leaderboard':
+        title = 'Leaderboard | Crystal';
+        break;
+      case '/swap':
+      case '/market':
+      case '/limit':
+      case '/send':
+      case '/scale':
+        if (trades.length > 0) {
+          const formattedPrice = formatSubscript(trades[0][1]);
+          if (activeMarket.quoteAsset) {
+            title = `${formattedPrice} - ${activeMarket.baseAsset + '/' + activeMarket.quoteAsset} | Crystal`;
+          } else {
+            title = `${location.pathname.slice(1).charAt(0).toUpperCase() + location.pathname.slice(2)} | Crystal`;
+          }
+          break;
+        }
+    }
+
+    document.title = title;
+  }, [trades, location.pathname]);
+
+  // referral data
+  useEffect(() => {
+    if (!refDataLoading && refData) {
+      setUsedRefAddress(
+        refData[0]?.result as any || '0x0000000000000000000000000000000000000000',
+      );
+      setClaimableFees(() => {
+        let newFees = {};
+        let totalFees = 0;
+        const baseOffset = new Set(
+          Object.values(markets).map(
+            (market) => market.address as `0x${string}`
+          )
+        ).size
+        Array.from(
+          Object.values(markets).reduce((acc, market: any) => {
+            if (!acc.has(market.address)) acc.set(market.address, market);
+            return acc;
+          }, new Map<string, any>()).values()
+        ).forEach((market: any, index) => {
+          if (
+            mids !== null &&
+            market !== null
+          ) {
+            const quoteIndex = index;
+            const baseIndex = index + baseOffset;
+            const quotePrice = market.quoteAsset == 'USDC' ? 1 : tradesByMarket[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.[0]?.[3]
+              / Number(markets[(market.quoteAsset == wethticker ? ethticker : market.quoteAsset) + 'USDC']?.priceFactor)
+            const midValue = Number(
+              (mids?.[`${market.baseAsset}${market.quoteAsset}`]?.[0]) || 0,
+            ) * quotePrice;
+            if (!(newFees as any)[market.quoteAsset]) {
+              (newFees as any)[market.quoteAsset] =
+                Number(refData[quoteIndex + 1].result) /
+                10 ** Number(market.quoteDecimals);
+              totalFees +=
+                Number(refData[quoteIndex + 1].result) /
+                10 ** Number(market.quoteDecimals);
+            } else {
+              (newFees as any)[market.quoteAsset] +=
+                Number(refData[quoteIndex + 1].result) /
+                10 ** Number(market.quoteDecimals);
+              totalFees +=
+                Number(refData[quoteIndex + 1].result) /
+                10 ** Number(market.quoteDecimals);
+            }
+
+            if (!(newFees as any)[market.baseAsset]) {
+              (newFees as any)[market.baseAsset] =
+                Number(refData[baseIndex + 1].result) /
+                10 ** Number(market.baseDecimals);
+              totalFees +=
+                (Number(refData[baseIndex + 1].result) * midValue) /
+                Number(market.scaleFactor) /
+                10 ** Number(market.quoteDecimals);
+            } else {
+              (newFees as any)[market.baseAsset] +=
+                Number(refData[baseIndex + 1].result) /
+                10 ** Number(market.baseDecimals);
+              totalFees +=
+                (Number(refData[baseIndex + 1].result) * midValue) /
+                Number(market.scaleFactor) /
+                10 ** Number(market.quoteDecimals);
+            }
+          }
+        });
+        setTotalClaimableFees(totalFees || 0);
+
+        return newFees;
+      });
+    }
+  }, [refData, mids]);
+
+  useEffect(() => {
+    if (prevOrderData && Array.isArray(prevOrderData) && prevOrderData.length >= 4) {
+      try {
+        const buyOrdersRaw: bigint[] = [];
+        const sellOrdersRaw: bigint[] = [];
+
+        for (let i = 2; i < prevOrderData[2].length; i += 64) {
+          const chunk = prevOrderData[2].slice(i, i + 64);
+          buyOrdersRaw.push(BigInt(`0x${chunk}`));
+        }
+
+        for (let i = 2; i < prevOrderData[3].length; i += 64) {
+          const chunk = prevOrderData[3].slice(i, i + 64);
+          sellOrdersRaw.push(BigInt(`0x${chunk}`));
+        }
+
+        const {
+          buyOrders: processedBuyOrders,
+          sellOrders: processedSellOrders,
+        } = processOrders(buyOrdersRaw, sellOrdersRaw);
+
+        const { roundedOrders: roundedBuy, } =
+          processOrdersForDisplay(
+            processedBuyOrders,
+            amountsQuote,
+            processedBuyOrders?.[0]?.price && processedSellOrders?.[0]?.price ? (processedBuyOrders?.[0]?.price + processedSellOrders?.[0]?.price) / 2 : processedBuyOrders?.[0]?.price,
+            orders,
+            true,
+          );
+        const {
+          roundedOrders: roundedSell,
+        } = processOrdersForDisplay(
+          processedSellOrders,
+          amountsQuote,
+          processedBuyOrders?.[0]?.price && processedSellOrders?.[0]?.price ? (processedBuyOrders?.[0]?.price + processedSellOrders?.[0]?.price) / 2 : processedSellOrders?.[0]?.price,
+          orders,
+          false,
+        );
+
+        roundedBuy.forEach((order, index) => {
+          const match = roundedBuyOrders.find(
+            (o) => o.price == order.price && o.size == order.size,
+          );
+          if (!match || index == 0 && index != roundedBuyOrders.findIndex((o) => o.price == order.price && o.size == order.size)) {
+            order.shouldFlash = true;
+          }
+        });
+        roundedSell.forEach((order, index) => {
+          const match = roundedSellOrders.find(
+            (o) => o.price == order.price && o.size == order.size,
+          );
+          if (!match || index == 0 && index != roundedSellOrders.findIndex((o) => o.price == order.price && o.size == order.size)) {
+            order.shouldFlash = true;
+          }
+        });
+        setRoundedBuyOrders(roundedBuy);
+        setRoundedSellOrders(roundedSell);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [amountsQuote, orders]);
+
+  // update state variables when data is loaded
+  useEffect(() => {
+    if (!isLoading && data) {
+      if (!txPending.current && !debounceTimerRef.current) {
+        if (data?.[1]?.result != null) {
+          setallowance(data[1].result);
+        }
+        let tempbalances = tokenBalances
+        if (data?.[2]?.result || !address) {
+          tempbalances = Object.values(tokendict).reduce((acc, token, i) => {
+            const balance = data[2].result?.[i] || BigInt(0);
+            acc[token.address] = balance;
+            return acc;
+          }, {});
+          if (stateloading || sliderPercent == 0) {
+            const percentage = !tempbalances[tokenIn]
+              ? 0
+              : Math.min(
+                100,
+                Math.floor(
+                  Number((amountIn * BigInt(100)) / tempbalances[tokenIn]),
+                ),
+              );
+            setSliderPercent(percentage);
+            const slider = document.querySelector('.balance-amount-slider');
+            const popup = document.querySelector('.slider-percentage-popup');
+            if (slider && popup) {
+              const rect = slider.getBoundingClientRect();
+              (popup as HTMLElement).style.left =
+                `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+            }
+          }
+          setTokenBalances(tempbalances);
+        }
+        if (data?.[0]?.result || ((data?.[0]?.error as any)?.cause?.name as any) == 'ContractFunctionRevertedError') {
+          setStateIsLoading(false);
+          setstateloading(false);
+          if (switched == false && !isWrap) {
+            const outputValue = BigInt(data[0].result?.at(-1) || BigInt(0));
+            setamountOutSwap(outputValue);
+            setoutputString(
+              outputValue === BigInt(0)
+                ? ''
+                : parseFloat(
+                  customRound(
+                    Number(outputValue) /
+                    10 ** Number(tokendict[tokenOut].decimals),
+                    3,
+                  ),
+                ).toString(),
+            );
+          } else if (!isWrap) {
+            let inputValue;
+            if (BigInt(data[0].result?.at(-1) || BigInt(0)) != amountOutSwap) {
+              inputValue = BigInt(0);
+            } else {
+              inputValue = BigInt(data[0].result?.[0] || BigInt(0));
+            }
+            setamountIn(inputValue);
+            setInputString(
+              inputValue == BigInt(0)
+                ? ''
+                : parseFloat(
+                  customRound(
+                    Number(inputValue) /
+                    10 ** Number(tokendict[tokenIn].decimals),
+                    3,
+                  ),
+                ).toString(),
+            );
+            const percentage = !tempbalances[tokenIn]
+              ? 0
+              : Math.min(
+                100,
+                Math.floor(
+                  Number((inputValue * BigInt(100)) / tempbalances[tokenIn]),
+                ),
+              );
+            setSliderPercent(percentage);
+            const slider = document.querySelector('.balance-amount-slider');
+            const popup = document.querySelector('.slider-percentage-popup');
+            if (slider && popup) {
+              const rect = slider.getBoundingClientRect();
+              (popup as HTMLElement).style.left =
+                `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+            }
+          }
+        }
+      }
+      let tempmids = mids;
+      if (data?.[4]?.result) {
+        tempmids = Object.keys(markets).filter((key) => {
+          return !(
+            key.startsWith(wethticker) || key.endsWith(wethticker)
+          );
+        }).reduce(
+          (acc, market, i) => {
+            const prices = [
+              (data as any)[4].result?.[0][i],
+              (data as any)[4].result?.[1][i],
+              (data as any)[4].result?.[2][i],
+            ];
+            acc[market] = prices;
+            return acc;
+          },
+          {} as Record<string, any>,
+        );
+        setmids(tempmids);
+      }
+      if (data?.[3]?.result) {
+        sethighestBid((data as any)[3].result[0] || BigInt(0));
+        setlowestAsk((data as any)[3].result[1] || BigInt(0));
+        const orderdata = data[3].result;
+        setPrevOrderData(orderdata as any);
+        if (orderdata && Array.isArray(orderdata) && orderdata.length >= 4 && !(orderdata[0] == prevOrderData[0] &&
+          orderdata[1] == prevOrderData[1] &&
+          orderdata[2]?.toLowerCase() == prevOrderData[2]?.toLowerCase() &&
+          orderdata[3]?.toLowerCase() == prevOrderData[3]?.toLowerCase())) {
+          try {
+            const buyOrdersRaw: bigint[] = [];
+            const sellOrdersRaw: bigint[] = [];
+
+            for (let i = 2; i < orderdata[2].length; i += 64) {
+              const chunk = orderdata[2].slice(i, i + 64);
+              buyOrdersRaw.push(BigInt(`0x${chunk}`));
+            }
+
+            for (let i = 2; i < orderdata[3].length; i += 64) {
+              const chunk = orderdata[3].slice(i, i + 64);
+              sellOrdersRaw.push(BigInt(`0x${chunk}`));
+            }
+
+            const {
+              buyOrders: processedBuyOrders,
+              sellOrders: processedSellOrders,
+            } = processOrders(buyOrdersRaw, sellOrdersRaw);
+
+            const { roundedOrders: roundedBuy, defaultOrders: liquidityBuy } =
+              processOrdersForDisplay(
+                processedBuyOrders,
+                amountsQuote,
+                processedBuyOrders?.[0]?.price && processedSellOrders?.[0]?.price ? (processedBuyOrders?.[0]?.price + processedSellOrders?.[0]?.price) / 2 : processedBuyOrders?.[0]?.price,
+                orders,
+                true,
+              );
+            const {
+              roundedOrders: roundedSell,
+              defaultOrders: liquiditySell,
+            } = processOrdersForDisplay(
+              processedSellOrders,
+              amountsQuote,
+              processedBuyOrders?.[0]?.price && processedSellOrders?.[0]?.price ? (processedBuyOrders?.[0]?.price + processedSellOrders?.[0]?.price) / 2 : processedSellOrders?.[0]?.price,
+              orders,
+              false,
+            );
+
+            const highestBid =
+              roundedBuy.length > 0 ? roundedBuy[0].price : undefined;
+            const lowestAsk =
+              roundedSell.length > 0 ? roundedSell[0].price : undefined;
+
+            const spread = {
+              spread:
+                highestBid !== undefined && lowestAsk !== undefined
+                  ? lowestAsk - highestBid
+                  : NaN,
+              averagePrice:
+                highestBid !== undefined && lowestAsk !== undefined
+                  ? Number(
+                    ((highestBid + lowestAsk) / 2).toFixed(
+                      Math.floor(Math.log10(Number(activeMarket.priceFactor))) + 1,
+                    ),
+                  )
+                  : NaN,
+            };
+
+            roundedBuy.forEach((order, index) => {
+              const match = roundedBuyOrders.find(
+                (o) => o.price == order.price && o.size == order.size,
+              );
+              if (!match || index == 0 && index != roundedBuyOrders.findIndex((o) => o.price == order.price && o.size == order.size)) {
+                order.shouldFlash = true;
+              }
+            });
+            roundedSell.forEach((order, index) => {
+              const match = roundedSellOrders.find(
+                (o) => o.price == order.price && o.size == order.size,
+              );
+              if (!match || index == 0 && index != roundedSellOrders.findIndex((o) => o.price == order.price && o.size == order.size)) {
+                order.shouldFlash = true;
+              }
+            });
+            setPriceFactor(Number(activeMarket.priceFactor));
+            setSymbolIn(activeMarket.quoteAsset);
+            setSymbolOut(activeMarket.baseAsset);
+            setSpreadData(spread);
+            setRoundedBuyOrders(roundedBuy);
+            setRoundedSellOrders(roundedSell);
+            setLiquidityBuyOrders([liquidityBuy, activeMarket.address]);
+            setLiquiditySellOrders([liquiditySell, activeMarket.address]);
+
+            setBaseInterval(1 / Number(activeMarket.priceFactor));
+            setOBInterval(
+              localStorage.getItem(`${activeMarket.baseAsset}_ob_interval`)
+                ? Number(
+                  localStorage.getItem(
+                    `${activeMarket.baseAsset}_ob_interval`,
+                  ),
+                )
+                : 1 / Number(activeMarket.priceFactor),
+            );
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      }
+    } else {
+      setStateIsLoading(true);
+    }
+  }, [data, activechain, isLoading, location.pathname.slice(1), dataUpdatedAt]);
+
+  // update display values when loading is finished
+  useEffect(() => {
+    if (!isLoading && !stateIsLoading && Object.keys(mids).length > 0) {
+      setDisplayValuesLoading(false);
+      let estPrice = multihop
+        ? (Number(amountIn) * 100000) /
+        Number(activeMarket.fee) /
+        10 ** Number(tokendict[tokenIn].decimals) /
+        (Number(amountOutSwap) /
+          10 ** Number(tokendict[tokenOut].decimals)) ||
+        (() => {
+          let price = 1;
+          let mid;
+          for (let i = 0; i < activeMarket.path.length - 1; i++) {
+            let market = getMarket(
+              activeMarket.path[i],
+              activeMarket.path[i + 1],
+            );
+            if (activeMarket.path[i] == market.quoteAddress) {
+              mid = Number(mids[(market.baseAsset + market.quoteAsset).replace(
+                new RegExp(
+                  `^${wethticker}|${wethticker}$`,
+                  'g'
+                ),
+                ethticker
+              )][2]);
+              price *= mid / Number(market.priceFactor);
+            } else {
+              mid = Number(mids[(market.baseAsset + market.quoteAsset).replace(
+                new RegExp(
+                  `^${wethticker}|${wethticker}$`,
+                  'g'
+                ),
+                ethticker
+              )][1]);
+              price /= mid / Number(market.priceFactor);
+            }
+          }
+          return price;
+        })()
+        : amountIn != BigInt(0) && amountOutSwap != BigInt(0)
+          ? Number(
+            tokenIn == activeMarket.quoteAddress
+              ? amountIn
+              : (Number(amountOutSwap) * 100000) / Number(activeMarket.fee),
+          ) /
+          10 ** Number(tokendict[activeMarket.quoteAddress].decimals) /
+          (Number(
+            tokenIn == activeMarket.quoteAddress
+              ? (Number(amountOutSwap) * 100000) / Number(activeMarket.fee)
+              : amountIn,
+          ) /
+            10 ** Number(tokendict[activeMarket.baseAddress].decimals))
+          : (tokenIn == activeMarket.quoteAddress
+            ? Number(lowestAsk)
+            : Number(highestBid)) / Number(activeMarket.priceFactor);
+      setAveragePrice(
+        multihop
+          ? `${customRound(estPrice, 2)} ${tokendict[tokenOut].ticker}`
+          : `${estPrice.toFixed(Math.floor(Math.log10(Number(activeMarket.priceFactor))))} USDC`,
+      );
+      setPriceImpact(() => {
+        let temppriceimpact;
+        if (multihop) {
+          let price = 1;
+          let mid;
+          for (let i = 0; i < activeMarket.path.length - 1; i++) {
+            let market = getMarket(
+              activeMarket.path[i],
+              activeMarket.path[i + 1],
+            );
+            mid = Number(mids[(market.baseAsset + market.quoteAsset).replace(
+              new RegExp(
+                `^${wethticker}|${wethticker}$`,
+                'g'
+              ),
+              ethticker
+            )][0]);
+            if (activeMarket.path[i] == market.quoteAddress) {
+              price *= mid / Number(market.priceFactor);
+            } else {
+              price /= mid / Number(market.priceFactor);
+            }
+          }
+          temppriceimpact = `${customRound(
+            0.001 > Math.abs(((estPrice - price) / price) * 100)
+              ? 0
+              : Math.abs(((estPrice - price) / price) * 100),
+            3,
+          )}%`;
+        } else {
+          temppriceimpact = `${customRound(
+            0.001 >
+              Math.abs(
+                ((estPrice -
+                  (tokenIn == activeMarket.quoteAddress
+                    ? Number(lowestAsk) / Number(activeMarket.priceFactor)
+                    : Number(highestBid) / Number(activeMarket.priceFactor))) /
+                  (tokenIn == activeMarket.quoteAddress
+                    ? Number(lowestAsk) / Number(activeMarket.priceFactor)
+                    : Number(highestBid) / Number(activeMarket.priceFactor))) *
+                100,
+              )
+              ? 0
+              : Math.abs(
+                ((estPrice -
+                  (tokenIn == activeMarket.quoteAddress
+                    ? Number(lowestAsk) / Number(activeMarket.priceFactor)
+                    : Number(highestBid) /
+                    Number(activeMarket.priceFactor))) /
+                  (tokenIn == activeMarket.quoteAddress
+                    ? Number(lowestAsk) / Number(activeMarket.priceFactor)
+                    : Number(highestBid) /
+                    Number(activeMarket.priceFactor))) *
+                100,
+              ),
+            3,
+          )}%`;
+        }
+        setSwapButtonDisabled(
+          (amountIn === BigInt(0) ||
+            amountIn > tokenBalances[tokenIn] ||
+            ((orderType == 1 || multihop) &&
+              !isWrap &&
+              BigInt(data?.[0].result?.at(0) || BigInt(0)) != amountIn)) &&
+          connected &&
+          userchain == activechain,
+        );
+        setSwapButton(
+          connected && userchain == activechain
+            ? (switched &&
+              amountOutSwap != BigInt(0) &&
+              amountIn == BigInt(0)) ||
+              ((orderType == 1 || multihop) &&
+                !isWrap &&
+                BigInt(data?.[0].result?.at(0) || BigInt(0)) != amountIn)
+              ? 0
+              : amountIn === BigInt(0)
+                ? 1
+                : amountIn <= tokenBalances[tokenIn]
+                  ? allowance < amountIn && tokenIn != eth && !isWrap
+                    ? 6
+                    : 2
+                  : 3
+            : connected
+              ? 4
+              : 5,
+        );
+        setLimitButtonDisabled(
+          (amountIn === BigInt(0) ||
+            limitPrice == BigInt(0) ||
+            (tokenIn == activeMarket.quoteAddress
+              ? amountIn < activeMarket.minSize
+              : (amountIn * limitPrice) / activeMarket.scaleFactor <
+              activeMarket.minSize) ||
+            amountIn > tokenBalances[tokenIn] ||
+            (addliquidityonly &&
+              ((limitPrice >= lowestAsk &&
+                tokenIn == activeMarket.quoteAddress) ||
+                (limitPrice <= highestBid &&
+                  tokenIn == activeMarket.baseAddress)))) &&
+          connected &&
+          userchain == activechain,
+        );
+        setLimitButton(
+          connected && userchain == activechain
+            ? amountIn === BigInt(0)
+              ? 0
+              : limitPrice == BigInt(0)
+                ? 1
+                : amountIn <= tokenBalances[tokenIn]
+                  ? addliquidityonly &&
+                    ((limitPrice >= lowestAsk &&
+                      tokenIn == activeMarket.quoteAddress) ||
+                      (limitPrice <= highestBid &&
+                        tokenIn == activeMarket.baseAddress))
+                    ? tokenIn == activeMarket.quoteAddress
+                      ? 2
+                      : 3
+                    : (
+                      tokenIn == activeMarket.quoteAddress
+                        ? amountIn < activeMarket.minSize
+                        : (amountIn * limitPrice) /
+                        activeMarket.scaleFactor <
+                        activeMarket.minSize
+                    )
+                      ? 4
+                      : allowance < amountIn && tokenIn != eth
+                        ? 9
+                        : 5
+                  : 6
+            : connected
+              ? 7
+              : 8,
+        );
+        setSendButtonDisabled(
+          (amountIn === BigInt(0) ||
+            amountIn > tokenBalances[tokenIn] ||
+            !/^(0x[0-9a-fA-F]{40})$/.test(recipient)) &&
+          connected &&
+          userchain == activechain,
+        );
+        setSendButton(
+          connected && userchain == activechain
+            ? amountIn === BigInt(0)
+              ? 0
+              : !/^(0x[0-9a-fA-F]{40})$/.test(recipient)
+                ? 1
+                : amountIn <= tokenBalances[tokenIn]
+                  ? 2
+                  : 3
+            : connected
+              ? 4
+              : 5,
+        );
+        setSendPopupButtonDisabled(
+          (sendAmountIn === BigInt(0) ||
+            sendAmountIn > tokenBalances[sendTokenIn] ||
+            !/^(0x[0-9a-fA-F]{40})$/.test(recipient)) &&
+          connected &&
+          userchain == activechain,
+        );
+        setSendPopupButton(
+          connected && userchain == activechain
+            ? sendAmountIn === BigInt(0)
+              ? 0
+              : !/^(0x[0-9a-fA-F]{40})$/.test(recipient)
+                ? 1
+                : sendAmountIn <= tokenBalances[sendTokenIn]
+                  ? 2
+                  : 3
+            : connected
+              ? 4
+              : 5,
+        );
+        setScaleButtonDisabled(
+          (amountIn === BigInt(0) ||
+            scaleStart == BigInt(0) || scaleEnd == BigInt(0) || scaleOrders == BigInt(0) || scaleOrders == BigInt(1) || scaleSkew == 0 ||
+            calculateScaleOutput(
+              amountIn,
+              Number(scaleStart),
+              Number(scaleEnd),
+              Number(scaleOrders || 2),
+              Number(scaleSkew)
+            ).some((order) => order[2] < activeMarket.minSize) ||
+            amountIn > tokenBalances[tokenIn] ||
+            (
+              ((scaleStart >= lowestAsk &&
+                tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                (scaleStart <= highestBid &&
+                  tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth)) || (scaleEnd >= lowestAsk &&
+                    tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                (scaleEnd <= highestBid &&
+                  tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth))))) &&
+          connected &&
+          userchain == activechain,
+        );
+        setScaleButton(
+          connected && userchain == activechain
+            ? amountIn === BigInt(0)
+              ? 0
+              : scaleStart == BigInt(0)
+                ? 1 : scaleEnd == BigInt(0) ? 2
+                  : amountIn <= tokenBalances[tokenIn]
+                    ? ((scaleStart >= lowestAsk &&
+                      tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                      (scaleStart <= highestBid &&
+                        tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth)))
+                      ? tokenIn == activeMarket.quoteAddress
+                        ? 3
+                        : 4 : ((scaleEnd >= lowestAsk &&
+                          tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                          (scaleEnd <= highestBid &&
+                            tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth)))
+                        ? tokenIn == activeMarket.quoteAddress
+                          ? 5
+                          : 6
+                        : (
+                          calculateScaleOutput(
+                            amountIn,
+                            Number(scaleStart),
+                            Number(scaleEnd),
+                            Number(scaleOrders || 2),
+                            Number(scaleSkew)
+                          ).some((order) => order[2] < activeMarket.minSize)
+                        ) ? 7 : scaleOrders <= BigInt(1) ? 8 : scaleSkew == 0 ? 9
+                          : allowance < amountIn && tokenIn != eth
+                            ? 13
+                            : 14
+                    : 10
+            : connected
+              ? 11
+              : 12,
+        );
+        setwarning(
+          !isWrap &&
+            ((amountIn == BigInt(0) && amountOutSwap != BigInt(0)) ||
+              ((orderType == 1 || multihop) &&
+                BigInt(data?.[0].result?.at(0) || BigInt(0)) != amountIn))
+            ? multihop
+              ? 3
+              : 2
+            : parseFloat(temppriceimpact.slice(0, -1)) > 5 &&
+              !isWrap &&
+              (orderType != 0 || (slippage < BigInt(9500))) &&
+              !isLoading &&
+              !stateIsLoading
+              ? 1
+              : 0,
+        );
+        return temppriceimpact == 'NaN%' ? '0%' : temppriceimpact;
+      });
+      setTradeFee(
+        `${(Number(amountIn) * (100000 - Number(activeMarket.fee))) /
+          100000 /
+          10 ** Number(tokendict[tokenIn].decimals) >
+          0.0001
+          ? customRound(
+            (Number(amountIn) * (100000 - Number(activeMarket.fee))) /
+            100000 /
+            10 ** Number(tokendict[tokenIn].decimals),
+            2,
+          )
+          : (Number(amountIn) * (100000 - Number(activeMarket.fee))) /
+            100000 /
+            10 ** Number(tokendict[tokenIn].decimals) ==
+            0
+            ? '0'
+            : '<0.0001'
+        } ${tokendict[tokenIn].ticker}`,
+      );
+    } else if (stateIsLoading && !isWrap) {
+      setDisplayValuesLoading(true);
+    }
+  }, [
+    isLoading,
+    stateIsLoading,
+    amountIn,
+    amountOutSwap,
+    tokenIn,
+    tokenOut,
+    activechain,
+    isWrap,
+    addliquidityonly,
+    limitPrice,
+    highestBid,
+    lowestAsk,
+    activeMarket.quoteAddress,
+    activeMarket.baseAddress,
+    orderType,
+    slippage,
+    connected,
+    userchain,
+    tokenBalances[tokenIn],
+    multihop,
+    data?.[0].result?.at(0),
+    recipient,
+    mids,
+    scaleStart,
+    scaleEnd,
+    scaleOrders,
+    scaleSkew,
+    amountOutScale,
+  ]);
+
+  // trades processing
+  useEffect(() => {
+    const temp: Trade[] | undefined = tradesByMarket[activeMarketKey];
+
+    let processed: [boolean, string, number, string, string][] = [];
+
+    if (temp) {
+      processed = temp.slice(0, 100).map((trade: Trade) => {
+        const isBuy = trade[2] === 1;
+        const { price, tradeValue } = getTradeValue(trade, activeMarket);
+        const time = formatTime(trade[6]);
+        const hash = trade[5];
+
+        return [
+          isBuy,
+          formatCommas(
+            price.toFixed(Math.floor(Math.log10(Number(activeMarket.priceFactor)))),
+          ),
+          tradeValue,
+          time,
+          hash,
+        ];
+      });
+    }
+
+    setTrades(processed);
+  }, [tradesByMarket?.[activeMarketKey]?.[0]])
+
+  // fetch initial address info and event stream
+  useEffect(() => {
+    let liveStreamCancelled = false;
+    let startBlockNumber = '';
+    let endBlockNumber = '';
+    let worker: any;
+    let isAddressInfoFetching = false;
+
+    const workerCode = `
+      setInterval(() => {
+        self.postMessage('fetch');
+      }, 800);
+    `;
+
+    const fetchData = async () => {
+      try {
+        const req = await fetch(HTTP_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify([{
+            jsonrpc: '2.0',
+            id: 0,
+            method: 'eth_blockNumber',
+          }, {
+            jsonrpc: '2.0',
+            id: 0,
+            method: 'eth_getLogs',
+            params: [
+              {
+                fromBlock: startBlockNumber,
+                toBlock: endBlockNumber,
+                address: Object.values(markets).map(
+                  (market: { address: string }) => market.address,
+                ),
+                topics: [
+                  [
+                    '0xc3bcf95b5242764f3f2dc3e504ce05823a3b50c4ccef5e660d13beab2f51f2ca',
+                  ],
+                ],
+              },
+            ],
+          }, ...(address?.slice(2) ? [{
+            jsonrpc: '2.0',
+            id: 0,
+            method: 'eth_getLogs',
+            params: [
+              {
+                fromBlock: startBlockNumber,
+                toBlock: endBlockNumber,
+                address: Object.values(markets).map(
+                  (market: { address: string }) => market.address,
+                ),
+                topics: [
+                  [
+                    '0x1c87843c023cd30242ff04316b77102e873496e3d8924ef015475cf066c1d4f4',
+                  ],
+                  [
+                    '0x000000000000000000000000' + address?.slice(2),
+                  ],
+                ],
+              },
+            ],
+          }] : [])]),
+        });
+        const result = await req.json();
+        if (liveStreamCancelled) return;
+        startBlockNumber = '0x' + (parseInt(result[0].result, 16) - 30).toString(16);
+        endBlockNumber = '0x' + (parseInt(result[0].result, 16) + 10).toString(16);
+        const tradelogs = result[1].result;
+        const orderlogs = result?.[2]?.result;
+        setProcessedLogs(prev => {
+          let tempset = new Set(prev);
+          let temptrades: any = {};
+          setorders((orders) => {
+            let temporders = [...orders];
+            let ordersChanged = false;
+            setcanceledorders((canceledorders) => {
+              let tempcanceledorders = [...canceledorders];
+              let canceledOrdersChanged = false;
+              settradesByMarket((tradesByMarket: any) => {
+                let temptradesByMarket = {...tradesByMarket};
+                let tradesByMarketChanged = false;
+                settradehistory((tradehistory: any) => {
+                  let updatedTradeHistory = [...tradehistory];
+                  let tradeHistoryChanged = false;
+                  if (Array.isArray(orderlogs)) {
+                    for (const log of orderlogs) {
+                      const logIdentifier = `${log['transactionHash']}-${log['logIndex']}`;
+                      const marketKey = addresstoMarket[log['address']];
+                      if (!tempset.has(logIdentifier) && marketKey && log['topics'][1].slice(26) ==
+                        address?.slice(2).toLowerCase()) {
+                        if (tempset.size >= 10000) {
+                          const first = tempset.values().next().value;
+                          if (first !== undefined) {
+                            tempset.delete(first);
+                          }
+                        }
+                        tempset.add(logIdentifier);
+                        const resolve = txReceiptResolvers.get(log['transactionHash']);
+                        if (resolve) {
+                          resolve();
+                          txReceiptResolvers.delete(log['transactionHash']);
+                        }
+                        let _timestamp = parseInt(log['blockTimestamp'], 16);
+                        let _orderdata = log['data'].slice(130);
+                        for (let i = 0; i < _orderdata.length; i += 64) {
+                          let chunk = _orderdata.slice(i, i + 64);
+                          let _isplace = parseInt(chunk.slice(0, 1), 16) < 2;
+                          if (_isplace) {
+                            let buy = parseInt(chunk.slice(0, 1), 16);
+                            let price = parseInt(chunk.slice(1, 20), 16);
+                            let id = parseInt(chunk.slice(20, 32), 16);
+                            let size = parseInt(chunk.slice(32, 64), 16);
+                            let alreadyExist = tempcanceledorders.some(
+                              (o: any) => o[0] == price && o[1] == id && o[4] == marketKey
+                            );
+                            if (!alreadyExist) {
+                              ordersChanged = true;
+                              canceledOrdersChanged = true;
+                              let order = [
+                                price,
+                                id,
+                                size /
+                                price,
+                                buy,
+                                marketKey,
+                                log['transactionHash'],
+                                _timestamp,
+                                0,
+                                size,
+                                2,
+                              ];
+                              temporders.push(order)
+                              tempcanceledorders.push([
+                                price,
+                                id,
+                                size /
+                                price,
+                                buy,
+                                marketKey,
+                                log['transactionHash'],
+                                _timestamp,
+                                0,
+                                size,
+                                2,
+                              ])
+                              let quoteasset =
+                                markets[marketKey].quoteAddress;
+                              let baseasset =
+                                markets[marketKey].baseAddress;
+                              let amountquote = (
+                                size /
+                                (Number(
+                                  markets[marketKey].scaleFactor,
+                                ) *
+                                  10 **
+                                  Number(
+                                    markets[marketKey]
+                                      .quoteDecimals,
+                                  ))
+                              ).toFixed(2);
+                              let amountbase = customRound(
+                                size /
+                                price /
+                                10 **
+                                Number(
+                                  markets[marketKey]
+                                    .baseDecimals,
+                                ),
+                                3,
+                              );
+                              newTxPopup(
+                                log['transactionHash'],
+                                'limit',
+                                buy ? quoteasset : baseasset,
+                                buy ? baseasset : quoteasset,
+                                buy ? amountquote : amountbase,
+                                buy ? amountbase : amountquote,
+                                `${price / Number(markets[marketKey].priceFactor)} ${markets[marketKey].quoteAsset}`,
+                                '',
+                              );
+                            }
+                          } else {
+                            let buy = parseInt(chunk.slice(0, 1), 16) == 3;
+                            let price = parseInt(chunk.slice(1, 20), 16);
+                            let id = parseInt(chunk.slice(20, 32), 16);
+                            let size = parseInt(chunk.slice(32, 64), 16);
+                            let index = temporders.findIndex(
+                              (o: any) =>
+                                o[0] == price &&
+                                o[1] == id &&
+                                o[4] == marketKey,
+                            );
+                            if (index != -1) {
+                              ordersChanged = true;
+                              canceledOrdersChanged = true;
+                              let canceledOrderIndex: number;
+                              canceledOrderIndex = tempcanceledorders.findIndex(
+                                (canceledOrder) =>
+                                  canceledOrder[0] ==
+                                  price &&
+                                  canceledOrder[1] ==
+                                  id &&
+                                  canceledOrder[4] ==
+                                  marketKey,
+                              );
+                              if (canceledOrderIndex !== -1 && tempcanceledorders[canceledOrderIndex][9] != 0) {
+                                tempcanceledorders[canceledOrderIndex] = [...tempcanceledorders[canceledOrderIndex]]
+                                tempcanceledorders[canceledOrderIndex][9] = 0;
+                                tempcanceledorders[canceledOrderIndex][8] =
+                                  tempcanceledorders[canceledOrderIndex][8] -
+                                  size;
+                                tempcanceledorders[canceledOrderIndex][6] =
+                                  _timestamp;
+                              }
+                              if (temporders[index]?.[10] && typeof temporders[index][10].remove === 'function') {
+                                temporders[index] = [...temporders[index]]
+                                try {
+                                  temporders[index][10].remove();
+                                }
+                                catch {}
+                                temporders[index].splice(10, 1)
+                              }
+                              temporders.splice(index, 1);
+                              let quoteasset =
+                              markets[marketKey].quoteAddress;
+                              let baseasset =
+                                markets[marketKey].baseAddress;
+                              let amountquote = (
+                                size /
+                                (Number(
+                                  markets[marketKey].scaleFactor,
+                                ) *
+                                  10 **
+                                  Number(
+                                    markets[marketKey]
+                                      .quoteDecimals,
+                                  ))
+                              ).toFixed(2);
+                              let amountbase = customRound(
+                                size /
+                                price /
+                                10 **
+                                Number(
+                                  markets[marketKey]
+                                    .baseDecimals,
+                                ),
+                                3,
+                              );
+                              newTxPopup(
+                                log['transactionHash'],
+                                'cancel',
+                                buy ? quoteasset : baseasset,
+                                buy ? baseasset : quoteasset,
+                                buy ? amountquote : amountbase,
+                                buy ? amountbase : amountquote,
+                                `${price / Number(markets[marketKey].priceFactor)} ${markets[marketKey].quoteAsset}`,
+                                '',
+                              );
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  if (Array.isArray(tradelogs)) {
+                    for (const log of tradelogs) {
+                      const logIdentifier = `${log['transactionHash']}-${log['logIndex']}`;
+                      const marketKey = addresstoMarket[log['address']];
+                      if (!tempset.has(logIdentifier) && marketKey && !temptradesByMarket[marketKey]?.some((trade: any) =>
+                        trade[0] == parseInt(log['data'].slice(2, 34), 16) &&
+                        trade[1] == parseInt(log['data'].slice(34, 66), 16) &&
+                        trade[5] == log['transactionHash'])) {
+                        if (tempset.size >= 10000) {
+                          const first = tempset.values().next().value;
+                          if (first !== undefined) {
+                            tempset.delete(first);
+                          }
+                        }
+                        tempset.add(logIdentifier);
+                        const resolve = txReceiptResolvers.get(log['transactionHash']);
+                        if (resolve) {
+                          resolve();
+                          txReceiptResolvers.delete(log['transactionHash']);
+                        }
+                        let _timestamp = parseInt(log['blockTimestamp'], 16);
+                        let _orderdata = log['data'].slice(258);
+                        for (let i = 0; i < _orderdata.length; i += 64) {
+                          let chunk = _orderdata.slice(i, i + 64);
+                          let price = parseInt(chunk.slice(1, 20), 16);
+                          let id = parseInt(chunk.slice(20, 32), 16);
+                          let size = parseInt(chunk.slice(32, 64), 16);
+                          let orderIndex = temporders.findIndex(
+                            (sublist: any) =>
+                              sublist[0] ==
+                            price &&
+                              sublist[1] ==
+                              id &&
+                              sublist[4] == marketKey,
+                          );
+                          let canceledOrderIndex = tempcanceledorders.findIndex(
+                            (sublist: any) =>
+                              sublist[0] ==
+                              price &&
+                              sublist[1] ==
+                              id &&
+                              sublist[4] == marketKey,
+                          );
+                          if (orderIndex != -1 && canceledOrderIndex != -1) {
+                            ordersChanged = true;
+                            canceledOrdersChanged = true;
+                            temporders[orderIndex] = [...temporders[orderIndex]]
+                            tempcanceledorders[canceledOrderIndex] = [...tempcanceledorders[canceledOrderIndex]]
+                            let order = [...temporders[orderIndex]];
+                            let buy = order[3];
+                            let quoteasset =
+                              markets[marketKey]
+                                .quoteAddress;
+                            let baseasset =
+                              markets[marketKey]
+                                .baseAddress;
+                            let amountquote = (
+                              ((order[2] - order[7] - size / order[0]) *
+                                order[0]) /
+                              (Number(
+                                markets[marketKey]
+                                  .scaleFactor,
+                              ) *
+                                10 **
+                                Number(
+                                  markets[marketKey]
+                                    .quoteDecimals,
+                                ))
+                            ).toFixed(2);
+                            let amountbase = customRound(
+                              (order[2] - order[7] - size / order[0]) /
+                              10 **
+                              Number(
+                                markets[marketKey]
+                                  .baseDecimals,
+                              ),
+                              3,
+                            );
+                            newTxPopup(
+                              log['transactionHash'],
+                              'fill',
+                              buy ? quoteasset : baseasset,
+                              buy ? baseasset : quoteasset,
+                              buy ? amountquote : amountbase,
+                              buy ? amountbase : amountquote,
+                              `${order[0] / Number(markets[marketKey].priceFactor)} ${markets[marketKey].quoteAsset}`,
+                              '',
+                            );
+                            if (size == 0) {
+                              tradeHistoryChanged = true;
+                              updatedTradeHistory.push([
+                                order[3] == 1
+                                  ? (order[2] * order[0]) /
+                                  Number(markets[order[4]].scaleFactor)
+                                  : order[2],
+                                order[3] == 1
+                                  ? order[2]
+                                  : (order[2] * order[0]) /
+                                  Number(markets[order[4]].scaleFactor),
+                                order[3],
+                                order[0],
+                                order[4],
+                                order[5],
+                                _timestamp,
+                                0,
+                              ]);
+                              if (temporders[orderIndex]?.[10] && typeof temporders[orderIndex][10].remove === 'function') {
+                                try {
+                                  temporders[orderIndex][10].remove();
+                                }
+                                catch {}
+                                temporders[orderIndex].splice(10, 1)
+                              }
+                              temporders.splice(orderIndex, 1);
+                              tempcanceledorders[canceledOrderIndex][9] =
+                                1;
+                              tempcanceledorders[canceledOrderIndex][7] = order[2]
+                              tempcanceledorders[canceledOrderIndex][8] = order[8];
+                            } else {
+                              if (temporders[orderIndex]?.[10] && typeof temporders[orderIndex][10].setQuantity === 'function') {
+                                try {
+                                  temporders[orderIndex][10].setQuantity(formatDisplay(customRound((size / order[0]) / 10 ** Number(markets[order[4]].baseDecimals), 3)))
+                                }
+                                catch {}
+                              }
+                              temporders[orderIndex][7] =
+                                order[2] - size / order[0];
+                              tempcanceledorders[canceledOrderIndex][7] =
+                                order[2] - size / order[0];
+                            }
+                          }
+                        }
+                        tradesByMarketChanged = true;
+                        if (!Array.isArray(temptradesByMarket[marketKey])) {
+                          temptradesByMarket[marketKey] = [];
+                        }
+                        let amountIn = parseInt(log['data'].slice(2, 34), 16);
+                        let amountOut = parseInt(log['data'].slice(34, 66), 16);
+                        let buy = parseInt(log['data'].slice(66, 67), 16);
+                        let price = parseInt(log['data'].slice(98, 130), 16);
+                        temptradesByMarket[marketKey].unshift([
+                          amountIn,
+                          amountOut,
+                          buy,
+                          price,
+                          marketKey,
+                          log['transactionHash'],
+                          _timestamp,
+                        ]);
+                        if (!Array.isArray(temptrades[marketKey])) {
+                          temptrades[marketKey] = [];
+                        }
+                        temptrades[marketKey].unshift([
+                          amountIn,
+                          amountOut,
+                          buy,
+                          price,
+                          marketKey,
+                          log['transactionHash'],
+                          _timestamp,
+                          parseInt(log['data'].slice(67, 98), 16),
+                        ])
+                        if (
+                          log['topics'][1].slice(26) ==
+                          address?.slice(2).toLowerCase()
+                        ) {
+                          tradeHistoryChanged = true;
+                          updatedTradeHistory.push([
+                            amountIn,
+                            amountOut,
+                            buy,
+                            price,
+                            marketKey,
+                            log['transactionHash'],
+                            _timestamp,
+                            1,
+                          ])
+                          let quoteasset =
+                            markets[marketKey].quoteAddress;
+                          let baseasset =
+                            markets[marketKey].baseAddress;
+                          let popupAmountIn = customRound(
+                            amountIn /
+                            10 **
+                            Number(
+                              buy
+                                ? markets[marketKey]
+                                  .quoteDecimals
+                                : markets[marketKey]
+                                  .baseDecimals,
+                            ),
+                            3,
+                          );
+                          let popupAmountOut = customRound(
+                            amountOut /
+                            10 **
+                            Number(
+                              buy
+                                ? markets[marketKey]
+                                  .baseDecimals
+                                : markets[marketKey]
+                                  .quoteDecimals,
+                            ),
+                            3,
+                          );
+                          newTxPopup(
+                            log['transactionHash'],
+                            'swap',
+                            buy ? quoteasset : baseasset,
+                            buy ? baseasset : quoteasset,
+                            popupAmountIn,
+                            popupAmountOut,
+                            '',
+                            '',
+                          );
+                        }
+                      }
+                    }
+                    if (tradesByMarketChanged) {
+                      setChartData(([existingBars, existingIntervalLabel, existingShowOutliers]) => {
+                        const marketKey = existingIntervalLabel?.match(/^\D*/)?.[0];
+                        const updatedBars = [...existingBars];
+                        let rawVolume;
+                        if (marketKey && Array.isArray(temptrades?.[marketKey])) {
+                          const barSizeSec =
+                            existingIntervalLabel?.match(/\d.*/)?.[0] === '1' ? 60 :
+                            existingIntervalLabel?.match(/\d.*/)?.[0] === '5' ? 5 * 60 :
+                            existingIntervalLabel?.match(/\d.*/)?.[0] === '15' ? 15 * 60 :
+                            existingIntervalLabel?.match(/\d.*/)?.[0] === '30' ? 30 * 60 :
+                            existingIntervalLabel?.match(/\d.*/)?.[0] === '60' ? 60 * 60 :
+                            existingIntervalLabel?.match(/\d.*/)?.[0] === '240' ? 4 * 60 * 60 :
+                            existingIntervalLabel?.match(/\d.*/)?.[0] === '1D' ? 24 * 60 * 60 :
+                            5 * 60;
+                          const priceFactor = Number(markets[marketKey].priceFactor);
+                          for (const lastTrade of temptrades[marketKey]) {
+                            const lastBarIndex = updatedBars.length - 1;
+                            const lastBar = updatedBars[lastBarIndex];
+
+                            let openPrice = parseFloat((lastTrade[7] / priceFactor).toFixed(Math.floor(Math.log10(priceFactor))));
+                            let closePrice = parseFloat((lastTrade[3] / priceFactor).toFixed(Math.floor(Math.log10(priceFactor))));
+                            rawVolume =
+                              (lastTrade[2] == 1 ? lastTrade[0] : lastTrade[1]) /
+                              10 ** Number(markets[marketKey].quoteDecimals);
+                            
+                            const tradeTimeSec = lastTrade[6];
+                            const flooredTradeTimeSec = Math.floor(tradeTimeSec / barSizeSec) * barSizeSec;
+                            const lastBarTimeSec = Math.floor(new Date(lastBar?.time).getTime() / 1000);
+                            if (flooredTradeTimeSec === lastBarTimeSec) {
+                              updatedBars[lastBarIndex] = {
+                                ...lastBar,
+                                high: Math.max(lastBar.high, Math.max(openPrice, closePrice)),
+                                low: Math.min(lastBar.low, Math.min(openPrice, closePrice)),
+                                close: closePrice,
+                                volume: lastBar.volume + rawVolume,
+                              };
+                              if (realtimeCallbackRef.current[existingIntervalLabel]) {
+                                realtimeCallbackRef.current[existingIntervalLabel]({
+                                  ...lastBar,
+                                  high: Math.max(lastBar.high, Math.max(openPrice, closePrice)),
+                                  low: Math.min(lastBar.low, Math.min(openPrice, closePrice)),
+                                  close: closePrice,
+                                  volume: lastBar.volume + rawVolume,
+                                });
+                              }
+                            } else {
+                              updatedBars.push({
+                                time: flooredTradeTimeSec * 1000,
+                                open: openPrice,
+                                high: Math.max(openPrice, closePrice),
+                                low: Math.min(openPrice, closePrice),
+                                close: closePrice,
+                                volume: rawVolume,
+                              });
+                              if (realtimeCallbackRef.current[existingIntervalLabel]) {
+                                realtimeCallbackRef.current[existingIntervalLabel]({
+                                  time: flooredTradeTimeSec * 1000,
+                                  open: openPrice,
+                                  high: Math.max(openPrice, closePrice),
+                                  low: Math.min(openPrice, closePrice),
+                                  close: closePrice,
+                                  volume: rawVolume,
+                                });
+                              }
+                            }
+                          }
+                        }
+                        setMarketsData((marketsData) =>
+                          marketsData.map((market) => {
+                            if (!market) return;
+                            const marketKey = market?.marketKey.replace(
+                              new RegExp(`^${wethticker}|${wethticker}$`, 'g'),
+                              ethticker
+                            );
+                            const newTrades = temptrades?.[marketKey]
+                            if (!Array.isArray(newTrades) || newTrades.length < 1) return market;
+                            const firstKlineOpen: number =
+                              market?.series && Array.isArray(market?.series) && market?.series.length > 0
+                                ? Number(market?.series[0].open)
+                                : 0;
+                            const currentPriceRaw = Number(newTrades[newTrades.length - 1][3]);
+                            const percentageChange = firstKlineOpen === 0 ? 0 : ((currentPriceRaw - firstKlineOpen) / firstKlineOpen) * 100;
+                            const quotePrice = market.quoteAsset == 'USDC' ? 1 : temptradesByMarket[(market.quoteAsset == settings.chainConfig[activechain].wethticker ? settings.chainConfig[activechain].ethticker : market.quoteAsset) + 'USDC']?.[0]?.[3]
+                              / Number(markets[(market.quoteAsset == settings.chainConfig[activechain].wethticker ? settings.chainConfig[activechain].ethticker : market.quoteAsset) + 'USDC']?.priceFactor)
+                            const volume = newTrades.reduce((sum: number, trade: any) => {
+                              const amount = Number(trade[2] === 1 ? trade[0] : trade[1]);
+                              return sum + amount;
+                            }, 0) / 10 ** Number(market?.quoteDecimals) * quotePrice;
+                            return {
+                              ...market,
+                              volume: formatCommas(
+                                (parseFloat(market.volume.replace(/,/g, '')) + volume).toFixed(2)
+                              ),
+                              currentPrice: formatSubscript(
+                                (currentPriceRaw / Number(market.priceFactor)).toFixed(Math.floor(Math.log10(Number(market.priceFactor))))
+                              ),
+                              priceChange: `${percentageChange >= 0 ? '+' : ''}${percentageChange.toFixed(2)}`,
+                              priceChangeAmount: currentPriceRaw - firstKlineOpen
+                            };
+                          })
+                        );
+                        return [updatedBars, existingIntervalLabel, existingShowOutliers];
+                      });
+                    }
+                  }
+                  if (tradeHistoryChanged) {
+                    return updatedTradeHistory
+                  }
+                  else {
+                    return tradehistory
+                  }
+                });
+                if (tradesByMarketChanged) {
+                  return temptradesByMarket
+                }
+                else {
+                  return tradesByMarket
+                }
+              });
+              if (canceledOrdersChanged) {
+                return tempcanceledorders
+              }
+              else {
+                return canceledorders
+              }
+            })
+            if (ordersChanged) {
+              return temporders
+            }
+            else {
+              return orders
+            }
+          });
+          return tempset;
+        })
+      } catch {
+      }
+    };
+
+    (async () => {
+      if (address) {
+        setTransactions([]);
+        settradehistory([]);
+        setorders([]);
+        setcanceledorders([]);
+        setrecipient('');
+        isAddressInfoFetching = true;
+        try {
+          const endpoint = `https://gateway.thegraph.com/api/${settings.graphKey}/subgraphs/id/6ikTAWa2krJSVCr4bSS9tv3i5nhyiELna3bE8cfgm8yn`;
+          let temptradehistory: any[] = [];
+          let temporders: any[] = [];
+          let tempcanceledorders: any[] = [];
+
+          const query = `
+            query {
+              marketFilledMaps(
+                where: {
+                  caller: "${address}"
+                }
+              ) {
+                id
+                orders(first: 1000, orderDirection: desc, orderBy: timeStamp) {
+                  id
+                  caller
+                  amountIn
+                  amountOut
+                  buySell
+                  price
+                  contractAddress
+                  transactionHash
+                  timeStamp
+                }
+              }
+              orders1: orderMaps(where:{caller: "${address}"}) {
+                id
+                batches(first: 200, orderDirection: desc, orderBy: id) {
+                  id
+                  orders(first: 1000, where:{status: 2}) {
+                    id
+                    caller
+                    originalSizeBase
+                    originalSizeQuote
+                    filledAmountBase
+                    filledSizeQuote
+                    price
+                    buySell
+                    contractAddress
+                    transactionHash
+                    timestamp
+                    status
+                  }
+                }
+              }
+              orders2: orderMaps(where:{caller: "${address}"}) {
+                id
+                batches(first: 10, orderDirection: desc, orderBy: id) {
+                  id
+                  orders(first: 1000, where: { status_not: 2 }) {
+                    id
+                    caller
+                    originalSizeBase
+                    originalSizeQuote
+                    filledAmountBase
+                    filledSizeQuote
+                    price
+                    buySell
+                    contractAddress
+                    transactionHash
+                    timestamp
+                    filledTimestamp
+                    status
+                  }
+                }
+              }
+              filledMaps(where:{caller: "${address}"}) {
+                id
+                orders(first: 1000, orderDirection: desc, orderBy: timestamp) {
+                  id
+                  caller
+                  originalSizeBase
+                  originalSizeQuote
+                  filledAmountBase
+                  filledSizeQuote
+                  price
+                  buySell
+                  contractAddress
+                  transactionHash
+                  timestamp
+                  filledTimestamp
+                  status
+                }
+              }
+            }
+          `;
+
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query }),
+          });
+
+          const result = await response.json();
+
+          if (!isAddressInfoFetching) return;
+          const map = result?.data?.marketFilledMaps || [];
+          for (const batch of map) {
+            for (const event of batch.orders) {
+              const marketKey = addresstoMarket[event.contractAddress];
+              if (marketKey) {
+                temptradehistory.push([
+                  event.amountIn,
+                  event.amountOut,
+                  event.buySell,
+                  event.price,
+                  marketKey,
+                  event.transactionHash,
+                  event.timeStamp,
+                  1,
+                ]);
+              }
+            }
+          }
+
+          const updatedMaps = (result?.data?.orders1 || []).concat(result?.data?.orders2 || []).concat(result?.data?.filledMaps || []);
+          for (const orderMap of updatedMaps) {
+            const batches = orderMap.batches || [];
+            for (const batch of batches) {
+              const orders = batch.orders || [];
+              for (const order of orders) {
+                const marketKey = addresstoMarket[order.contractAddress];
+                if (!marketKey) continue;
+                const row = [
+                  parseInt(order.id.split('-')[0], 10),
+                  parseInt(order.id.split('-')[2], 10),
+                  Number(order.originalSizeBase.toString()),
+                  order.buySell,
+                  marketKey,
+                  order.transactionHash,
+                  order.timestamp,
+                  Number(order.filledAmountBase.toString()),
+                  Number(order.originalSizeQuote.toString()),
+                  order.status,
+                ];
+
+                if (order.status === 2) {
+                  temporders.push(row);
+                  tempcanceledorders.push(row);
+                } else if (order.status === 1) {
+                  const tradeRow = [
+                    order.buySell === 1 ? Number(BigInt(order.originalSizeQuote) / markets[marketKey].scaleFactor) : order.originalSizeBase,
+                    order.buySell === 1 ? order.originalSizeBase : Number(BigInt(order.originalSizeQuote) / markets[marketKey].scaleFactor),
+                    order.buySell,
+                    parseInt(order.id.split('-')[0], 10),
+                    marketKey,
+                    order.transactionHash,
+                    order?.filledTimestamp ? order.filledTimestamp : order.timestamp,
+                    0
+                  ];
+
+                  const row = [
+                    parseInt(order.id.split('-')[0], 10),
+                    parseInt(order.id.split('-')[2], 10),
+                    Number(order.originalSizeBase.toString()),
+                    order.buySell,
+                    marketKey,
+                    order.transactionHash,
+                    order.timestamp,
+                    Number(order.filledAmountBase.toString()),
+                    Number(order.originalSizeQuote.toString()),
+                    order.status,
+                  ];
+
+                  temptradehistory.push(tradeRow);
+                  tempcanceledorders.push(row);
+                } else {
+                  tempcanceledorders.push(row);
+                }
+              }
+            }
+          }
+
+          settradehistory([...temptradehistory]);
+          setorders([...temporders]);
+          setcanceledorders([...tempcanceledorders]);
+          setaddressinfoloading(false);
+          isAddressInfoFetching = false
+        } catch (error) {
+          console.error("Error fetching logs:", error);
+          setaddressinfoloading(false);
+        }
+      }
+      else if (!user) {
+        setSliderPercent(0)
+        const slider = document.querySelector('.balance-amount-slider');
+        const popup = document.querySelector('.slider-percentage-popup');
+        if (slider && popup) {
+          (popup as HTMLElement).style.left = `${15 / 2}px`;
+        }
+        setTransactions([]);
+        settradehistory([]);
+        setorders([]);
+        setcanceledorders([]);
+        setaddressinfoloading(false);
+      }
+      let firstBlockNumber = await getBlockNumber(config);
+      startBlockNumber = '0x' + (firstBlockNumber - BigInt(80)).toString(16)
+      endBlockNumber = '0x' + (firstBlockNumber + BigInt(10)).toString(16)
+
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      worker = new Worker(URL.createObjectURL(blob));
+
+      worker.onmessage = () => {
+        fetchData();
+      };
+    })()
+
+    return () => {
+      liveStreamCancelled = true;
+      isAddressInfoFetching = false;
+      if (worker) {
+        worker.terminate();
+      }
+    };
+  }, [activechain, address]);
+
+  // klines + trades
+  useEffect(() => {
+    (async () => {
+      try {
+        settradesloading(true);
+        // amountin, amountout, buy/sell, price, market, hash, timestamp
+        let temptradesByMarket: any = {};
+        Object.keys(markets).forEach((market) => {
+          temptradesByMarket[market] = [];
+        });
+        const endpoint = `https://gateway.thegraph.com/api/${settings.graphKey}/subgraphs/id/6ikTAWa2krJSVCr4bSS9tv3i5nhyiELna3bE8cfgm8yn`;
+        let allLogs: any[] = [];
+
+        const query = `
+          query {
+            orders1: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0xCd5455B24f3622A1CfEce944615AE5Bc8f36Ee18" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders2: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x97fa0031E2C9a21F0727bcaB884E15c090eC3ee3" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders3: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x33C5Dc9091952870BD1fF47c89fA53D63f9729b6" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders4: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0xcB5ec6D6d0E49478119525E4013ff333Fc46B742" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders5: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x93cBC4b52358c489665680182f0056f4F23C76CD" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders6: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0xf00A3bd942DC0e32d07048ED6255E281667784f6" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders7: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x3051ec9feFaEc14F2bAB836FAb5A4c970A71874a" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders8: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x9fA48CFB43829A932A227E4d7996e310ccf40E9C" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders9: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x45f7db719367bbf9E508D3CeA401EBC62fc732A9" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders10: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x5a6f296032AaAE6737ed5896bC09D01dc2d42507" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders11: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0xCF16582dC82c4C17fA5b54966ee67b74FD715fB5" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            orders12: orderFilleds(
+              first: 50,
+              orderBy: timeStamp,
+              orderDirection: desc,
+              where: { contractAddress: "0x3829EdA9aA5Bb9077d31F995327886309712BBA2" }
+            ) {
+              id
+              caller
+              amountIn
+              amountOut
+              buySell
+              price
+              timeStamp
+              transactionHash
+              blockNumber
+              contractAddress
+            }
+            series_collection(
+              where: {
+                id_gte: "series-1h-",
+                id_lte: "series-1h-ffffffffffffffffffffffffffffffffffffffff"
+              }
+            ) {
+              id
+              klines(first: 24, orderBy: time, orderDirection: desc) {
+                id
+                time
+                open
+                high
+                low
+                close
+                volume
+              }
+            }
+          }
+        `;
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        });
+        const json = await response.json();
+        const orders = json.data.orders1
+          .concat(
+            json.data.orders2,
+            json.data.orders3,
+            json.data.orders4,
+            json.data.orders5,
+            json.data.orders6,
+            json.data.orders7,
+            json.data.orders8,
+            json.data.orders9,
+            json.data.orders10,
+            json.data.orders11,
+            json.data.orders12,
+          );
+
+        allLogs = allLogs.concat(orders);
+
+        if (Array.isArray(allLogs)) {
+          for (const event of allLogs) {
+            if (addresstoMarket[event.contractAddress]) {
+              temptradesByMarket[addresstoMarket[event.contractAddress]].push([
+                parseInt(event.amountIn),
+                parseInt(event.amountOut),
+                event.buySell,
+                event.price,
+                addresstoMarket[event.contractAddress],
+                event.transactionHash,
+                event.timeStamp,
+              ]);
+            }
+          }
+        }
+        settradesByMarket(temptradesByMarket);
+        settradesloading(false);
+        if (
+          sendInputString === '' &&
+          location.pathname.slice(1) === 'send' &&
+          amountIn &&
+          BigInt(amountIn) != BigInt(0)
+        ) {
+          setsendInputString(
+            `$${calculateUSDValue(
+              BigInt(amountIn),
+              temptradesByMarket[
+              (({ baseAsset, quoteAsset }) =>
+                (baseAsset === wethticker ? ethticker : baseAsset) +
+                (quoteAsset === wethticker ? ethticker : quoteAsset)
+              )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+              ],
+              tokenIn,
+              getMarket(activeMarket.path.at(0), activeMarket.path.at(1)),
+            ).toFixed(2)}`,
+          );
+        }
+
+        try {
+          const data = json.data.series_collection;
+          const processedMarkets = data.map((series: any) => {
+            const idParts = series.id.split("-");
+            const address = idParts[2];
+
+            const match = Object.values(markets).find(
+              (m) => m.address.toLowerCase() === address.toLowerCase()
+            );
+            if (!match) return;
+            const candles: any = series.klines.reverse();
+            const highs = candles.map((c: any) => c.high);
+            const lows = candles.map((c: any) => c.low);
+            const high = Math.max(...highs);
+            const low = Math.min(...lows);
+            const firstPrice = candles[0].open;
+            const lastPrice = candles[candles.length - 1].close;
+            const percentageChange = firstPrice === 0 ? 0 : ((lastPrice - firstPrice) / firstPrice) * 100;
+            const quotePrice = match.quoteAsset == 'USDC' ? 1 : temptradesByMarket[(match.quoteAsset == settings.chainConfig[activechain].wethticker ? settings.chainConfig[activechain].ethticker : match.quoteAsset) + 'USDC']?.[0]?.[3]
+              / Number(markets[(match.quoteAsset == settings.chainConfig[activechain].wethticker ? settings.chainConfig[activechain].ethticker : match.quoteAsset) + 'USDC']?.priceFactor)
+            const totalVolume = candles
+              .filter((c: any) => Math.floor(Date.now() / 1000) - parseInt(c.time) <= 86400)
+              .reduce((acc: number, c: any) => acc + parseFloat(c.volume.toString()), 0) * quotePrice;
+            const decimals = Math.floor(Math.log10(Number(match.priceFactor)));
+
+            return {
+              ...match,
+              pair: `${match.baseAsset}/${match.quoteAsset}`,
+              currentPrice: formatSubscript((lastPrice / Number(match.priceFactor)).toFixed(decimals)),
+              priceChange: `${percentageChange >= 0 ? '+' : ''}${percentageChange.toFixed(2)}`,
+              priceChangeAmount: lastPrice - firstPrice,
+              volume: formatCommas(totalVolume.toFixed(2)),
+              marketKey: `${match.baseAsset}${match.quoteAsset}`,
+              series: candles,
+              firstPrice: firstPrice,
+              high24h: formatSubscript(high.toFixed(decimals)),
+              low24h: formatSubscript(low.toFixed(decimals)),
+            };
+          });
+          setMarketsData(processedMarkets);
+        } catch (error) {
+          console.error("error fetching candles:", error);
+        }
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        settradesloading(false);
+      }
+    })();
+  }, [activechain]);
+
+  // mobile trade
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && popup != 11) {
+        setpopup(0);
+        setSendUsdValue('');
+        setSendInputAmount('');
+        setSendAmountIn(BigInt(0));
+        setIsLanguageDropdownOpen(false);
+        settokenString('');
+        setSelectedConnector(null);
+
+        if (showTrade && !simpleView) {
+          document.body.style.overflow = 'auto'
+          document.querySelector('.right-column')?.classList.add('hide');
+          document.querySelector('.right-column')?.classList.remove('show');
+          document.querySelector('.trade-mobile-switch')?.classList.remove('open');
+          setTimeout(() => {
+            setShowTrade(false);
+          }, 300);
+        }
+      }
+    };
+    const handleMouseDown = (e: MouseEvent) => {
+      setpopup((popup) => {
+        if (showTrade && popup == 0 && !simpleView) {
+          const rectangleElement = document.querySelector('.rectangle');
+          if (
+            rectangleElement &&
+            !rectangleElement.contains(e.target as Node)
+          ) {
+            document.body.style.overflow = 'auto'
+            document.querySelector('.right-column')?.classList.add('hide');
+            document.querySelector('.right-column')?.classList.remove('show');
+            document.querySelector('.trade-mobile-switch')?.classList.remove('open');
+            setTimeout(() => {
+              setShowTrade(false);
+            }, 300);
+          }
+        }
+
+        if (!popupref.current?.contains(e.target as Node) && popup != 11) {
+          setIsLanguageDropdownOpen(false);
+          setSendUsdValue('');
+          setSendInputAmount('');
+          setSendAmountIn(BigInt(0));
+          settokenString('');
+          return 0;
+        }
+        return popup;
+      });
+    };
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    document.addEventListener('keydown', handleEscapeKey);
+    document.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [showTrade]);
+
+  // url
+  useEffect(() => {
+    const path = location.pathname.slice(1);
+    if (['swap', 'limit', 'send', 'scale', 'market'].includes(path)) {
+      setSearchParams({
+        ...(path != 'send' ? { tokenIn } : { token: tokenIn }),
+        ...(tokenOut && path != 'send' && { tokenOut }),
+        ...(switched && (path == 'swap' || path == 'market')
+          ? { amountOut: amountOutSwap }
+          : { amountIn }),
+      });
+    }
+  }, [tokenIn, tokenOut, location.pathname.slice(1), amountIn, amountOutSwap, switched]);
+
+  // update active tab
+  useEffect(() => {
+    const path = location.pathname.slice(1);
+    if (path === 'swap') {
+      setSimpleView(true);
+    } else if (path === 'market') {
+      setSimpleView(false);
+    }
+    if (path === 'send' || path === 'scale') {
+      setCurrentProText(path.toLowerCase());
+    } else {
+      setCurrentProText('pro');
+    }
+    if (['swap', 'limit', 'send', 'scale', 'market'].includes(path)) {
+      if (amountIn == BigInt(0)) {
+        setInputString('');
+      }
+      const slider = document.querySelector('.balance-amount-slider');
+      const popup = document.querySelector('.slider-percentage-popup');
+      if (slider && popup) {
+        const rect = slider.getBoundingClientRect();
+        (popup as HTMLElement).style.left =
+          `${(rect.width - 15) * (sliderPercent / 100) + 15 / 2}px`;
+      }
+      if (path == 'send') {
+        setswitched(false);
+        setsendInputString(
+          amountIn != BigInt(0)
+            ? `$${calculateUSDValue(
+              amountIn,
+              tradesByMarket[
+              (({ baseAsset, quoteAsset }) =>
+                (baseAsset === wethticker ? ethticker : baseAsset) +
+                (quoteAsset === wethticker ? ethticker : quoteAsset)
+              )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+              ],
+              tokenIn,
+              getMarket(activeMarket.path.at(0), activeMarket.path.at(1)),
+            ).toFixed(2)}`
+            : '',
+        );
+      } else if (path == 'limit') {
+        setCurrentProText('pro');
+        setswitched(false);
+        if (multihop || isWrap) {
+          let token;
+          let pricefetchmarket;
+          let found = false;
+          for (const market in markets) {
+            if (markets[market].baseAddress === tokenOut) {
+              token = tokendict[markets[market].quoteAddress];
+              pricefetchmarket = getMarket(
+                markets[market].quoteAddress,
+                tokenOut,
+              );
+              setTokenIn(markets[market].quoteAddress);
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            for (const market in markets) {
+              if (markets[market].quoteAddress === tokenOut) {
+                token = tokendict[markets[market].baseAddress];
+                pricefetchmarket = getMarket(
+                  markets[market].baseAddress,
+                  tokenOut,
+                );
+                setTokenIn(markets[market].baseAddress);
+                break;
+              }
+            }
+          }
+          setamountIn(
+            limitPrice != BigInt(0) && amountOutSwap != BigInt(0)
+              ? token.address === pricefetchmarket?.baseAddress
+                ? (amountOutSwap *
+                  (pricefetchmarket.scaleFactor || BigInt(1))) /
+                limitPrice
+                : (amountOutSwap * limitPrice) /
+                (pricefetchmarket.scaleFactor || BigInt(1))
+              : BigInt(0),
+          );
+          setInputString(
+            (limitPrice != BigInt(0) && amountOutSwap != BigInt(0)
+              ? token.address === pricefetchmarket?.baseAddress
+                ? customRound(
+                  Number(
+                    (amountOutSwap *
+                      (pricefetchmarket.scaleFactor || BigInt(1))) /
+                    limitPrice,
+                  ) /
+                  10 ** Number(token.decimals),
+                  3,
+                )
+                : customRound(
+                  Number(
+                    (amountOutSwap * limitPrice) /
+                    (pricefetchmarket.scaleFactor || BigInt(1)),
+                  ) /
+                  10 ** Number(token.decimals),
+                  3,
+                )
+              : ''
+            ).toString(),
+          );
+          setamountOutLimit(amountOutSwap);
+          setlimitoutputString(outputString);
+          const percentage = !tokenBalances[token.address]
+            ? 0
+            : Math.min(
+              100,
+              Math.floor(
+                Number(
+                  ((limitPrice != BigInt(0) && amountOutSwap != BigInt(0)
+                    ? token === pricefetchmarket?.baseAddress
+                      ? (amountOutSwap *
+                        (pricefetchmarket.scaleFactor || BigInt(1))) /
+                      limitPrice
+                      : (amountOutSwap * limitPrice) /
+                      (pricefetchmarket.scaleFactor || BigInt(1))
+                    : BigInt(0)) *
+                    BigInt(100)) /
+                  tokenBalances[token.address],
+                ),
+              ),
+            );
+          setSliderPercent(percentage);
+          const slider = document.querySelector('.balance-amount-slider');
+          const popup = document.querySelector('.slider-percentage-popup');
+          if (slider && popup) {
+            const rect = slider.getBoundingClientRect();
+            (popup as HTMLElement).style.left =
+              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+          }
+        } else {
+          setamountOutLimit(
+            limitPrice != BigInt(0) && amountIn != BigInt(0)
+              ? tokenIn === activeMarket?.baseAddress
+                ? (amountIn * limitPrice) /
+                (activeMarket.scaleFactor || BigInt(1))
+                : (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                limitPrice
+              : BigInt(0),
+          );
+          setlimitoutputString(
+            (limitPrice != BigInt(0) && amountIn != BigInt(0)
+              ? tokenIn === activeMarket?.baseAddress
+                ? customRound(
+                  Number(
+                    (amountIn * limitPrice) /
+                    (activeMarket.scaleFactor || BigInt(1)),
+                  ) /
+                  10 ** Number(tokendict[tokenOut].decimals),
+                  3,
+                )
+                : customRound(
+                  Number(
+                    (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                    limitPrice,
+                  ) /
+                  10 ** Number(tokendict[tokenOut].decimals),
+                  3,
+                )
+              : ''
+            )
+              .toString()
+              .replace(/(\.\d*?[1-9])0+$/g, '$1')
+              .replace(/\.0+$/, ''),
+          );
+        }
+      } else if (path == 'swap' || path == 'market') {
+        setCurrentProText('pro');
+      } else if (path == 'scale') {
+        setswitched(false);
+        if (multihop || isWrap) {
+          let token;
+          let found = false;
+          for (const market in markets) {
+            if (markets[market].baseAddress === tokenOut) {
+              token = tokendict[markets[market].quoteAddress];
+              setTokenIn(markets[market].quoteAddress);
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            for (const market in markets) {
+              if (markets[market].quoteAddress === tokenOut) {
+                token = tokendict[markets[market].baseAddress];
+                setTokenIn(markets[market].baseAddress);
+                break;
+              }
+            }
+          }
+          setamountIn(
+            BigInt(0)
+          );
+          setInputString('')
+          setAmountOutScale(BigInt(0))
+          setScaleOutputString('')
+          setScaleStart(BigInt(0))
+          setScaleEnd(BigInt(0))
+          setScaleStartString('')
+          setScaleEndString('')
+          const percentage = !tokenBalances[token.address]
+            ? 0
+            : Math.min(
+              100,
+              Math.floor(
+                Number(
+                  (BigInt(0) *
+                    BigInt(100)) /
+                  tokenBalances[token.address],
+                ),
+              ),
+            );
+          setSliderPercent(percentage);
+          const slider = document.querySelector('.balance-amount-slider');
+          const popup = document.querySelector('.slider-percentage-popup');
+          if (slider && popup) {
+            const rect = slider.getBoundingClientRect();
+            (popup as HTMLElement).style.left =
+              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+          }
+        }
+        else {
+          if (scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+            setScaleOutput(Number(amountIn), Number(scaleStart), Number(scaleEnd), Number(scaleOrders), Number(scaleSkew))
+          }
+        }
+      }
+    }
+
+    return () => {
+    };
+  }, [location.pathname]);
+
+  // limit chase
+  useEffect(() => {
+    if (limitChase && mids?.[activeMarketKey]?.[0]) {
+      const price = tokenIn === activeMarket?.baseAddress ? mids[activeMarketKey][0] == mids[activeMarketKey][1] ? mids[activeMarketKey][2] : mids[activeMarketKey][0] : mids[activeMarketKey][0] == mids[activeMarketKey][2] ? mids[activeMarketKey][1] : mids[activeMarketKey][0]
+      setlimitPrice(price);
+      setlimitPriceString(
+        (
+          Number(price) / Number(activeMarket.priceFactor)
+        ).toFixed(Math.floor(Math.log10(Number(activeMarket.priceFactor)))),
+      );
+      setamountOutLimit(
+        price != BigInt(0) && amountIn != BigInt(0)
+          ? tokenIn === activeMarket?.baseAddress
+            ? (amountIn * price) /
+            (activeMarket.scaleFactor || BigInt(1))
+            : (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+            price
+          : BigInt(0),
+      );
+      setlimitoutputString(
+        (price != BigInt(0) && amountIn != BigInt(0)
+          ? tokenIn === activeMarket?.baseAddress
+            ? customRound(
+              Number(
+                (amountIn * price) /
+                (activeMarket.scaleFactor || BigInt(1)),
+              ) /
+              10 ** Number(tokendict[tokenOut].decimals),
+              3,
+            )
+            : customRound(
+              Number(
+                (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                price,
+              ) /
+              10 ** Number(tokendict[tokenOut].decimals),
+              3,
+            )
+          : ''
+        ).toString(),
+      );
+    }
+  }, [location.pathname, limitChase, activechain, mids?.[activeMarketKey]?.[0], activeMarketKey, tokenIn]);
+
+  // tx popup time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTransactions((prevTransactions) => {
+        const time = Date.now();
+        const filteredTransactions = prevTransactions
+          .filter((tx) => time - tx.timestamp < 9950)
+          .map((tx) => ({
+            ...tx,
+            isNew: time - tx.timestamp < 300 ? true : false,
+            isExiting: time - tx.timestamp > 9700 ? true : false,
+          }));
+        return filteredTransactions.length !== prevTransactions.length ||
+          filteredTransactions.some(
+            (tx, i) => tx.isNew !== prevTransactions[i]?.isNew,
+          ) ||
+          filteredTransactions.some(
+            (tx, i) => tx.isExiting !== prevTransactions[i]?.isExiting,
+          )
+          ? filteredTransactions
+          : prevTransactions;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // popup
+  useEffect(() => {
+    if (user && !connected && !loading) {
+      setpopup(11);
+    }
+    else if (connected && popup === 11) {
+      setpopup(12);
+    }
+  }, [popup, connected, user != null, loading]);
+
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState('forward');
+  const [exitingChallenge, setExitingChallenge] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [animationStarted, setAnimationStarted] = useState(false);
+  const [isUsernameSigning, setIsUsernameSigning] = useState(false);
+  const [typedRefCode, setTypedRefCode] = useState(() => searchParams.get('ref') || '');
+  const [usernameInput, setUsernameInput] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [isRefSigning, setIsRefSigning] = useState(false);
+  const [error, setError] = useState('');
+  const [username, setUsername] = useState('');
+  const [isConnectEntering, setIsConnectEntering] = useState(false);
+  const [usernameResolved, setUsernameResolved] = useState(false);
+  const [isWelcomeExiting, setIsWelcomeExiting] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [typedText, ] = useState("");
+  const backAudioRef = useRef<HTMLAudioElement>(null);
+
+  const isValidInput = (value: string) => {
+    const regex = /^[a-zA-Z0-9-]{0,20}$/;
+    return regex.test(value);
+  };
+  
+  const handleWelcomeTransition = () => {
+    audio.currentTime = 0;
+    audio.play();
+    
+    setIsTransitioning(true);
+    setIsWelcomeExiting(true);
+    
+    setTimeout(() => {
+      setIsConnectEntering(true);
+    }, 200);
+    
+    setTimeout(() => {
+      setShowWelcomeScreen(false);
+      setIsTransitioning(false);
+      setIsWelcomeExiting(false);
+    }, 200);
+  };
+  
+  const handleSetRef = async (used: string) => {
+    let lookup
+    setIsRefSigning(true);
+    if (used !== '') {
+      lookup = (await readContracts(config, {
+        contracts: [
+          {
+            abi: CrystalReferralAbi,
+            address: settings.chainConfig[activechain].referralManager,
+            functionName: 'refToAddress',
+            args: [used.toLowerCase()],
+          },
+        ],
+      })) as any[];
+
+      if (lookup[0].result === '0x0000000000000000000000000000000000000000') {
+        setError(t('setRefFailed'));
+        setIsRefSigning(false);
+        return false;
+      }
+    }
+
+    if (used === '') {
+      try {
+        const hash = await sendUserOperationAsync({
+          uo: {
+            target: settings.chainConfig[activechain].referralManager,
+            data: encodeFunctionData({
+              abi: CrystalReferralAbi,
+              functionName: 'setUsedRef',
+              args: [used],
+            }),
+            value: 0n,
+          },
+        });
+        await waitForTxReceipt(hash.hash);
+        setUsedRefLink(used);
+        setUsedRefAddress('0x0000000000000000000000000000000000000000')
+        setIsRefSigning(false);
+        return true;
+      } catch {
+        setIsRefSigning(false);
+        return false;
+      }
+    } else {
+      try {
+        const hash = await sendUserOperationAsync({
+          uo: {
+            target: settings.chainConfig[activechain].referralManager,
+            data: encodeFunctionData({
+              abi: CrystalReferralAbi,
+              functionName: 'setUsedRef',
+              args: [used],
+            }),
+            value: 0n,
+          },
+        });
+        await waitForTxReceipt(hash.hash);
+        setUsedRefLink(used);
+        setUsedRefAddress(lookup?.[0].result)
+        setIsRefSigning(false);
+        return true;
+      } catch (error) {
+        setIsRefSigning(false);
+        return false;
+      }
+    }
+  };
+
+  const handleNextClick = () => {
+    audio.currentTime = 0;
+    audio.play();
+    handleCompleteChallenge();
+  };
+
+  const handleBackClick = () => {
+    if (backAudioRef.current) {
+      backAudioRef.current.currentTime = 0;
+      backAudioRef.current.play().catch(console.error);
+    }
+    if (currentStep > 0) {
+      setCurrentStep(prevStep => prevStep - 1);
+    }
+  };
+
+  const handleCompleteChallenge = () => {
+    if (currentStep < 2) { setCurrentStep(c => c + 1); return; }
+
+    setExitingChallenge(true);
+    setTimeout(() => {
+      localStorage.setItem('crystal_has_completed_onboarding123', 'true');
+      setpopup(0);
+      setCurrentStep(0)
+      setExitingChallenge(false);
+    }, 250);
+  };
+
+  const handleEditUsername = async (_usernameInput: any) => {
+    setUsernameError("");
+
+    if (_usernameInput.length < 3) {
+      setUsernameError(t("minUsernameLength"));
+      return;
+    }
+
+    if (_usernameInput.length > 20) {
+      setUsernameError(t("maxUsernameLength"));
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(_usernameInput)) {
+      setUsernameError("Username can only contain letters, numbers, and underscores");
+      return;
+    }
+
+    setIsUsernameSigning(true);
+
+    try {
+      const read = (await readContracts(config, {
+        contracts: [
+          {
+            abi: CrystalReferralAbi,
+            address: settings.chainConfig[activechain].referralManager,
+            functionName: 'usernameToAddress',
+            args: [_usernameInput],
+          },
+        ]
+      })) as any[];
+
+      if (read[0].result !== '0x0000000000000000000000000000000000000000') {
+        setUsernameError(t("usernameAlreadyTaken"));
+        setIsUsernameSigning(false);
+        return;
+      }
+
+      const hash = await sendUserOperationAsync({
+        uo: {
+          target: settings.chainConfig[activechain].referralManager,
+          data: encodeFunctionData({
+            abi: CrystalReferralAbi,
+            functionName: 'setUsername',
+            args: [
+              _usernameInput
+            ],
+          }),
+          value: 0n,
+        },
+      });
+
+      await waitForTxReceipt(hash.hash);
+      setUsername(_usernameInput);
+      audio.currentTime = 0;
+      audio.play();
+      if (popup == 16) {
+        setpopup(0)
+      }
+      else {
+        setpopup(17);
+      }
+      return true;
+    } catch (error) {
+      return false;
+    } finally {
+      setIsUsernameSigning(false);
+    }
+  };
+
+  const handleBackToUsernameWithAudio = () => {
+    if (backAudioRef.current) {
+      backAudioRef.current.currentTime = 0;
+      backAudioRef.current.play().catch(console.error);
+    }
+    setIsTransitioning(true);
+    setTransitionDirection('backward');
+    setExitingChallenge(true);
+
+    setTimeout(() => {
+      setpopup(14);
+      setCurrentStep(0);
+
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setExitingChallenge(false);
+      });
+    }, 10);
+  };
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const read = await readContracts(config, {
+          contracts: [
+            {
+              abi: CrystalReferralAbi,
+              address: settings.chainConfig[activechain].referralManager,
+              functionName: 'addressToUsername',
+              args: [address as `0x${string}`],
+            },
+          ]
+        });
+
+        if (read[0]?.result?.length != null) {
+          setUsernameInput(read[0]?.result?.length > 0 ? read[0]?.result : "");
+          setUsername(read[0]?.result?.length > 0 ? read[0]?.result : "");
+          setUsernameResolved(true)
+        }
+      } catch (error) {
+        console.error("Failed to fetch username:", error);
+      }
+    };
+
+    if (address) {
+      fetchUsername();
+    }
+  }, [address, activechain, config]);
+
+  useEffect(() => {
+    let animationStartTimer: ReturnType<typeof setTimeout> | undefined;
+    let animatingTimer: ReturnType<typeof setTimeout> | undefined;
+  
+    if (currentStep === 0) {
+      animationStartTimer = setTimeout(() => {
+        setAnimationStarted(true);
+      }, 100);
+    } else {
+      setAnimationStarted(false);
+    }
+  
+    setAnimating(true);
+    animatingTimer = setTimeout(() => {
+      setAnimating(false);
+    }, 300);
+  
+    return () => {
+      if (animationStartTimer) clearTimeout(animationStartTimer);
+      if (animatingTimer) clearTimeout(animatingTimer);
+    };
+  }, [currentStep]);
+  
+  // input tokenlist
+  const TokenList1 = (
+    <div className="tokenlistcontainer">
+      <ul className="tokenlist">
+        {Object.values(tokendict).filter(
+          (token) =>
+            token.ticker.toLowerCase().includes(tokenString.toLowerCase()) ||
+            token.name.toLowerCase().includes(tokenString.toLowerCase()) ||
+            token.address.toLowerCase().includes(tokenString.toLowerCase()),
+        ).length === 0 ? (
+          <div className="empty-token-list">
+            <div className="empty-token-list-content">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="empty-token-list-icon"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+              <div className="empty-token-list-text">{t('noTokens')}</div>
+            </div>
+          </div>
+        ) : (
+          Object.values(tokendict)
+            .filter(
+              (token) =>
+                token.ticker
+                  .toLowerCase()
+                  .includes(tokenString.toLowerCase()) ||
+                token.name.toLowerCase().includes(tokenString.toLowerCase()) ||
+                token.address.toLowerCase().includes(tokenString.toLowerCase()),
+            )
+            .map((token) => (
+              <button
+                className="tokenbutton"
+                key={token.address}
+                onClick={() => {
+                  let pricefetchmarket;
+                  let newTokenOut;
+                  setpopup(0);
+                  settokenString('');
+                  setTokenIn(token.address);
+                  setStateIsLoading(true);
+                  if (location.pathname.slice(1) == 'swap' || location.pathname.slice(1) == 'market') {
+                    if (token.address !== tokenOut) {
+                      if (
+                        markets[
+                        `${tokendict[token.address].ticker}${tokendict[tokenOut].ticker}`
+                        ] ||
+                        markets[
+                        `${tokendict[tokenOut].ticker}${tokendict[token.address].ticker}`
+                        ]
+                      ) {
+                        newTokenOut = tokenOut;
+                      } else {
+                        const path = findShortestPath(token.address, tokenOut);
+                        if (path && path.length > 1 && (location.pathname.slice(1) == 'swap' || location.pathname.slice(1) == 'market')) {
+                          newTokenOut = tokenOut;
+                        } else {
+                          let found = false;
+                          for (const market in markets) {
+                            if (
+                              markets[market].baseAddress === token.address
+                            ) {
+                              setTokenOut(markets[market].quoteAddress);
+                              newTokenOut = markets[market].quoteAddress;
+                              found = true;
+                              break;
+                            }
+                          }
+                          if (!found) {
+                            for (const market in markets) {
+                              if (
+                                markets[market].quoteAddress === token.address
+                              ) {
+                                setTokenOut(markets[market].baseAddress);
+                                newTokenOut = markets[market].baseAddress;
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      }
+                      if (
+                        (tokenOut == eth && token.address == weth) ||
+                        (tokenOut == weth && token.address == eth)
+                      ) {
+                        if (switched == false) {
+                          setamountIn((amountIn * BigInt(10) ** token.decimals) / BigInt(10) ** tokendict[tokenIn].decimals)
+                          setamountOutSwap((amountIn * BigInt(10) ** token.decimals) / BigInt(10) ** tokendict[tokenIn].decimals);
+                          setoutputString(inputString);
+                          const percentage = !tokenBalances[token.address]
+                            ? 0
+                            : Math.min(
+                              100,
+                              Math.floor(
+                                Number(
+                                  ((amountIn * BigInt(10) ** token.decimals) /
+                                    BigInt(10) ** tokendict[tokenIn].decimals * BigInt(100)) /
+                                  tokenBalances[token.address],
+                                ),
+                              ),
+                            );
+                          setSliderPercent(percentage);
+                          const slider = document.querySelector(
+                            '.balance-amount-slider',
+                          );
+                          const popup = document.querySelector(
+                            '.slider-percentage-popup',
+                          );
+                          if (slider && popup) {
+                            const rect = slider.getBoundingClientRect();
+                            (popup as HTMLElement).style.left =
+                              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                          }
+                        }
+                        else {
+                          setamountIn(amountOutSwap);
+                          setInputString(outputString);
+                          const percentage = !tokenBalances[token.address]
+                            ? 0
+                            : Math.min(
+                              100,
+                              Math.floor(
+                                Number(
+                                  (amountOutSwap * BigInt(100)) /
+                                  tokenBalances[token.address],
+                                ),
+                              ),
+                            );
+                          setSliderPercent(percentage);
+                          const slider = document.querySelector(
+                            '.balance-amount-slider',
+                          );
+                          const popup = document.querySelector(
+                            '.slider-percentage-popup',
+                          );
+                          if (slider && popup) {
+                            const rect = slider.getBoundingClientRect();
+                            (popup as HTMLElement).style.left =
+                              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                          }
+                        }
+                      } else {
+                        if (switched === false && token.address != tokenIn) {
+                          setamountIn(
+                            (amountIn * BigInt(10) ** token.decimals) /
+                            BigInt(10) ** tokendict[tokenIn].decimals
+                          );
+                          setamountOutSwap(BigInt(0));
+                          setoutputString('');
+                          const percentage = !tokenBalances[token.address]
+                            ? 0
+                            : Math.min(
+                              100,
+                              Math.floor(
+                                Number(
+                                  ((amountIn * BigInt(10) ** token.decimals) /
+                                    BigInt(10) ** tokendict[tokenIn].decimals * BigInt(100)) /
+                                  tokenBalances[token.address],
+                                ),
+                              ),
+                            );
+                          setSliderPercent(percentage);
+                          const slider = document.querySelector(
+                            '.balance-amount-slider',
+                          );
+                          const popup = document.querySelector(
+                            '.slider-percentage-popup',
+                          );
+                          if (slider && popup) {
+                            const rect = slider.getBoundingClientRect();
+                            (popup as HTMLElement).style.left =
+                              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                          }
+                        } else if (newTokenOut != tokenOut) {
+                          setamountOutSwap(
+                            (amountOutSwap *
+                              BigInt(10) ** tokendict[newTokenOut].decimals) /
+                            BigInt(10) ** tokendict[tokenOut].decimals,
+                          );
+                          setamountIn(BigInt(0));
+                          setInputString('');
+                        }
+                      }
+                      setlimitChase(true);
+                      setAmountOutScale(BigInt(0))
+                      setScaleOutputString('')
+                      setScaleStart(BigInt(0))
+                      setScaleEnd(BigInt(0))
+                      setScaleStartString('')
+                      setScaleEndString('')
+                    } else {
+                      setTokenOut(tokenIn);
+                      if (
+                        (amountIn != BigInt(0) || amountOutSwap != BigInt(0)) &&
+                        !isWrap
+                      ) {
+                        if (switched == false) {
+                          setswitched(true);
+                          setStateIsLoading(true);
+                          setInputString('');
+                          setamountIn(BigInt(0));
+                          setamountOutSwap(amountIn);
+                          setoutputString(
+                            amountIn === BigInt(0)
+                              ? ''
+                              : String(
+                                customRound(
+                                  Number(amountIn) /
+                                  10 ** Number(tokendict[tokenIn].decimals),
+                                  3,
+                                ),
+                              ),
+                          );
+                        } else {
+                          setswitched(false);
+                          setStateIsLoading(true);
+                          setoutputString('');
+                          setamountOutSwap(BigInt(0));
+                          setamountIn(amountOutSwap);
+                          setInputString(
+                            amountOutSwap === BigInt(0)
+                              ? ''
+                              : String(
+                                customRound(
+                                  Number(amountOutSwap) /
+                                  10 **
+                                  Number(tokendict[tokenOut].decimals),
+                                  3,
+                                ),
+                              ),
+                          );
+                          const percentage = !tokenBalances[tokenOut]
+                            ? 0
+                            : Math.min(
+                              100,
+                              Math.floor(
+                                Number(
+                                  (amountOutSwap * BigInt(100)) /
+                                  tokenBalances[tokenOut],
+                                ),
+                              ),
+                            );
+                          setSliderPercent(percentage);
+                          const slider = document.querySelector(
+                            '.balance-amount-slider',
+                          );
+                          const popup = document.querySelector(
+                            '.slider-percentage-popup',
+                          );
+                          if (slider && popup) {
+                            const rect = slider.getBoundingClientRect();
+                            (popup as HTMLElement).style.left =
+                              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                          }
+                        }
+                      }
+                    }
+                  } else if (location.pathname.slice(1) == 'limit') {
+                    if (token.address != tokenOut) {
+                      if (
+                        markets[
+                        `${tokendict[token.address].ticker}${tokendict[tokenOut].ticker}`
+                        ] ||
+                        markets[
+                        `${tokendict[tokenOut].ticker}${tokendict[token.address].ticker}`
+                        ]
+                      ) {
+                      } else {
+                        let found = false;
+                        for (const market in markets) {
+                          if (
+                            markets[market].baseAddress === token.address
+                          ) {
+                            setTokenOut(markets[market].quoteAddress);
+                            found = true;
+                            break;
+                          }
+                        }
+                        if (!found) {
+                          for (const market in markets) {
+                            if (markets[market].quoteAddress === token.address) {
+                              setTokenOut(markets[market].baseAddress);
+                              break;
+                            }
+                          }
+                        }
+                      }
+                      setamountIn(
+                        (amountIn * BigInt(10) ** token.decimals) /
+                        BigInt(10) ** tokendict[tokenIn].decimals,
+                      );
+                      setlimitChase(true);
+                      setAmountOutScale(BigInt(0))
+                      setScaleOutputString('')
+                      setScaleStart(BigInt(0))
+                      setScaleEnd(BigInt(0))
+                      setScaleStartString('')
+                      setScaleEndString('')
+                      const percentage = !tokenBalances[token.address]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              ((amountIn * BigInt(10) ** token.decimals) /
+                                BigInt(10) ** tokendict[tokenIn].decimals * BigInt(100)) /
+                              tokenBalances[token.address],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left =
+                          `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                      }
+                    } else {
+                      setTokenOut(tokenIn);
+                      if (amountIn != BigInt(0)) {
+                        if (limitChase && mids?.[activeMarketKey]?.[0]) {
+                          const price = tokenOut === activeMarket?.baseAddress ? mids[activeMarketKey][0] == mids[activeMarketKey][1] ? mids[activeMarketKey][2] : mids[activeMarketKey][0] : mids[activeMarketKey][0] == mids[activeMarketKey][2] ? mids[activeMarketKey][1] : mids[activeMarketKey][0]
+                          setlimitPrice(price);
+                          setlimitPriceString(
+                            (
+                              Number(price) / Number(activeMarket.priceFactor)
+                            ).toFixed(Math.floor(Math.log10(Number(activeMarket.priceFactor)))),
+                          );
+                          setamountOutLimit(
+                            price != BigInt(0) && amountIn != BigInt(0)
+                              ? tokenOut === activeMarket?.baseAddress
+                                ? (amountIn * price) /
+                                (activeMarket.scaleFactor || BigInt(1))
+                                : (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                                price
+                              : BigInt(0),
+                          );
+                          setlimitoutputString(
+                            (price != BigInt(0) && amountIn != BigInt(0)
+                              ? tokenOut === activeMarket?.baseAddress
+                                ? customRound(
+                                  Number(
+                                    (amountIn * price) /
+                                    (activeMarket.scaleFactor || BigInt(1)),
+                                  ) /
+                                  10 ** Number(tokendict[tokenIn].decimals),
+                                  3,
+                                )
+                                : customRound(
+                                  Number(
+                                    (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                                    price,
+                                  ) /
+                                  10 ** Number(tokendict[tokenIn].decimals),
+                                  3,
+                                )
+                              : ''
+                            ).toString(),
+                          );
+                        }
+                        setInputString(limitoutputString);
+                        setlimitoutputString(inputString);
+                        setamountIn(amountOutLimit);
+                        setamountOutLimit(amountIn);
+                        const percentage = !tokenBalances[tokenOut]
+                          ? 0
+                          : Math.min(
+                            100,
+                            Math.floor(
+                              Number(
+                                (amountOutLimit * BigInt(100)) /
+                                tokenBalances[tokenOut],
+                              ),
+                            ),
+                          );
+                        setSliderPercent(percentage);
+                        const slider = document.querySelector(
+                          '.balance-amount-slider',
+                        );
+                        const popup = document.querySelector(
+                          '.slider-percentage-popup',
+                        );
+                        if (slider && popup) {
+                          const rect = slider.getBoundingClientRect();
+                          (popup as HTMLElement).style.left =
+                            `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                        }
+                      }
+                    }
+                  } else if (location.pathname.slice(1) == 'send') {
+                    setlimitChase(true);
+                    setAmountOutScale(BigInt(0))
+                    setScaleOutputString('')
+                    setScaleStart(BigInt(0))
+                    setScaleEnd(BigInt(0))
+                    setScaleStartString('')
+                    setScaleEndString('')
+                    if (token.address == tokenOut && multihop == false) {
+                      setTokenOut(tokenIn);
+                      pricefetchmarket = getMarket(token.address, tokenIn);
+                    } else if (
+                      markets[
+                      `${tokendict[token.address].ticker}${tokendict[tokenOut].ticker}`
+                      ] ||
+                      markets[
+                      `${tokendict[tokenOut].ticker}${tokendict[token.address].ticker}`
+                      ]
+                    ) {
+                      pricefetchmarket = getMarket(token.address, tokenOut);
+                    } else {
+                      let found = false;
+                      for (const market in markets) {
+                        if (
+                          markets[market].baseAddress === token.address
+                        ) {
+                          setTokenOut(markets[market].quoteAddress);
+                          pricefetchmarket = getMarket(
+                            token.address,
+                            markets[market].quoteAddress,
+                          );
+                          found = true;
+                          break;
+                        }
+                      }
+                      if (!found) {
+                        for (const market in markets) {
+                          if (markets[market].quoteAddress === token.address) {
+                            setTokenOut(markets[market].baseAddress);
+                            pricefetchmarket = getMarket(
+                              token.address,
+                              markets[market].baseAddress,
+                            );
+                            break;
+                          }
+                        }
+                      }
+                    }
+                    if (displayMode == 'usd') {
+                      setInputString(
+                        customRound(
+                          Number(
+                            calculateTokenAmount(
+                              sendInputString.replace(/^\$|,/g, ''),
+                              tradesByMarket[
+                              (({ baseAsset, quoteAsset }) =>
+                                (baseAsset === wethticker ? ethticker : baseAsset) +
+                                (quoteAsset === wethticker ? ethticker : quoteAsset)
+                              )(pricefetchmarket)
+                              ],
+                              token.address,
+                              pricefetchmarket,
+                            ),
+                          ) /
+                          10 ** Number(token.decimals),
+                          3,
+                        ).toString(),
+                      );
+                      setamountIn(
+                        calculateTokenAmount(
+                          sendInputString.replace(/^\$|,/g, ''),
+                          tradesByMarket[
+                          (({ baseAsset, quoteAsset }) =>
+                            (baseAsset === wethticker ? ethticker : baseAsset) +
+                            (quoteAsset === wethticker ? ethticker : quoteAsset)
+                          )(pricefetchmarket)
+                          ],
+                          token.address,
+                          pricefetchmarket,
+                        ),
+                      );
+                      const percentage = !tokenBalances[token.address]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              (calculateTokenAmount(
+                                sendInputString.replace(/^\$|,/g, ''),
+                                tradesByMarket[
+                                (({ baseAsset, quoteAsset }) =>
+                                  (baseAsset === wethticker ? ethticker : baseAsset) +
+                                  (quoteAsset === wethticker ? ethticker : quoteAsset)
+                                )(pricefetchmarket)
+                                ],
+                                token.address,
+                                pricefetchmarket,
+                              ) * BigInt(100)) /
+                              tokenBalances[token.address],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left =
+                          `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                      }
+                    } else {
+                      setamountIn(
+                        (amountIn * BigInt(10) ** token.decimals) /
+                        BigInt(10) ** tokendict[tokenIn].decimals
+                      );
+                      setsendInputString(
+                        `$${calculateUSDValue(
+                          (amountIn * BigInt(10) ** token.decimals) /
+                          BigInt(10) ** tokendict[tokenIn].decimals,
+                          tradesByMarket[
+                          (({ baseAsset, quoteAsset }) =>
+                            (baseAsset === wethticker ? ethticker : baseAsset) +
+                            (quoteAsset === wethticker ? ethticker : quoteAsset)
+                          )(pricefetchmarket)
+                          ],
+                          token.address,
+                          pricefetchmarket,
+                        ).toFixed(2)}`,
+                      );
+                      const percentage = !tokenBalances[token.address]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              ((amountIn * BigInt(10) ** token.decimals) /
+                                BigInt(10) ** tokendict[tokenIn].decimals * BigInt(100)) /
+                              tokenBalances[token.address],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left =
+                          `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                      }
+                    }
+                  } else if (location.pathname.slice(1) == 'scale') {
+                    if (token.address != tokenOut) {
+                      if (
+                        markets[
+                        `${tokendict[token.address].ticker}${tokendict[tokenOut].ticker}`
+                        ] ||
+                        markets[
+                        `${tokendict[tokenOut].ticker}${tokendict[token.address].ticker}`
+                        ]
+                      ) {
+                      } else {
+                        let found = false;
+                        for (const market in markets) {
+                          if (
+                            markets[market].baseAddress === token.address
+                          ) {
+                            setTokenOut(markets[market].quoteAddress);
+                            found = true;
+                            break;
+                          }
+                        }
+                        if (!found) {
+                          for (const market in markets) {
+                            if (markets[market].quoteAddress === token.address) {
+                              setTokenOut(markets[market].baseAddress);
+                              break;
+                            }
+                          }
+                        }
+                      }
+                      setamountIn(
+                        BigInt(0)
+                      );
+                      setInputString('')
+                      setAmountOutScale(BigInt(0))
+                      setScaleOutputString('')
+                      setScaleStart(BigInt(0))
+                      setScaleEnd(BigInt(0))
+                      setScaleStartString('')
+                      setScaleEndString('')
+                      setlimitChase(true);
+                      const percentage = !tokenBalances[token.address]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              BigInt(0) /
+                              tokenBalances[token.address],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left =
+                          `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                      }
+                    } else {
+                      setTokenOut(tokenIn);
+                      if (amountIn != BigInt(0) && scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+                        setInputString(scaleOutputString);
+                        setScaleOutputString(inputString);
+                        setamountIn(amountOutScale);
+                        setAmountOutScale(amountIn);
+                        const percentage = !tokenBalances[tokenOut]
+                          ? 0
+                          : Math.min(
+                            100,
+                            Math.floor(
+                              Number(
+                                (amountOutScale * BigInt(100)) /
+                                tokenBalances[tokenOut],
+                              ),
+                            ),
+                          );
+                        setSliderPercent(percentage);
+                        const slider = document.querySelector('.balance-amount-slider');
+                        const popup = document.querySelector('.slider-percentage-popup');
+                        if (slider && popup) {
+                          const rect = slider.getBoundingClientRect();
+                          (popup as HTMLElement).style.left =
+                            `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                        }
+                      }
+                      else {
+                        setamountIn(BigInt(0))
+                        setInputString('')
+                      }
+                    }
+                  }
+                }}
+              >
+                <img className="tokenlistimage" src={token.image} />
+                <div className="tokenlisttext">
+                  <div className="tokenlistname">
+                    {token.ticker}
+                    {favorites.includes(token.address) && (
+                      <span className="token-favorites-label">Favorite</span>
+                    )}
+                  </div>
+                  <div className="tokenlistticker">{token.name}</div>
+                </div>
+                <div className="token-right-content">
+                  <div className="tokenlistbalance">
+                    {customRound(
+                      Number(tokenBalances[token.address] ?? 0) /
+                      10 ** Number(token.decimals ?? 18),
+                      3,
+                    )
+                      .replace(/(\.\d*?[1-9])0+$/g, '$1')
+                      .replace(/\.0+$/, '')}
+                  </div>
+                  <div className="token-address-container">
+                    <span className="token-address">
+                      {`${token.address.slice(0, 6)}...${token.address.slice(-4)}`}
+                    </span>
+                    <div
+                      className="copy-address-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(token.address);
+                        const copyIcon =
+                          e.currentTarget.querySelector('.copy-icon');
+                        const checkIcon =
+                          e.currentTarget.querySelector('.check-icon');
+                        if (copyIcon && checkIcon) {
+                          copyIcon.classList.add('hidden');
+                          checkIcon.classList.add('visible');
+                          setTimeout(() => {
+                            copyIcon.classList.remove('hidden');
+                            checkIcon.classList.remove('visible');
+                          }, 2000);
+                        }
+                      }}
+                    >
+                      <svg
+                        className="copy-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="9"
+                          y="9"
+                          width="13"
+                          height="13"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      <svg
+                        className="check-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M8 12l3 3 6-6" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))
+        )}
+      </ul>
+    </div>
+  );
+
+  // output tokenlist
+  const TokenList2 = (
+    <div className="tokenlistcontainer">
+      <ul className="tokenlist">
+        {Object.values(tokendict).filter(
+          (token) =>
+            token.ticker.toLowerCase().includes(tokenString.toLowerCase()) ||
+            token.name.toLowerCase().includes(tokenString.toLowerCase()) ||
+            token.address.toLowerCase().includes(tokenString.toLowerCase()),
+        ).length === 0 ? (
+          <div className="empty-token-list">
+            <div className="empty-token-list-content">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="empty-token-list-icon"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+              <div className="empty-token-list-text">{t('noTokens')}</div>
+            </div>
+          </div>
+        ) : (
+          Object.values(tokendict)
+            .filter(
+              (token) =>
+                token.ticker
+                  .toLowerCase()
+                  .includes(tokenString.toLowerCase()) ||
+                token.name.toLowerCase().includes(tokenString.toLowerCase()) ||
+                token.address.toLowerCase().includes(tokenString.toLowerCase()),
+            )
+            .map((token) => (
+              <button
+                className="tokenbutton"
+                key={token.address}
+                onClick={() => {
+                  let newTokenIn;
+                  setpopup(0);
+                  settokenString('');
+                  setTokenOut(token.address);
+                  setStateIsLoading(true);
+                  if (location.pathname.slice(1) == 'swap' || location.pathname.slice(1) == 'market') {
+                    if (token.address != tokenIn) {
+                      if (
+                        markets[
+                        `${tokendict[token.address].ticker}${tokendict[tokenIn].ticker}`
+                        ] ||
+                        markets[
+                        `${tokendict[tokenIn].ticker}${tokendict[token.address].ticker}`
+                        ]
+                      ) {
+                        newTokenIn = tokenIn;
+                      } else {
+                        const path = findShortestPath(
+                          tokendict[tokenIn].address,
+                          token.address,
+                        );
+                        if (path && path.length > 1) {
+                          newTokenIn = tokenIn;
+                        } else {
+                          let found = false;
+                          for (const market in markets) {
+                            if (
+                              markets[market].baseAddress === token.address
+                            ) {
+                              setTokenIn(markets[market].quoteAddress);
+                              newTokenIn = markets[market].quoteAddress;
+                              found = true;
+                              break;
+                            }
+                          }
+                          if (!found) {
+                            for (const market in markets) {
+                              if (
+                                markets[market].quoteAddress === token.address
+                              ) {
+                                setTokenIn(markets[market].baseAddress);
+                                newTokenIn = markets[market].baseAddress;
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      }
+                      if (
+                        (tokenIn == eth && token.address == weth) ||
+                        (tokenIn == weth && token.address == eth)
+                      ) {
+                        if (switched == false) {
+                          setamountOutSwap(amountIn);
+                          setoutputString(inputString);
+                        }
+                        else {
+                          setamountOutSwap((amountOutSwap * BigInt(10) ** token.decimals) / BigInt(10) ** tokendict[tokenOut].decimals)
+                          setamountIn((amountOutSwap * BigInt(10) ** token.decimals) / BigInt(10) ** tokendict[tokenOut].decimals);
+                          setInputString(outputString);
+                          const percentage = !tokenBalances[tokenIn]
+                            ? 0
+                            : Math.min(
+                              100,
+                              Math.floor(
+                                Number(
+                                  ((amountOutSwap * BigInt(10) ** token.decimals) / BigInt(10) ** tokendict[tokenOut].decimals * BigInt(100)) /
+                                  tokenBalances[tokenIn],
+                                ),
+                              ),
+                            );
+                          setSliderPercent(percentage);
+                          const slider = document.querySelector(
+                            '.balance-amount-slider',
+                          );
+                          const popup = document.querySelector(
+                            '.slider-percentage-popup',
+                          );
+                          if (slider && popup) {
+                            const rect = slider.getBoundingClientRect();
+                            (popup as HTMLElement).style.left =
+                              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                          }
+                        }
+                      } else {
+                        if (switched == false) {
+                          setamountIn(
+                            (amountIn *
+                              BigInt(10) ** tokendict[newTokenIn].decimals) /
+                            BigInt(10) ** tokendict[tokenIn].decimals
+                          );
+                          setamountOutSwap(BigInt(0));
+                          setoutputString('');
+                          const percentage = !tokenBalances[newTokenIn]
+                            ? 0
+                            : Math.min(
+                              100,
+                              Math.floor(
+                                Number(
+                                  ((amountIn *
+                                    BigInt(10) ** tokendict[newTokenIn].decimals) /
+                                    BigInt(10) ** tokendict[tokenIn].decimals * BigInt(100)) /
+                                  tokenBalances[newTokenIn],
+                                ),
+                              ),
+                            );
+                          setSliderPercent(percentage);
+                          const slider = document.querySelector(
+                            '.balance-amount-slider',
+                          );
+                          const popup = document.querySelector(
+                            '.slider-percentage-popup',
+                          );
+                          if (slider && popup) {
+                            const rect = slider.getBoundingClientRect();
+                            (popup as HTMLElement).style.left =
+                              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                          }
+                        } else if (token.address != tokenOut) {
+                          setamountOutSwap(
+                            (amountOutSwap * BigInt(10) ** token.decimals) /
+                            BigInt(10) ** tokendict[tokenOut].decimals,
+                          );
+                          setamountIn(BigInt(0));
+                          setInputString('');
+                        }
+                      }
+                      setlimitChase(true);
+                      setAmountOutScale(BigInt(0))
+                      setScaleOutputString('')
+                      setScaleStart(BigInt(0))
+                      setScaleEnd(BigInt(0))
+                      setScaleStartString('')
+                      setScaleEndString('')
+                    } else {
+                      setTokenIn(tokenOut);
+                      if (
+                        (amountIn != BigInt(0) || amountOutSwap != BigInt(0)) &&
+                        !isWrap
+                      ) {
+                        if (switched == false) {
+                          setswitched(true);
+                          setStateIsLoading(true);
+                          setInputString('');
+                          setamountIn(BigInt(0));
+                          setamountOutSwap(amountIn);
+                          setoutputString(
+                            amountIn === BigInt(0)
+                              ? ''
+                              : String(
+                                customRound(
+                                  Number(amountIn) /
+                                  10 ** Number(tokendict[tokenIn].decimals),
+                                  3,
+                                ),
+                              ),
+                          );
+                        } else {
+                          setswitched(false);
+                          setStateIsLoading(true);
+                          setoutputString('');
+                          setamountOutSwap(BigInt(0));
+                          setamountIn(amountOutSwap);
+                          setInputString(
+                            amountOutSwap === BigInt(0)
+                              ? ''
+                              : String(
+                                customRound(
+                                  Number(amountOutSwap) /
+                                  10 **
+                                  Number(tokendict[tokenOut].decimals),
+                                  3,
+                                ),
+                              ),
+                          );
+                          const percentage = !tokenBalances[tokenOut]
+                            ? 0
+                            : Math.min(
+                              100,
+                              Math.floor(
+                                Number(
+                                  (amountOutSwap * BigInt(100)) /
+                                  tokenBalances[tokenOut],
+                                ),
+                              ),
+                            );
+                          setSliderPercent(percentage);
+                          const slider = document.querySelector(
+                            '.balance-amount-slider',
+                          );
+                          const popup = document.querySelector(
+                            '.slider-percentage-popup',
+                          );
+                          if (slider && popup) {
+                            const rect = slider.getBoundingClientRect();
+                            (popup as HTMLElement).style.left =
+                              `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                          }
+                        }
+                      }
+                    }
+                  } else if (location.pathname.slice(1) == 'limit') {
+                    if (token.address != tokenIn) {
+                      if (
+                        markets[
+                        `${tokendict[token.address].ticker}${tokendict[tokenIn].ticker}`
+                        ] ||
+                        markets[
+                        `${tokendict[tokenIn].ticker}${tokendict[token.address].ticker}`
+                        ]
+                      ) {
+                        newTokenIn = tokenIn;
+                      } else {
+                        let found = false;
+                        for (const market in markets) {
+                          if (
+                            markets[market].baseAddress === token.address
+                          ) {
+                            setTokenIn(markets[market].quoteAddress);
+                            newTokenIn = markets[market].quoteAddress;
+                            found = true;
+                            break;
+                          }
+                        }
+                        if (!found) {
+                          for (const market in markets) {
+                            if (markets[market].quoteAddress === token.address) {
+                              setTokenIn(markets[market].baseAddress);
+                              newTokenIn = markets[market].baseAddress;
+                              break;
+                            }
+                          }
+                        }
+                      }
+                      setamountIn(
+                        (amountIn *
+                          BigInt(10) ** tokendict[newTokenIn].decimals) /
+                        BigInt(10) ** tokendict[tokenIn].decimals,
+                      );
+                      setlimitChase(true);
+                      setAmountOutScale(BigInt(0))
+                      setScaleOutputString('')
+                      setScaleStart(BigInt(0))
+                      setScaleEnd(BigInt(0))
+                      setScaleStartString('')
+                      setScaleEndString('')
+                      const percentage = !tokenBalances[newTokenIn]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              ((amountIn * BigInt(10) ** tokendict[newTokenIn].decimals) /
+                                BigInt(10) ** tokendict[tokenIn].decimals * BigInt(100)) /
+                              tokenBalances[newTokenIn],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left =
+                          `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                      }
+                    } else {
+                      setTokenIn(tokenOut);
+                      if (amountIn != BigInt(0)) {
+                        if (limitChase && mids?.[activeMarketKey]?.[0]) {
+                          const price = tokenOut === activeMarket?.baseAddress ? mids[activeMarketKey][0] == mids[activeMarketKey][1] ? mids[activeMarketKey][2] : mids[activeMarketKey][0] : mids[activeMarketKey][0] == mids[activeMarketKey][2] ? mids[activeMarketKey][1] : mids[activeMarketKey][0]
+                          setlimitPrice(price);
+                          setlimitPriceString(
+                            (
+                              Number(price) / Number(activeMarket.priceFactor)
+                            ).toFixed(Math.floor(Math.log10(Number(activeMarket.priceFactor)))),
+                          );
+                          setamountOutLimit(
+                            price != BigInt(0) && amountIn != BigInt(0)
+                              ? tokenOut === activeMarket?.baseAddress
+                                ? (amountIn * price) /
+                                (activeMarket.scaleFactor || BigInt(1))
+                                : (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                                price
+                              : BigInt(0),
+                          );
+                          setlimitoutputString(
+                            (price != BigInt(0) && amountIn != BigInt(0)
+                              ? tokenOut === activeMarket?.baseAddress
+                                ? customRound(
+                                  Number(
+                                    (amountIn * price) /
+                                    (activeMarket.scaleFactor || BigInt(1)),
+                                  ) /
+                                  10 ** Number(tokendict[tokenIn].decimals),
+                                  3,
+                                )
+                                : customRound(
+                                  Number(
+                                    (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                                    price,
+                                  ) /
+                                  10 ** Number(tokendict[tokenIn].decimals),
+                                  3,
+                                )
+                              : ''
+                            ).toString(),
+                          );
+                        }
+                        setInputString(limitoutputString);
+                        setlimitoutputString(inputString);
+                        setamountIn(amountOutLimit);
+                        setamountOutLimit(amountIn);
+                        const percentage = !tokenBalances[tokenOut]
+                          ? 0
+                          : Math.min(
+                            100,
+                            Math.floor(
+                              Number(
+                                (amountOutLimit * BigInt(100)) /
+                                tokenBalances[tokenOut],
+                              ),
+                            ),
+                          );
+                        setSliderPercent(percentage);
+                        const slider = document.querySelector(
+                          '.balance-amount-slider',
+                        );
+                        const popup = document.querySelector(
+                          '.slider-percentage-popup',
+                        );
+                        if (slider && popup) {
+                          const rect = slider.getBoundingClientRect();
+                          (popup as HTMLElement).style.left =
+                            `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                        }
+                      }
+                    }
+                  } else if (location.pathname.slice(1) == 'scale') {
+                    if (token.address != tokenIn) {
+                      if (
+                        markets[
+                        `${tokendict[token.address].ticker}${tokendict[tokenIn].ticker}`
+                        ] ||
+                        markets[
+                        `${tokendict[tokenIn].ticker}${tokendict[token.address].ticker}`
+                        ]
+                      ) {
+                        newTokenIn = tokenIn;
+                      } else {
+                        let found = false;
+                        for (const market in markets) {
+                          if (
+                            markets[market].baseAddress === token.address
+                          ) {
+                            setTokenIn(markets[market].quoteAddress);
+                            newTokenIn = markets[market].quoteAddress;
+                            found = true;
+                            break;
+                          }
+                        }
+                        if (!found) {
+                          for (const market in markets) {
+                            if (markets[market].quoteAddress === token.address) {
+                              setTokenIn(markets[market].baseAddress);
+                              newTokenIn = markets[market].baseAddress;
+                              break;
+                            }
+                          }
+                        }
+                      }
+                      setamountIn(
+                        BigInt(0)
+                      );
+                      setInputString('')
+                      setAmountOutScale(BigInt(0))
+                      setScaleOutputString('')
+                      setScaleStart(BigInt(0))
+                      setScaleEnd(BigInt(0))
+                      setScaleStartString('')
+                      setScaleEndString('')
+                      setlimitChase(true);
+                      const percentage = !tokenBalances[newTokenIn]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              BigInt(0) /
+                              tokenBalances[newTokenIn],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left =
+                          `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                      }
+                    } else {
+                      setTokenIn(tokenOut);
+                      if (amountIn != BigInt(0) && scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+                        setInputString(scaleOutputString);
+                        setScaleOutputString(inputString);
+                        setamountIn(amountOutScale);
+                        setAmountOutScale(amountIn);
+                        const percentage = !tokenBalances[tokenOut]
+                          ? 0
+                          : Math.min(
+                            100,
+                            Math.floor(
+                              Number(
+                                (amountOutScale * BigInt(100)) /
+                                tokenBalances[tokenOut],
+                              ),
+                            ),
+                          );
+                        setSliderPercent(percentage);
+                        const slider = document.querySelector('.balance-amount-slider');
+                        const popup = document.querySelector('.slider-percentage-popup');
+                        if (slider && popup) {
+                          const rect = slider.getBoundingClientRect();
+                          (popup as HTMLElement).style.left =
+                            `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                        }
+                      }
+                      else {
+                        setamountIn(BigInt(0))
+                        setInputString('')
+                      }
+                    }
+                  }
+                }}
+              >
+                <img className="tokenlistimage" src={token.image} />
+                <div className="tokenlisttext">
+                  <div className="tokenlistname">
+                    {token.ticker}
+                    {favorites.includes(token.address) && (
+                      <span className="token-favorites-label">Favorite</span>
+                    )}
+                  </div>
+                  <div className="tokenlistticker">{token.name}</div>
+                </div>
+                <div className="token-right-content">
+                  <div className="tokenlistbalance">
+                    {customRound(
+                      Number(tokenBalances[token.address] ?? 0) /
+                      10 ** Number(token.decimals ?? 18),
+                      3,
+                    )
+                      .replace(/(\.\d*?[1-9])0+$/g, '$1')
+                      .replace(/\.0+$/, '')}
+                  </div>
+                  <div className="token-address-container">
+                    <span className="token-address">
+                      {`${token.address.slice(0, 6)}...${token.address.slice(-4)}`}
+                    </span>
+                    <div
+                      className="copy-address-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(token.address);
+                        const copyIcon =
+                          e.currentTarget.querySelector('.copy-icon');
+                        const checkIcon =
+                          e.currentTarget.querySelector('.check-icon');
+                        if (copyIcon && checkIcon) {
+                          copyIcon.classList.add('hidden');
+                          checkIcon.classList.add('visible');
+                          setTimeout(() => {
+                            copyIcon.classList.remove('hidden');
+                            checkIcon.classList.remove('visible');
+                          }, 2000);
+                        }
+                      }}
+                    >
+                      <svg
+                        className="copy-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="9"
+                          y="9"
+                          width="13"
+                          height="13"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      <svg
+                        className="check-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M8 12l3 3 6-6" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))
+        )}
+      </ul>
+    </div>
+  );
+
+  //popup modals
+  const Modals = (
+    <>
+      <div className={`blur-background-popups ${popup != 0 ? 'active' : ''}`}>
+        {popup === 1 ? ( // token select
+          <div ref={popupref} className="tokenselectbg">
+            <button
+              className="tokenselect-close-button"
+              onClick={() => {
+                setpopup(0);
+                settokenString('');
+              }}
+            >
+              <img src={closebutton} className="close-button-icon" />
+            </button>
+            <div className="tokenselectheader1">{t('selectAToken')}</div>
+            <div className="tokenselectheader2">{t('selectTokenSubtitle')}</div>
+            <div className="tokenselectheader-divider"></div>
+            <div style={{ position: 'relative' }}>
+              <input
+                className="tokenselect"
+                onChange={(e) => {
+                  settokenString(e.target.value);
+                }}
+                placeholder={t('searchToken')}
+                autoFocus={!(windowWidth <= 1020)}
+              />
+              {tokenString && (
+                <button
+                  className="tokenselect-clear visible"
+                  onClick={() => {
+                    settokenString('');
+                    const input = document.querySelector(
+                      '.tokenselect',
+                    ) as HTMLInputElement;
+                    if (input) {
+                      input.value = '';
+                      input.focus();
+                    }
+                  }}
+                >
+                  {t('clear')}
+                </button>
+              )}
+            </div>
+            {TokenList1}
+          </div>
+        ) : null}
+        {popup === 2 ? ( // token select
+          <div ref={popupref} className="tokenselectbg">
+            <button
+              className="tokenselect-close-button"
+              onClick={() => {
+                setpopup(0);
+                settokenString('');
+              }}
+            >
+              <img src={closebutton} className="close-button-icon" />
+            </button>
+            <div className="tokenselectheader1">{t('selectAToken')}</div>
+            <div className="tokenselectheader2">{t('selectTokenSubtitle')}</div>
+            <div style={{ position: 'relative' }}>
+              <input
+                className="tokenselect"
+                onChange={(e) => {
+                  settokenString(e.target.value);
+                }}
+                placeholder={t('searchToken')}
+                autoFocus={!(windowWidth <= 1020)}
+              />
+              {tokenString && (
+                <button
+                  className="tokenselect-clear visible"
+                  onClick={() => {
+                    settokenString('');
+                    const input = document.querySelector(
+                      '.tokenselect',
+                    ) as HTMLInputElement;
+                    if (input) {
+                      input.value = '';
+                      input.focus();
+                    }
+                  }}
+                >
+                  {t('clear')}
+                </button>
+              )}
+            </div>
+            {TokenList2}
+          </div>
+        ) : null}
+        {popup === 3 ? ( // send popup
+          <div ref={popupref} className="send-popup-container">
+            <div className="send-popup-background">
+              <div className={`sendbg ${connected && sendAmountIn > tokenBalances[sendTokenIn] ? 'exceed-balance' : ''}`}>
+
+                <div className="sendbutton1container">
+                  <div className="send-Send">{t('send')}</div>
+                  <button
+                    className="send-button1"
+                    onClick={() => {
+                      setpopup(10);
+                    }}
+                  >
+                    <img className="send-button1pic" src={tokendict[sendTokenIn].image} />
+                    <span>{tokendict[sendTokenIn].ticker || '?'}</span>
+                  </button>
+
+                </div>
+                <div className="sendinputcontainer">
+                  <input
+                    inputMode="decimal"
+                    className={`send-input ${connected && sendAmountIn > tokenBalances[sendTokenIn] ? 'exceed-balance' : ''}`}
+                    onCompositionStart={() => {
+                      setIsComposing(true);
+                    }}
+                    onCompositionEnd={(
+                      e: React.CompositionEvent<HTMLInputElement>,
+                    ) => {
+                      setIsComposing(false);
+                      if (/^\$?\d*\.?\d{0,18}$/.test(e.currentTarget.value)) {
+                        if (displayMode == 'usd') {
+                          if (e.currentTarget.value == '$') {
+                            setSendUsdValue('');
+                            setSendInputAmount('');
+                            setSendAmountIn(BigInt(0));
+                          } else {
+                            setSendUsdValue(`$${e.currentTarget.value.replace(/^\$/, '')}`);
+                            const calculatedAmount = calculateTokenAmount(
+                              e.currentTarget.value.replace(/^\$/, ''),
+                              tradesByMarket[
+                              (({ baseAsset, quoteAsset }) =>
+                                (baseAsset === wethticker ? ethticker : baseAsset) +
+                                (quoteAsset === wethticker ? ethticker : quoteAsset)
+                              )(getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc))
+                              ],
+                              sendTokenIn,
+                              getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc),
+                            );
+                            setSendAmountIn(calculatedAmount);
+                            setSendInputAmount(
+                              customRound(
+                                Number(calculatedAmount) / 10 ** Number(tokendict[sendTokenIn].decimals),
+                                3,
+                              ).toString()
+                            );
+                          }
+                        } else {
+                          const inputValue = BigInt(
+                            Math.round((parseFloat(e.currentTarget.value || '0') || 0) * 10 ** Number(tokendict[sendTokenIn].decimals))
+                          );
+                          setSendAmountIn(inputValue);
+                          setSendInputAmount(e.currentTarget.value);
+                          setSendUsdValue(
+                            `$${calculateUSDValue(
+                              inputValue,
+                              tradesByMarket[
+                              (({ baseAsset, quoteAsset }) =>
+                                (baseAsset === wethticker ? ethticker : baseAsset) +
+                                (quoteAsset === wethticker ? ethticker : quoteAsset)
+                              )(getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc))
+                              ],
+                              sendTokenIn,
+                              getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc),
+                            ).toFixed(2)}`
+                          );
+                        }
+                      }
+                    }}
+                    onChange={(e) => {
+                      if (isComposing) {
+                        setSendInputAmount(e.target.value);
+                        return;
+                      }
+                      if (/^\$?\d*\.?\d{0,18}$/.test(e.target.value)) {
+                        if (displayMode == 'usd') {
+                          if (e.target.value == '$') {
+                            setSendUsdValue('');
+                            setSendInputAmount('');
+                            setSendAmountIn(BigInt(0));
+                          } else {
+                            setSendUsdValue(`$${e.target.value.replace(/^\$/, '')}`);
+                            const calculatedAmount = calculateTokenAmount(
+                              e.target.value.replace(/^\$/, ''),
+                              tradesByMarket[
+                              (({ baseAsset, quoteAsset }) =>
+                                (baseAsset === wethticker ? ethticker : baseAsset) +
+                                (quoteAsset === wethticker ? ethticker : quoteAsset)
+                              )(getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc))
+                              ],
+                              sendTokenIn,
+                              getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc),
+                            );
+                            setSendAmountIn(calculatedAmount);
+                            setSendInputAmount(
+                              customRound(
+                                Number(calculatedAmount) / 10 ** Number(tokendict[sendTokenIn].decimals),
+                                3,
+                              ).toString()
+                            );
+                          }
+                        } else {
+                          const inputValue = BigInt(
+                            Math.round((parseFloat(e.target.value || '0') || 0) * 10 ** Number(tokendict[sendTokenIn].decimals))
+                          );
+                          setSendAmountIn(inputValue);
+                          setSendInputAmount(e.target.value);
+                          setSendUsdValue(
+                            `$${calculateUSDValue(
+                              inputValue,
+                              tradesByMarket[
+                              (({ baseAsset, quoteAsset }) =>
+                                (baseAsset === wethticker ? ethticker : baseAsset) +
+                                (quoteAsset === wethticker ? ethticker : quoteAsset)
+                              )(getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc))
+                              ],
+                              sendTokenIn,
+                              getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc),
+                            ).toFixed(2)}`
+                          );
+                        }
+                      }
+                    }}
+                    placeholder={displayMode == 'usd' ? '$0.00' : '0.00'}
+                    value={displayMode == 'usd' ? sendUsdValue : sendInputAmount}
+                    autoFocus={!(windowWidth <= 1020)}
+                  />
+                </div>
+                <div className="send-balance-wrapper">
+                  <div className="send-balance-max-container">
+                    <div className="send-balance1">
+                      <img src={walleticon} className="send-balance-wallet-icon" />{' '}
+                      {formatDisplayValue(tokenBalances[sendTokenIn], Number(tokendict[sendTokenIn].decimals))}
+                    </div>
+                    <div
+                      className="send-max-button"
+                      onClick={() => {
+                        if (tokenBalances[sendTokenIn] != BigInt(0)) {
+                          let amount =
+                            (sendTokenIn == eth && !client)
+                              ? tokenBalances[sendTokenIn] - settings.chainConfig[activechain].gasamount > BigInt(0)
+                                ? tokenBalances[sendTokenIn] - settings.chainConfig[activechain].gasamount
+                                : BigInt(0)
+                              : tokenBalances[sendTokenIn];
+                          setSendAmountIn(amount);
+                          setSendInputAmount(
+                            customRound(Number(amount) / 10 ** Number(tokendict[sendTokenIn].decimals), 3).toString()
+                          );
+                          setSendUsdValue(
+                            `$${calculateUSDValue(
+                              amount,
+                              tradesByMarket[
+                              (({ baseAsset, quoteAsset }) =>
+                                (baseAsset === wethticker ? ethticker : baseAsset) +
+                                (quoteAsset === wethticker ? ethticker : quoteAsset)
+                              )(getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc))
+                              ],
+                              sendTokenIn,
+                              getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc),
+                            ).toFixed(2)}`
+                          );
+                        }
+                      }}
+                    >
+                      {t('max')}
+                    </div>
+                  </div>
+                  <div
+                    className="send-usd-switch-wrapper"
+                    onClick={() => {
+                      if (displayMode === 'usd') {
+                        setDisplayMode('token');
+                        if (parseFloat(sendUsdValue.replace(/^\$|,/g, '')) == 0) {
+                          setSendInputAmount('');
+                        }
+                      } else {
+                        setDisplayMode('usd');
+                        if (parseFloat(sendInputAmount) == 0) {
+                          setSendUsdValue('');
+                        }
+                      }
+                    }}
+                  >
+                    <div className="send-usd-value">
+                      {displayMode === 'usd'
+                        ? `${customRound(Number(sendAmountIn) / 10 ** Number(tokendict[sendTokenIn].decimals), 3)} ${tokendict[sendTokenIn].ticker}`
+                        : sendAmountIn === BigInt(0)
+                          ? '$0.00'
+                          : formatUSDDisplay(
+                            calculateUSDValue(
+                              sendAmountIn,
+                              tradesByMarket[
+                              (({ baseAsset, quoteAsset }) =>
+                                (baseAsset === wethticker ? ethticker : baseAsset) +
+                                (quoteAsset === wethticker ? ethticker : quoteAsset)
+                              )(getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc))
+                              ],
+                              sendTokenIn,
+                              getMarket(sendTokenIn, sendTokenIn == usdc ? eth : usdc),
+                            )
+                          )}
+                    </div>
+                    <img src={sendSwitch} className="send-arrow" />
+                  </div>
+                </div>
+              </div>
+              <div className="sendaddressbg">
+                <div className="send-To">{t('to')}</div>
+                <div className="send-address-input-container">
+                  <input
+                    className="send-output"
+                    onChange={(e) => {
+                      if (e.target.value === '' || /^(0x[0-9a-fA-F]{0,40}|0)$/.test(e.target.value)) {
+                        setrecipient(e.target.value);
+                      }
+                    }}
+                    value={recipient}
+                    placeholder={t('enterWalletAddress')}
+                  />
+                  <button
+                    className="address-paste-button"
+                    onClick={async () => {
+                      try {
+                        const text = await navigator.clipboard.readText();
+                        if (/^(0x[0-9a-fA-F]{40})$/.test(text)) {
+                          setrecipient(text);
+                        }
+                      } catch (err) {
+                      }
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <button
+                className={`send-swap-button ${isSigning ? 'signing' : ''}`}
+                onClick={async () => {
+                  if (
+                    connected &&
+                    userchain === activechain
+                  ) {
+                    let hash;
+                    setIsSigning(true)
+                    if (client) {
+                      txPending.current = true
+                    }
+                    try {
+                      if (sendTokenIn == eth) {
+                        hash = await sendeth(
+                          sendUserOperationAsync,
+                          recipient as `0x${string}`,
+                          sendAmountIn,
+                        );
+                        if (!client) {
+                          txPending.current = true
+                        }
+                        newTxPopup(
+                          (client ? hash.hash : await waitForTxReceipt(hash.hash)),
+                          'send',
+                          eth,
+                          '',
+                          customRound(
+                            Number(sendAmountIn) / 10 ** Number(tokendict[eth].decimals),
+                            3,
+                          ),
+                          0,
+                          '',
+                          recipient,
+                        );
+                      } else {
+                        hash = await sendtokens(
+                          sendUserOperationAsync,
+                          sendTokenIn as `0x${string}`,
+                          recipient as `0x${string}`,
+                          sendAmountIn,
+                        );
+                        if (!client) {
+                          txPending.current = true
+                        }
+                        newTxPopup(
+                          (client ? hash.hash : await waitForTxReceipt(hash.hash)),
+                          'send',
+                          sendTokenIn,
+                          '',
+                          customRound(
+                            Number(sendAmountIn) /
+                            10 ** Number(tokendict[sendTokenIn].decimals),
+                            3,
+                          ),
+                          0,
+                          '',
+                          recipient,
+                        );
+                      }
+                      await refetch()
+                      txPending.current = false
+                      setSendUsdValue('')
+                      setSendInputAmount('');
+                      setSendAmountIn(BigInt(0));
+                      setSendPopupButton(0);
+                      setSendPopupButtonDisabled(true);
+                    } catch (error) {
+                      if (!(error instanceof TransactionExecutionError)) {
+                        newTxPopup(
+                          hash.hash,
+                          "sendFailed",
+                          sendTokenIn === eth ? eth : sendTokenIn,
+                          "",
+                          customRound(
+                            Number(sendAmountIn) / 10 ** Number(tokendict[sendTokenIn === eth ? eth : sendTokenIn].decimals),
+                            3,
+                          ),
+                          0,
+                          "",
+                          recipient,
+                        );
+                      }
+                    } finally {
+                      txPending.current = false
+                      setIsSigning(false)
+                    }
+                  } else {
+                    !connected
+                      ? setpopup(4)
+                      : handleSetChain()
+                  }
+                }}
+                disabled={sendPopupButtonDisabled || isSigning}
+              >
+                {isSigning ? (
+                  <div className="button-content">
+                    <div className="loading-spinner" />
+                    {client ? t('sendingTransaction') : t('signTransaction')}
+                  </div>
+                ) : !connected ? (
+                  t('connectWallet')
+                ) : sendPopupButton == 0 ? (
+                  t('enterAmount')
+                ) : sendPopupButton == 1 ? (
+                  t('enterWalletAddress')
+                ) : sendPopupButton == 2 ? (
+                  t('send')
+                ) : sendPopupButton == 3 ? (
+                  t('insufficient') +
+                  (tokendict[sendTokenIn].ticker || '?') +
+                  ' ' +
+                  t('bal')
+                ) : sendPopupButton == 4 ? (
+                  `${t('switchto')} ${t(settings.chainConfig[activechain].name)}`
+                ) : (
+                  t('connectWallet')
+                )}
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {popup === 4 ? (
+          !connected ? (
+            <div ref={popupref} className="connect-wallet-background unconnected">
+              <div className="connect-wallet-content-container">
+                <AuthCard {...alchemyconfig.ui.auth} />
+              </div>
+            </div>
+          ) : (
+            <div ref={popupref} className="connect-wallet-background connected">
+              <div className="wallet-header">
+                <div className="wallet-info"
+                  onMouseEnter={() =>
+                    !copyTooltipVisible && setShowHoverTooltip(true)
+                  }
+                  onMouseLeave={() => setShowHoverTooltip(false)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(
+                      address || '',
+                    );
+                    setShowHoverTooltip(false);
+                    setCopyTooltipVisible(true);
+                    setTimeout(() => {
+                      setCopyTooltipVisible(false);
+                    }, 2000);
+                  }}>
+                  {connected &&
+                    address && (
+                      <>
+                        <div
+                          className="wallet-popup-address-container"
+                        >
+                          <span
+                            className={`wallet-popup-address`}
+                          >
+                            <img
+                              src={walleticon}
+                              className="port-popup-wallet-icon"
+                            />
+                            {`${address.slice(0, 6)}...${address.slice(-4)}`}
+                          </span>
+
+                          {copyTooltipVisible && (
+                            <div className="wallet-popup-copy-tooltip">
+                              {t('copied')}!
+                            </div>
+                          )}
+                          {!copyTooltipVisible && showHoverTooltip && (
+                            <div className="wallet-popup-hover-tooltip">
+                              {t('clickCopyAddress')}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                </div>
+                <button
+                  className={`eye-button ${!isBlurred ? '' : 'h'}`}
+                  onClick={() => setIsBlurred(!isBlurred)}
+                >
+                  <div className="eye-icon-container">
+                    <svg
+                      className="eye-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <div className="eye-slash" />
+                  </div>
+                </button>
+                <button
+                  className="popup-deposit-button"
+                  onClick={() => {
+                    setpopup(12)
+                  }}
+                >
+                  <svg
+                    className="deposit-icon"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="7 11 12 16 17 11"></polyline>
+                    <line x1="12" y1="1" x2="12" y2="14"></line>
+                    <path d="M22 14V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V14" />
+
+                  </svg>
+                </button>
+                <button
+                  className="popup-disconnect-button"
+                  onClick={() => {
+                    logout()
+                  }}
+                >
+                  <svg
+                    className="disconnect-icon"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                </button>
+                <div className="header-actions">
+                  <button
+                    className="connect-wallet-close-button"
+                    onClick={() => {
+                      setpopup(0);
+                      settokenString('');
+                    }}
+                  >
+                    <img src={closebutton} className="close-button-icon" />
+                  </button>
+                </div>
+              </div>
+              {portChartLoading ? (
+                <div
+                  className="portfolio-popup-graph"
+                  style={{ marginTop: 15, marginBottom: 10, height: 215 }}
+                >
+                  <LoadingOverlay
+                    isVisible={true}
+                    bgcolor={'#00000000'}
+                    height={30}
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="total-account-summary-value">
+                    <div
+                      className={`total-value ${isBlurred ? 'blurred' : ''}`}
+                    >
+                      ${formatCommas(totalAccountValue.toFixed(2))}
+                    </div>
+                    <div
+                      className={`percentage-change ${isBlurred ? 'blurred' : ''} ${percentage >= 0 ? 'positive' : 'negative'}`}
+                    >
+                      {percentage >= 0 ? '+' : ''}
+                      {percentage.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="portfolio-popup-graph">
+                    <PortfolioPopupGraph
+                      address={address ?? ''}
+                      onPercentageChange={setPercentage}
+                      colorValue={portfolioColorValue}
+                      setColorValue={setPortfolioColorValue}
+                      isPopup={true}
+                      chartData={typeof totalAccountValue === 'number' ? [
+                        ...chartData.slice(0, -1),
+                        {
+                          ...chartData[chartData.length - 1],
+                          value: totalAccountValue,
+                        },
+                      ] : chartData}
+                      portChartLoading={portChartLoading}
+                      chartDays={chartDays}
+                      setChartDays={setChartDays}
+                      isBlurred={isBlurred}
+                    />
+                  </div>
+                </>
+              )}
+              <div className="graph-assets-divider" />
+              <div className="portfolio-content-popup">
+                <PortfolioContent
+                  trades={tradesByMarket}
+                  tokenList={Object.values(tokendict)}
+                  onMarketSelect={onMarketSelect}
+                  setSendTokenIn={setSendTokenIn}
+                  setpopup={setpopup}
+                  sortConfig={memoizedSortConfig}
+                  tokenBalances={tokenBalances}
+                  isBlurred={isBlurred}
+                />
+              </div>
+            </div>
+          )
+        ) : null}
+        {popup === 5 ? ( // settings
+          <div
+            className={`layout-settings-background ${simpleView ? 'simple' : ''}`}
+            ref={popupref}
+          >
+            <div className="layout-settings-header">
+              <button
+                className="layout-settings-close-button"
+                onClick={() => setpopup(0)}
+              >
+                <img src={closebutton} className="close-button-icon" />
+              </button>
+
+              <div className="layout-settings-title">{t('settings')}</div>
+            </div>
+            <div className="layout-settings-content">
+              {!simpleView && (
+                <div className="layout-options">
+                  <div>
+                    <div className="layout-section-title">
+                      {t('tradePanelPosition')}
+                    </div>
+                    <div className="layout-section">
+                      <button
+                        className={`layout-option ${layoutSettings === 'alternative' ? 'active' : ''}`}
+                        onClick={() => {
+                          setLayoutSettings('alternative');
+                          localStorage.setItem('crystal_layout', 'alternative');
+                        }}
+                      >
+                        <div className="layout-preview-container">
+                          <div className="preview-trade"></div>
+                          <div className="layout-preview-wrapper">
+                            <div className="layout-preview alternative-layout">
+                              <div className="preview-chart"></div>
+                              <div className="preview-orderbook"></div>
+                            </div>
+                            <div className="layout-preview-bottom">
+                              <div className="preview-ordercenter"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="layout-label">
+                          <span className="layout-name">
+                            {t('left')} {t('panel')}
+                          </span>
+                        </div>
+                      </button>
+
+                      <button
+                        className={`layout-option ${layoutSettings === 'default' ? 'active' : ''}`}
+                        onClick={() => {
+                          setLayoutSettings('default');
+                          localStorage.setItem('crystal_layout', 'default');
+                        }}
+                      >
+                        <div className="layout-preview-container">
+                          <div className="layout-preview-wrapper">
+                            <div className="layout-preview alternative-layout">
+                              <div className="preview-chart" />
+                              <div className="preview-orderbook" />
+                            </div>
+                            <div className="layout-preview-bottom">
+                              <div className="preview-ordercenter" />
+                            </div>
+                          </div>
+                          <div className="preview-trade" />
+                        </div>
+
+                        <div className="layout-label">
+                          <span className="layout-name">
+                            {t('right')} {t('panel')}
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="layout-section-title">
+                      {t('orderbookPosition')}
+                    </div>
+                    <div className="layout-section">
+                      <button
+                        className={`layout-option ${orderbookPosition === 'left' ? 'active' : ''}`}
+                        onClick={() => {
+                          setOrderbookPosition('left');
+                          localStorage.setItem('crystal_orderbook', 'left');
+                        }}
+                      >
+                        <div className="ob-layout-preview-container">
+                          <div className="ob-layout-preview alternative-layout">
+                            <div className="ob-preview-orderbook">
+                              <div className="ob-preview-sell"></div>
+                              <div className="ob-preview-buy"></div>
+                            </div>
+                            <div className="ob-preview-chart"></div>
+                          </div>
+                        </div>
+                        <div className="layout-label">
+                          <span className="layout-name">
+                            {t('left')} {t('side')}
+                          </span>
+                        </div>
+                      </button>
+
+                      <button
+                        className={`layout-option ${orderbookPosition === 'right' ? 'active' : ''}`}
+                        onClick={() => {
+                          setOrderbookPosition('right');
+                          localStorage.setItem('crystal_orderbook', 'right');
+                        }}
+                      >
+                        <div className="ob-layout-preview-container">
+                          <div className="ob-layout-preview alternative-layout">
+                            <div className="ob-preview-chart"></div>
+
+                            <div className="ob-preview-orderbook">
+                              <div className="ob-preview-sell"></div>
+                              <div className="ob-preview-buy"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="layout-label">
+                          <span className="layout-name">
+                            {t('right')} {t('side')}
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="layout-language-row">
+                <span className="layout-language-label">{t('language')}</span>
+                <div className="language-selector-app-container">
+                  <LanguageSelector
+                    languages={languageOptions}
+                    isLanguageDropdownOpen={isLanguageDropdownOpen}
+                    setIsLanguageDropdownOpen={setIsLanguageDropdownOpen}
+                  />
+                </div>
+              </div>
+              <div className="trade-markers-toggle-row">
+                <span className="trade-markers-toggle-label">
+                  {t('showTradeMarkers')}
+                </span>
+                <ToggleSwitch
+                  checked={isMarksVisible}
+                  onChange={() => {
+                    setIsMarksVisible(!isMarksVisible);
+                    localStorage.setItem(
+                      'crystal_marks_visible',
+                      JSON.stringify(!isMarksVisible),
+                    );
+                  }}
+                />
+              </div>
+              <div className="trade-markers-toggle-row">
+                <span className="trade-markers-toggle-label">
+                  {t('showChartOrders')}
+                </span>
+                <ToggleSwitch
+                  checked={isOrdersVisible}
+                  onChange={() => {
+                    setIsOrdersVisible(!isOrdersVisible);
+                    localStorage.setItem(
+                      'crystal_orders_visible',
+                      JSON.stringify(!isOrdersVisible),
+                    );
+                  }}
+                />
+              </div>
+              <div className="orderbook-toggle-row">
+                <span className="orderbook-toggle-label">
+                  {t('showOB')}
+                </span>
+                <ToggleSwitch
+                  checked={isOrderbookVisible}
+                  onChange={() => {
+                    setIsOrderbookVisible(!isOrderbookVisible);
+                    localStorage.setItem(
+                      'crystal_orderbook_visible',
+                      JSON.stringify(!isOrderbookVisible),
+                    );
+                  }}
+                />
+              </div>
+
+              <div className="ordercenter-toggle-row">
+                <span className="ordercenter-toggle-label">
+                  {t('showOC')}
+                </span>
+                <ToggleSwitch
+                  checked={isOrderCenterVisible}
+                  onChange={() => {
+                    setIsOrderCenterVisible(!isOrderCenterVisible);
+                    localStorage.setItem(
+                      'crystal_ordercenter_visible',
+                      JSON.stringify(!isOrderCenterVisible),
+                    );
+                  }}
+                />
+              </div>
+              <div className="audio-toggle-row">
+                <span className="audio-toggle-label">{t('showChartOutliers')}</span>
+                <ToggleSwitch
+                  checked={showChartOutliers}
+                  onChange={() => {
+                    setShowChartOutliers(!showChartOutliers);
+                    localStorage.setItem('crystal_show_chart_outliers', JSON.stringify(!showChartOutliers));
+                  }}
+                />
+              </div>
+              <div className="audio-toggle-row">
+                <span className="audio-toggle-label">{t('audioNotifications')}</span>
+                <ToggleSwitch
+                  checked={isAudioEnabled}
+                  onChange={() => {
+                    setIsAudioEnabled(!isAudioEnabled);
+                    localStorage.setItem('crystal_audio_notifications', JSON.stringify(!isAudioEnabled));
+                  }}
+                />
+              </div>
+
+              <button
+                className="revert-settings-button"
+                onClick={() => {
+                  setLanguage('EN');
+                  localStorage.setItem('crystal_language', 'EN');
+
+                  setLayoutSettings('default');
+                  localStorage.setItem('crystal_layout', 'default');
+
+                  setOrderbookPosition('right');
+                  localStorage.setItem('crystal_orderbook', 'right');
+
+                  setSimpleView(false);
+                  localStorage.setItem('crystal_simple_view', 'false');
+
+                  setIsMarksVisible(true);
+                  localStorage.setItem('crystal_marks_visible', 'true');
+
+                  setIsOrdersVisible(true);
+                  localStorage.setItem('crystal_orders_visible', 'true');
+
+                  setIsOrderbookVisible(true);
+                  localStorage.setItem('crystal_orderbook_visible', 'true');
+
+                  setIsOrderCenterVisible(true);
+                  localStorage.setItem(
+                    'crystal_ordercenter_visible',
+                    'true',
+                  );
+
+                  setShowChartOutliers(false);
+                  localStorage.setItem('crystal_show_chart_outliers', 'false');
+
+                  setIsAudioEnabled(false);
+                  localStorage.setItem('crystal_audio_notifications', 'false');
+
+                  setOrderbookWidth(300);
+                  localStorage.setItem('orderbookWidth', '300');
+
+                  setAddLiquidityOnly(false);
+                  localStorage.setItem(
+                    'crystal_add_liquidity_only',
+                    'false',
+                  );
+
+                  setorderType(1);
+                  localStorage.setItem('crystal_order_type', '1');
+
+                  setSlippageString('1');
+                  setSlippage(BigInt(9900));
+                  localStorage.setItem('crystal_slippage_string', '1');
+                  localStorage.setItem('crystal_slippage', '9900');
+
+                  setActiveSection('orders');
+                  localStorage.setItem('crystal_oc_tab', 'orders');
+
+                  setFilter('all');
+                  localStorage.setItem('crystal_oc_filter', 'all');
+
+                  setOnlyThisMarket(false);
+                  localStorage.setItem('crystal_only_this_market', 'false');
+
+                  setOBInterval(baseInterval);
+                  localStorage.setItem(
+                    `${activeMarket.baseAsset}_ob_interval`,
+                    JSON.stringify(baseInterval),
+                  );
+
+                  const currentKey = `${activeMarket.baseAsset}_ob_interval`;
+                  for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    if (
+                      key &&
+                      key.endsWith('_ob_interval') &&
+                      key !== currentKey
+                    ) {
+                      localStorage.removeItem(key);
+                    }
+                  }
+
+                  setViewMode('both');
+                  localStorage.setItem('ob_viewmode', 'both');
+
+                  setOBTab('orderbook');
+                  localStorage.setItem('ob_active_tab', 'orderbook');
+
+                  setMobileView('chart');
+
+                  setAmountsQuote('Quote');
+                  localStorage.setItem('ob_amounts_quote', 'Quote');
+
+                  localStorage.setItem('crystal_chart_timeframe', '5')
+
+                  let defaultHeight: number;
+
+                  if (window.innerHeight > 1080) defaultHeight = 361.58;
+                  else if (window.innerHeight > 960) defaultHeight = 320.38;
+                  else if (window.innerHeight > 840) defaultHeight = 279.18;
+                  else if (window.innerHeight > 720) defaultHeight = 237.98;
+                  else defaultHeight = 196.78;
+
+                  setOrderCenterHeight(defaultHeight);
+                  localStorage.setItem(
+                    'orderCenterHeight',
+                    defaultHeight.toString(),
+                  );
+                }}
+              >
+                {t('revertToDefault')}
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {popup === 6 && selectedConnector ? (
+          <div ref={popupref} className="connecting-popup">
+            <div className="connecting-content">
+              <div className="connecting-header">
+                <button
+                  className="connecting-back-button"
+                  onClick={() => {
+                    setpopup(4);
+                    setSelectedConnector(null);
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  className="disconnected-wallet-close-button"
+                  onClick={() => {
+                    setpopup(0);
+                    setSelectedConnector(null);
+                  }}
+                >
+                  <img src={closebutton} className="close-button-icon" />
+                </button>
+              </div>
+
+              <div className="logo-container">
+                <div className="logo-spinner" />
+                <img
+                  src={
+                    selectedConnector.name === 'MetaMask'
+                      ? walletmetamask
+                      : selectedConnector.name === 'Coinbase Wallet'
+                        ? walletcoinbase
+                        : selectedConnector.name === 'WalletConnect'
+                          ? walletconnect
+                          : selectedConnector.name === 'Safe'
+                            ? walletsafe
+                            : selectedConnector.name === 'Rabby Wallet'
+                              ? walletrabby
+                              : selectedConnector.name === 'Backpack'
+                                ? walletbackpack
+                                : selectedConnector.name === 'Phantom'
+                                  ? walletphantom
+                                  : selectedConnector.name === 'Tomo' ? wallettomo : selectedConnector.name === 'HaHa Wallet' ? wallethaha : walletinjected
+                  }
+                  className="wallet-logo"
+                />
+              </div>
+
+              <h2 className="connecting-title">{selectedConnector.name}</h2>
+              <p className="connecting-text">{t('requestingConnection')}</p>
+              <p className="connecting-subtext">
+                {t('confirmConnection1')} {selectedConnector.name}{' '}
+                {t('confirmConnection2')}.
+              </p>
+            </div>
+          </div>
+        ) : null}
+        {popup === 7 ? (
+          <TokenInfoPopupContent
+            symbol={activeMarket.baseAsset}
+            setpopup={setpopup}
+            ref={popupref}
+          />
+        ) : null}
+        {popup === 8 ? (
+          <div className="search-markets-dropdown-popup" ref={popupref}>
+            <div className="search-markets-dropdown-header">
+              <div className="search-container">
+                <div className="search-wrapper">
+                  <SearchIcon className="search-icon" size={12} />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder={t('searchMarkets')}
+                    className="search-input"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    autoFocus={!(windowWidth <= 1020)}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      className="cancel-search"
+                      onClick={() => setSearchQuery('')}
+                    >
+                      {t('clear')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="search-markets-list-header">
+              <div className="favorites-header">
+                <button
+                  onClick={() => handleSort('favorites')}
+                  className="favorite-sort-button"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="favorites-sort-icon"
+                  >
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                  </svg>
+                </button>
+              </div>
+              <div
+                className="search-header-item"
+                onClick={() => handleSort('volume')}
+              >
+                {t('market')} / {t('volume')}
+                <SortArrow
+                  sortDirection={
+                    sortField === 'volume' ? sortDirection : undefined
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSort('volume');
+                  }}
+                />
+              </div>
+              <div
+                className="search-header-item"
+                onClick={() => handleSort('change')}
+              >
+                {t('last') + ' ' + t('day')}
+                <SortArrow
+                  sortDirection={
+                    sortField === 'change' ? sortDirection : undefined
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSort('change');
+                  }}
+                />
+              </div>
+              <div
+                className="search-header-item"
+                onClick={() => handleSort('price')}
+              >
+                {t('price')}
+                <SortArrow
+                  sortDirection={
+                    sortField === 'price' ? sortDirection : undefined
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSort('price');
+                  }}
+                />
+              </div>
+            </div>
+            <div
+              className="search-markets-list"
+              id="search-markets-list-container"
+            >
+              {sortedMarkets.filter((market) => {
+                const matchesSearch = market?.pair
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase());
+                const notWeth =
+                  market?.baseAddress !== settings.chainConfig[activechain].weth;
+                return matchesSearch && notWeth;
+              }).length > 0 ? (
+                sortedMarkets.filter((market) => {
+                  const matchesSearch = market?.pair
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase());
+                  const notWeth =
+                    market?.baseAddress !== settings.chainConfig[activechain].weth;
+                  return matchesSearch && notWeth;
+                }).map((market, index) => (
+                  <div
+                    key={market.pair}
+                    className={`search-market-item ${index === selectedIndex ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSearchQuery('');
+                      setpopup(0);
+                      onMarketSelect(market)
+                    }}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    role="button"
+                    tabIndex={-1}
+                    id={`search-market-item-${index}`}
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        toggleFavorite(market.baseAddress?.toLowerCase() ?? '');
+                        refocusSearchInput();
+                      }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      tabIndex={-1}
+                      className={`dropdown-market-favorite-button 
+                            ${favorites.includes(market.baseAddress?.toLowerCase() ?? '') ? 'active' : ''}`}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill={
+                          favorites.includes(
+                            market.baseAddress?.toLowerCase() ?? '',
+                          )
+                            ? 'currentColor'
+                            : 'none'
+                        }
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                      </svg>
+                    </button>
+
+                    <div className="search-market-pair-section">
+                      <img src={market.image} className="market-icon" />
+                      <div className="market-info">
+                        <span className="market-pair">{market.pair}</span>
+                        <span className="market-volume">
+                          ${formatCommas(market.volume)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="search-market-chart-section">
+                      <MiniChart
+                        market={market}
+                        series={market.series}
+                        priceChange={market.priceChange}
+                        isVisible={true}
+                      />
+                    </div>
+                    <div className="search-market-price-section">
+                      <div className="search-market-price">
+                        {formatSubscript(market.currentPrice)}
+                      </div>
+                      <div
+                        className={`search-market-change ${market.priceChange.startsWith('-') ? 'negative' : 'positive'}`}
+                      >
+                        {market.priceChange}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-markets-message">{t('noMarkets')}</div>
+              )}
+            </div>
+
+            <div className="keyboard-shortcuts-container">
+              <div className="keyboard-shortcut">
+                <span className="arrow-key">↑</span>
+                <span className="arrow-key">↓</span>
+                <span>{t('toNavigate')}</span>
+              </div>
+              <div className="keyboard-shortcut">
+                <span className="key">Enter</span>
+                <span>{t('toSelect')}</span>
+              </div>
+              <div className="keyboard-shortcut">
+                <span className="key">Esc</span>
+                <span>{t('toClose')}</span>
+              </div>
+            </div>
+          </div>
+        ) : null}
+        {popup === 9 ? (
+          <div ref={popupref} className="connect-wallet-background unconnected">
+            <div className="social-content-container">
+              <div className="social-content">
+                <h1 className="social-heading">Join our growing community!</h1>
+                <p className="social-description">
+                  Crystal Exchange is being released in phases. Be the first to know when new features arrive by joining our vibrant community!
+                </p>
+
+                <div className="social-buttons">
+                  <button
+                    className="wallet-option"
+                    onClick={() =>
+                      window.open('https://discord.gg/CrystalExch', '_blank')
+                    }
+                  >
+                    <img
+                      className="connect-wallet-icon"
+                      src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg"
+                    />
+                    <span className="wallet-name">Join Crystal's Discord</span>
+                  </button>
+
+                  <button
+                    className="wallet-option"
+                    onClick={() =>
+                      window.open('https://x.com/CrystalExch', '_blank')
+                    }
+                  >
+                    <img
+                      className="connect-wallet-icon"
+                      src={Xicon}
+                    />
+                    <span className="wallet-name">Follow us on X (Twitter)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+        {popup === 10 ? ( // send token search popup
+          <div ref={popupref} className="sendselectbg">
+            <div className="send-top-row">
+              <input
+                className="sendselect"
+                onChange={(e) => {
+                  settokenString(e.target.value);
+                }}
+                placeholder={t('searchToken')}
+                autoFocus={!(windowWidth <= 1020)}
+              />
+              {tokenString && (
+                <button
+                  className="sendselect-clear visible"
+                  onClick={() => {
+                    settokenString('');
+                    const input = document.querySelector('.sendselect') as HTMLInputElement;
+                    if (input) {
+                      input.value = '';
+                      input.focus();
+                    }
+                  }}
+                >
+                  {t('clear')}
+                </button>
+              )}
+              <button
+                className="sendselect-back"
+                onClick={() => {
+                  setpopup(3);
+                }}
+              >
+                <img src={closebutton} className="send-close-button-icon" />
+              </button>
+            </div>
+
+            <ul className="sendtokenlist">
+              {Object.values(tokendict)
+                .filter(
+                  (token) =>
+                    token.ticker.toLowerCase().includes(tokenString.trim().toLowerCase()) ||
+                    token.name.toLowerCase().includes(tokenString.trim().toLowerCase()) ||
+                    token.address.toLowerCase().includes(tokenString.trim().toLowerCase())
+                ).length === 0 ? (
+                <div className="empty-token-list">
+                  <div className="empty-token-list-content">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="empty-token-list-icon"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                    <div className="empty-token-list-text">{t('noTokens')}</div>
+                  </div>
+                </div>
+              ) : (
+                Object.values(tokendict)
+                  .filter(
+                    (token) =>
+                      token.ticker.toLowerCase().includes(tokenString.trim().toLowerCase()) ||
+                      token.name.toLowerCase().includes(tokenString.trim().toLowerCase()) ||
+                      token.address.toLowerCase().includes(tokenString.trim().toLowerCase())
+                  )
+                  .map((token) => (
+                    <button
+                      className="sendtokenbutton"
+                      key={token.address}
+                      onClick={() => {
+                        setSendTokenIn(token.address);
+                        setSendUsdValue('');
+                        setSendInputAmount('');
+                        setSendAmountIn(BigInt(0));
+                        settokenString('');
+                        setpopup(3);
+                      }}
+                    >
+                      <img className="tokenlistimage" src={token.image} />
+                      <div className="tokenlisttext">
+                        <div className="tokenlistname">{token.ticker}</div>
+                        <div className="tokenlistticker">{token.name}</div>
+                      </div>
+                      <div className="token-right-content">
+                        <div className="tokenlistbalance">
+                          {formatDisplayValue(tokenBalances[token.address], Number(token.decimals))}
+                        </div>
+                        <div className="token-address-container">
+                          <span className="token-address">
+                            {`${token.address.slice(0, 6)}...${token.address.slice(-4)}`}
+                          </span>
+                          <div
+                            className="copy-address-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(token.address);
+                              const copyIcon =
+                                e.currentTarget.querySelector('.copy-icon');
+                              const checkIcon =
+                                e.currentTarget.querySelector('.check-icon');
+                              if (copyIcon && checkIcon) {
+                                copyIcon.classList.add('hidden');
+                                checkIcon.classList.add('visible');
+                                setTimeout(() => {
+                                  copyIcon.classList.remove('hidden');
+                                  checkIcon.classList.remove('visible');
+                                }, 2000);
+                              }
+                            }}
+                          >
+                            <svg
+                              className="copy-icon"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"
+                              ></rect>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <svg
+                              className="check-icon"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <circle cx="12" cy="12" r="10" />
+                              <path d="M8 12l3 3 6-6" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))
+              )}
+            </ul>
+          </div>
+        ) : null}
+        {popup === 11 ? (
+          <div ref={popupref} className="generating-address-popup">
+            <span className="loader"></span>
+            <h2 className="generating-address-title">Fetching Your Smart Wallet</h2>
+            <p className="generating-address-text">
+              Please wait while your smart wallet address is being loaded...
+            </p>
+          </div>
+        ) : null}
+        {popup === 12 ? (
+          <div ref={popupref} className="deposit-page-container" onClick={(e) => e.stopPropagation()}>
+            <div className="deposit-page-header">
+              <h2>{t("deposit")}</h2>
+              <button className="deposit-close-button" onClick={() => { setpopup(0) }}>
+                <img src={closebutton} className="deposit-close-icon" />
+              </button>
+            </div>
+            <div className={`token-dropdown-container ${dropdownOpen ? 'open' : ''}`}>
+              <div
+                className="selected-token-display"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <div className="selected-token-info">
+                  <img className="deposit-token-icon" src={tokendict[selectedDepositToken].image} />
+                  <span className="deposit-token-name">{tokendict[selectedDepositToken].name}</span>
+                  <span className="deposit-token-ticker">({tokendict[selectedDepositToken].ticker})</span>
+                  <CopyButton textToCopy={selectedDepositToken} />
+                </div>
+                <div className="selected-token-balance">
+                  {formatDisplayValue(
+                    tokenBalances[selectedDepositToken] || 0,
+                    Number(tokendict[selectedDepositToken].decimals || 18)
+                  )}
+
+                  <svg
+                    className="deposit-button-arrow"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+
+              </div>
+
+              {dropdownOpen && (
+                <div className="token-dropdown-list">
+                  {Object.entries(tokendict).map(([address, token]) => (
+                    <div
+                      key={address}
+                      className={`token-dropdown-item ${selectedDepositToken === address ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSelectedDepositToken(address);
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      <div className="dropdown-token-info">
+                        <img className="deposit-token-icon" src={token.image} />
+                        <span className="deposit-token-name">{token.name}</span>
+                        <span className="deposit-token-ticker">({token.ticker})</span>
+                        <CopyButton textToCopy={address} />
+                      </div>
+                      <span className="deposit-token-balance">
+                        {formatDisplayValue(
+                          tokenBalances[address] || 0,
+                          Number(token.decimals || 18)
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <span className="deposit-subtitle">{t('sendTo')}</span>
+            <div className="deposit-address-container">
+              <div className="deposit-address-box">
+                <span className="deposit-address">{address}</span>
+                <button
+                  className={`deposit-copy-button ${copyTooltipVisible ? 'success' : ''}`}
+                  onClick={() => {
+                    navigator.clipboard.writeText(address || '');
+                    setCopyTooltipVisible(true);
+                    setTimeout(() => setCopyTooltipVisible(false), 2000);
+                  }}
+                >
+                  {copyTooltipVisible ?
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> :
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                    </svg>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div className="deposit-warning">
+              {t("depositWarning")}
+            </div>
+            <div className="deposit-qr-container">
+              <QRCodeSVG
+                value={address || ''}
+                size={170}
+                level="H"
+                includeMargin={true}
+                bgColor="#000000"
+                fgColor="#ffffff"
+              />
+            </div>
+
+            <button
+              className="deposit-done-button"
+              onClick={() => { setpopup(4) }}
+            >
+              {t('done')}
+            </button>
+          </div>
+        ) : null}
+        {popup === 13 ? (
+          <div ref={popupref} className="high-impact-confirmation-popup">
+            <div className="high-impact-confirmation-header">
+              <button
+                className="high-impact-close-button"
+                onClick={() => {
+                  setpopup(0);
+                  window.dispatchEvent(new Event('high-impact-cancel'));
+                }}
+              >
+                <img src={closebutton} className="close-button-icon" />
+              </button>
+            </div>
+            <div className="high-impact-content">
+              <div className="high-impact-warning-icon">
+                <img className="warning-image" src={warningicon} />
+              </div>
+
+              <p className="high-impact-message">
+                {t('highPriceImpactMessage')}
+              </p>
+
+              <div className="high-impact-details">
+                <div className="high-impact-detail-row">
+                  <span className="high-impact-value-title">{t('priceImpact')}</span>
+                  <span className="high-impact-value">{priceImpact}</span>
+                </div>
+
+                <div className="high-impact-detail-row">
+                  <span className="high-impact-value-title">{t('pay')}</span>
+                  <span className="high-impact-value">
+                    {formatDisplayValue(
+                      amountIn,
+                      Number(tokendict[tokenIn].decimals)
+                    )} {tokendict[tokenIn].ticker}
+                  </span>
+                </div>
+
+                <div className="high-impact-detail-row">
+                  <span className="high-impact-value-title">{t('receive')}</span>
+                  <span className="high-impact-value">
+                    {formatDisplayValue(
+                      amountOutSwap,
+                      Number(tokendict[tokenOut].decimals)
+                    )} {tokendict[tokenOut].ticker}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="high-impact-actions">
+              <button
+                className="high-impact-cancel-button"
+                onClick={() => {
+                  setpopup(0);
+                  window.dispatchEvent(new Event('high-impact-cancel'));
+                }}
+              >
+                {t('cancel')}
+              </button>
+
+              <button
+                className="high-impact-confirm-button"
+                onClick={async () => {
+                  setpopup(0);
+                  window.dispatchEvent(new Event('high-impact-confirm'));
+                }}
+              >
+                {t('confirmSwap')}
+              </button>
+            </div>
+          </div>
+        ) : null}
+        {popup == 18 && (
+          <div className="onboarding-section active">
+            <div className="onboarding-split-container">
+              <div className="onboarding-left-side">
+                <div ref={popupref} className="onboarding-content">
+                  <div className="onboarding-header">
+                    <h2 className="onboarding-title">join our community</h2>
+                    <p className="onboarding-subtitle">
+                      follow our twitter and join our discord please
+                    </p>
+                  </div>
+
+                  <div className="social-buttons">
+                    <button
+                      className="wallet-option"
+                      onClick={() =>
+                        window.open('https://discord.gg/CrystalExch', '_blank')
+                      }
+                    >
+                      <img
+                        className="connect-wallet-icon"
+                        src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg"
+                      />
+                      <span className="wallet-name">Join Crystal's Discord</span>
+                    </button>
+
+                    <button
+                      className="wallet-option"
+                      onClick={() =>
+                        window.open('https://x.com/CrystalExch', '_blank')
+                      }
+                    >
+                      <img
+                        className="connect-wallet-icon"
+                        src={Xicon}
+                      />
+                      <span className="wallet-name">Follow us on X (Twitter)</span>
+                    </button>
+                  </div>
+
+                  <div className="onboarding-actions">
+                    <button
+                      className="skip-button"
+                      onClick={() => {
+                        audio.currentTime = 0;
+                        audio.play();
+                        localStorage.setItem('crystal_has_completed_onboarding123', 'true');
+                        setpopup(0);
+                      }}
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {(popup === 14 || popup === 15 || popup === 17 || isTransitioning) ? (
+          <div ref={popupref} className={`onboarding-container ${exitingChallenge ? 'exiting' : ''}`}>
+            <div
+              className={`onboarding-background-blur ${exitingChallenge ? 'exiting' : ''} ${(isTransitioning && transitionDirection === 'forward') || (popup === 15 && connected)
+                ? 'active'
+                : ''
+                }`}
+            />
+            <div className="onboarding-crystal-logo">
+              <img className="onboarding-crystal-logo-image" src={clearlogo} />
+              <span className="onboarding-crystal-text">CRYSTAL</span>
+            </div>
+            {user && !connected && (
+              <div className="generating-address-popup">
+                <span className="loader"></span>
+                <h2 className="generating-address-title">Fetching Your Smart Wallet</h2>
+                <p className="generating-address-text">
+                  Please wait while your smart wallet address is being loaded...
+                </p>
+              </div>
+            )}
+            {connected ? (
+              <>
+                <div
+                  className={`onboarding-wrapper ${isTransitioning ? `transitioning ${transitionDirection}` : ''
+                    }`}
+                >
+                  
+                  {popup == 17 && (
+                    <div className="onboarding-section active">
+                      <div className="onboarding-split-container">
+                        <div className="onboarding-left-side">
+                          <div className="onboarding-content">
+                            <div className="onboarding-header">
+                              <h2 className="use-ref-title">Add a referral code (optional)</h2>
+                              <div className="form-group">
+                                {error && <span className="error-message">{error}</span>}
+
+                                <input
+                                  className="username-input"
+                                  placeholder="Enter a code"
+                                  value={typedRefCode}
+                                  onChange={e => {
+                                    const value = e.target.value.trim();
+                                    if (isValidInput(value) || value === "") {
+                                      setTypedRefCode(value);
+                                      setError('')
+                                    }
+                                  }}
+                                />
+                              </div>
+
+                              <div className="onboarding-actions">
+                                <button
+                                  className={`create-username-button ${isRefSigning ? 'signing' : !typedRefCode ? 'disabled' : ''}`}
+                                  disabled={!typedRefCode || isRefSigning}
+                                  onClick={async () => {
+                                    const ok = await handleSetRef(typedRefCode);
+                                    if (ok) {
+                                      audio.currentTime = 0;
+                                      audio.play();
+                                      setpopup(18);
+                                    }
+                                  }}
+                                >
+                                  {isRefSigning ? (
+                                    <div className="button-content">
+                                      <div className="loading-spinner" />
+                                      {t('signTransaction')}
+                                    </div>
+                                  ) : t('setReferral')}
+                                </button>
+
+                                <button
+                                  className="skip-button"
+                                  onClick={() => {
+                                    audio.currentTime = 0;
+                                    audio.play();
+                                    setpopup(18);
+                                  }}
+                                >
+                                  Skip
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div
+                    className={`onboarding-section username-section ${(popup === 14 || (isTransitioning)) && ((!username && usernameResolved) || transitionDirection == 'backward')
+                      ? 'active'
+                      : ''
+                      }`}
+                  >
+                    <div className="onboarding-split-container">
+                      <div className="onboarding-left-side">
+                        <div className="onboarding-content">
+                          <div className="onboarding-header">
+                            <h2 className="onboarding-title">
+                              {username ? 'Edit Name' : 'Enter a Name'}
+                            </h2>
+                            <p className="onboarding-subtitle">
+                              {username
+                                ? 'Update the name that appears on the leaderboard.'
+                                : 'This username will be visible on the leaderboard to all.'}
+                            </p>
+                          </div>
+
+                          <div className="onboarding-form">
+                            <div className="form-group">
+                              <label className="form-label">Your Wallet Address</label>
+                              <div className="wallet-address">{address || '0x1234...5678'}</div>
+                            </div>
+
+                            <div className="form-group">
+                              <label htmlFor="username" className="form-label">Username</label>
+                              <input
+                                type="text"
+                                id="username"
+                                className="username-input"
+                                placeholder={usernameInput ? usernameInput : 'Enter a username'}
+                                value={usernameInput || ''}
+                                onChange={e => {
+                                  const value = e.target.value.trim();
+                                  if (isValidInput(value) || value === "") {
+                                    setUsernameInput(value);
+                                  }
+                                }}
+                              />
+                              {usernameError && <p className="username-error">{usernameError}</p>}
+                            </div>
+                          </div>
+
+                          <button
+                            className={`create-username-button ${isUsernameSigning ? 'signing' : ''
+                              } ${!usernameInput.trim() ? 'disabled' : ''}`}
+                            onClick={async () => {
+                              if (!usernameInput.trim() || isUsernameSigning || usernameInput === username) return;
+                              await handleEditUsername(usernameInput)
+                            }}
+                            disabled={!usernameInput.trim() || isUsernameSigning || usernameInput === username}
+                          >
+                            {isUsernameSigning ? (
+                              <div className="button-content">
+                                <div className="loading-spinner" />
+                                {t('signTransaction')}
+                              </div>
+                            ) : username ? t('editUsername') : 'Create Username'}
+                          </button>
+                        </div>
+
+                        {(!usernameInput || username !== '') && (
+                          <>
+                            <div className="onboarding-actions">
+                              <button
+                                className="skip-button"
+                                type="button"
+                                onClick={() => {
+                                  audio.currentTime = 0;
+                                  audio.play();
+                                  setpopup(17);
+                                }}
+                              >
+                                {!usernameInput ? "Continue Without Username" : "Continue"}
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`onboarding-section challenge-section ${popup === 15 ||
+                      (isTransitioning && transitionDirection === 'forward')
+                      ? 'active'
+                      : ''
+                      } ${exitingChallenge ? 'exiting' : ''}`}
+                    data-step={currentStep}
+                  >
+                    <div className="challenge-intro-split-container">
+                      <div className="floating-elements-container">
+                        <img src={circleleft} className="circle-bottom" />
+                        <img src={topright} className="top-right" />
+                        <img src={topleft} className="top-left" />
+                        <img src={circleleft} className="circle-left" />
+                        <img src={veryleft} className="very-left" />
+                        <img src={circleleft} className="circle-right" />
+                        <img src={veryright} className="very-right" />
+                        <img src={topmiddle} className="top-middle" />
+                        <img src={topleft} className="bottom-middle" />
+                        <img src={circleleft} className="bottom-right" />
+
+                        <div className="account-setup-header">
+                          <div className="account-setup-title-wrapper">
+                            <h2 className="account-setup-title">
+                              {t('challengeOverview')}
+                            </h2>
+                            <p className="account-setup-subtitle">
+                              {t('learnHowToCompete')}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="challenge-intro-content-wrapper">
+                          <div className="challenge-intro-content-side">
+                            <div className="challenge-intro-content-inner">
+                              <div className="intro-text">
+                                <h3 className="intro-title">
+                                  {currentStep === 0
+                                    ? t('precisionMatters')
+                                    : currentStep === 1
+                                      ? t('earnCrystals')
+                                      : t('claimRewards')}
+                                </h3>
+                                <p className="intro-description">
+                                  {currentStep === 0
+                                    ? t('placeYourBids')
+                                    : currentStep === 1
+                                      ? t('midsGiveYou')
+                                      : t('competeOnLeaderboards')}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            className={`challenge-intro-visual-side${animating ? ' is-animating' : ''
+                              }`}
+                          >
+                            {currentStep === 0 && (
+                              <div className="intro-image-container">
+                                <div
+                                  className={`zoom-container${animationStarted ? ' zoom-active' : ''
+                                    }`}
+                                >
+                                  <img
+                                    src={part1image}
+                                    className="intro-image"
+                                    alt="Tutorial illustration"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {currentStep === 1 && (
+                              <div className="xp-animation-container">
+                                <div className="user-profile">
+                                  <div className="self-pfp">
+                                    <img
+                                      src={defaultPfp}
+                                      className="profile-pic-second"
+                                      alt="User profile"
+                                    />
+                                    <div className="username-display">
+                                      @{usernameInput || 'player123'}
+                                    </div>
+                                    <div className="xp-counter">
+                                      <img
+                                        src={crystalxp}
+                                        className="xp-icon"
+                                        alt="Crystal XP"
+                                        style={{
+                                          width: '23px',
+                                          height: '23px',
+                                          verticalAlign: 'middle',
+                                        }}
+                                      />
+                                      <span className="self-pfp-xp">8732.23</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="challenge-mini-leaderboard">
+                                    <div className="mini-leaderboard-header">
+                                      <span className="mini-leaderboard-title">
+                                        Season 0 Leaderboard
+                                      </span>
+                                      <span className="mini-leaderboard-time">
+                                        7d 22h 50m 54s
+                                      </span>
+                                    </div>
+
+                                    <div className="mini-progress-bar">
+                                      <div className="mini-progress-fill"></div>
+                                    </div>
+
+                                    <div className="mini-leaderboard-user">
+                                      <div className="mini-leaderboard-user-left">
+                                        <span className="mini-user-rank">#62</span>
+                                        <span className="mini-user-address">
+                                          0xB080...c423
+                                          <svg
+                                            className="mini-user-copy-icon"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="#b8b7b7"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          >
+                                            <rect
+                                              x="9"
+                                              y="9"
+                                              width="13"
+                                              height="13"
+                                              rx="2"
+                                              ry="2"
+                                            />
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                          </svg>
+                                        </span>
+                                      </div>
+                                      <div className="mini-user-points">
+                                        14.448
+                                        <img
+                                          src={crystalxp}
+                                          width="14"
+                                          height="14"
+                                          alt="XP"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <div className="mini-top-users">
+                                      <div className="mini-top-user mini-top-user-1">
+                                        <span className="mini-top-rank mini-top-rank-1">
+                                          1
+                                        </span>
+                                        <img
+                                          className="mini-user-pfp"
+                                          src={firstPlacePfp}
+                                        />
+                                        <div className="mini-points-container">
+                                          <img
+                                            src={crystalxp}
+                                            className="mini-token-icon"
+                                            alt="Token"
+                                          />
+                                          <span className="mini-top-points">
+                                            234,236
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      <div className="mini-top-user mini-top-user-2">
+                                        <span className="mini-top-rank mini-top-rank-2">
+                                          2
+                                        </span>
+                                        <img
+                                          className="mini-user-pfp"
+                                          src={secondPlacePfp}
+                                        />
+                                        <div className="mini-points-container">
+                                          <img
+                                            src={crystalxp}
+                                            className="mini-token-icon"
+                                            alt="Token"
+                                          />
+                                          <span className="mini-top-points">91,585</span>
+                                        </div>
+                                      </div>
+
+                                      <div className="mini-top-user mini-top-user-3">
+                                        <span className="mini-top-rank mini-top-rank-3">
+                                          3
+                                        </span>
+                                        <img
+                                          className="mini-user-pfp"
+                                          src={thirdPlacePfp}
+                                        />
+                                        <div className="mini-points-container">
+                                          <img
+                                            src={crystalxp}
+                                            className="mini-token-icon"
+                                            alt="Token"
+                                          />
+                                          <span className="mini-top-points">52,181</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {currentStep === 2 && (
+                              <div className="rewards-container">
+                                <div className="rewards-stage">
+                                  <img className="lbstand" src={lbstand} />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="account-setup-footer">
+                      {currentStep > 0 ? (
+                        <button className="back-button" onClick={handleBackClick}>
+                          {t('back')}
+                        </button>
+                      ) : (
+                        <button
+                          className="back-to-username-button"
+                          onClick={handleBackToUsernameWithAudio}
+                        >
+                          {t('back')}
+                        </button>
+                      )}
+
+                      <button className="next-button" onClick={handleNextClick}>
+                        {currentStep < 2 ? t('next') : t('getStarted')}
+                      </button>
+
+                      <audio ref={backAudioRef} src={backaudio} preload="auto" />
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              !user && (
+                <div
+                  className="connect-wallet-username-onboarding-bg"
+                >
+                  {showWelcomeScreen || isTransitioning ? (
+                    <div className={`crystal-welcome-screen ${isWelcomeExiting ? 'welcome-screen-exit' : ''}`}>
+                      <div className="welcome-screen-content">
+                        <div className="welcome-text-container">
+                          <p className="welcome-text">{typedText}</p>
+                        </div>
+                        {animationStarted && typedText ? (
+                          <button
+                            className="welcome-enter-button"
+                            onClick={handleWelcomeTransition}
+                          >
+                            EXPLORE NOW
+                          </button>
+                        ) : (
+                          <button
+                            className="welcome-enter-button noshow"
+                            onClick={handleWelcomeTransition}
+                          >
+                            EXPLORE NOW
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={`connect-wallet-username-wrapper ${!showWelcomeScreen || isConnectEntering ? 'connect-wallet-enter' : 'connect-wallet-hidden'}`}>
+                      <div className="onboarding-connect-wallet">
+                        <div className="smart-wallet-reminder">
+                          <img className="onboarding-info-icon" src={infoicon} />
+                          Use a Smart Wallet to receive a multiplier on all Crystals
+                        </div>
+                        <div className="connect-wallet-content-container">
+                          <AuthCard {...alchemyconfig.ui.auth} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            )}
+          </div>
+        ) : null}
+        {popup === 16 ? (
+          <div className="edit-username-bg">
+            <div ref={popupref} className="edit-username-container">
+              <div className="onboarding-split-container">
+                <div className="onboarding-content">
+                  <div className="onboarding-header">
+                    <h2 className="onboarding-title">{t("editUsername")}</h2>
+                    <p className="onboarding-subtitle">{t("editUsernameSubtitle")}</p>
+                  </div>
+
+                  <div className="onboarding-form">
+                    <div className="form-group">
+                      <label className="form-label">{t("yourWalletAddress")}</label>
+                      <div className="wallet-address">{address || "0x1234...5678"}</div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="username" className="form-label">{t('username')}</label>
+                      <input
+                        type="text"
+                        id="username"
+                        className="username-input"
+                        placeholder="Enter a username"
+                        value={usernameInput || ""}
+                        onChange={e => {
+                          const value = e.target.value.trim();
+                          if (isValidInput(value) || value === "") {
+                            setUsernameInput(value);
+                          }
+                        }}
+                      />
+                      {usernameError && (
+                        <p className="username-error">{usernameError}</p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    className={`create-username-button ${isUsernameSigning ? 'signing' : ''} ${!usernameInput.trim() ? 'disabled' : ''}`}
+                    onClick={async () => {
+                      if (!usernameInput.trim() || isUsernameSigning) return;
+                      await handleEditUsername(usernameInput);
+                    }}
+                    disabled={!usernameInput.trim() || isUsernameSigning}
+                  >
+                    {isUsernameSigning ? (
+                      <div className="button-content">
+                        <div className="loading-spinner" />
+                        {t('signTransaction')}
+                      </div>
+                    ) : (
+                      t("editUsername")
+                    )}
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </>
+  );
+
+  // trade ui component
+  const swap = (
+    <div className="rectangle">
+      <div className="navlinkwrapper" data-active={location.pathname.slice(1)}>
+        <div className="innernavlinkwrapper">
+          <Link
+            to={simpleView ? "/swap" : "/market"}
+            className={`navlink ${location.pathname.slice(1) === 'market' || location.pathname.slice(1) === 'swap' ? 'active' : ''}`}
+            onClick={(e) => {
+              if ((location.pathname === '/swap' && simpleView) ||
+                (location.pathname === '/market' && !simpleView)) {
+                e.preventDefault();
+              }
+            }}
+          >
+            {simpleView ? t('swap') : t('market')}
+          </Link>
+          <Link
+            to="/limit"
+            className={`navlink ${location.pathname.slice(1) === 'limit' ? 'active' : ''}`}
+          >
+            {t('limit')}
+          </Link>
+          <span
+            ref={(el: HTMLSpanElement | null) => {
+              sendButtonRef.current = el;
+            }}
+            className={`navlink ${location.pathname.slice(1) === 'send' || location.pathname.slice(1) === 'scale' ? 'active' : ''}`}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              setShowSendDropdown(!showSendDropdown);
+            }}
+          >
+            <span className="current-pro-text">{t(currentProText)}</span>
+            <svg
+              className={`dropdown-arrow ${showSendDropdown ? 'open' : ''}`}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+          <button
+            className={`refresh-quote-button ${isRefreshing ? 'refreshing' : ''}`}
+            onClick={handleRefreshQuote}
+            disabled={isRefreshing}
+          >
+            <img src={refreshicon} className="refresh-quote-icon"></img>
+            <svg className="refresh-timer-circle" viewBox="0 0 24 24">
+              <circle className="timer-circle-border" cx="12" cy="12" r="9" />
+            </svg>
+          </button>
+          {showSendDropdown && (
+            <div className="navlink-dropdown" ref={sendDropdownRef}>
+              <Link
+                to="/send"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('send');
+                }}
+              >
+                {t('send')}
+              </Link>
+              <Link
+                to="/scale"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('scale');
+                }}
+              >
+                <TooltipLabel
+                  label={t('scale')}
+                  tooltipText={
+                    <div>
+                      <div className="tooltip-description">
+                        {t('scaleTooltip')}
+                      </div>
+                    </div>
+                  }
+                  className="impact-label"
+                />
+              </Link>
+
+            </div>
+          )}
+        </div>
+        <div className="sliding-tab-indicator" />
+      </div>
+      <div className="swapmodal">
+        <div
+          className={`inputbg ${connected && amountIn > tokenBalances[tokenIn]
+            ? 'exceed-balance'
+            : ''
+            }`}
+        >
+          <div className="Pay">{t('pay')}</div>
+          <div className="inputbutton1container">
+            {displayValuesLoading &&
+              switched == true &&
+              !(inputString == '' && outputString == '') ? (
+              <div className="output-skeleton" />
+            ) : (
+              <input
+                inputMode="decimal"
+                className={`input ${connected &&
+                  amountIn > tokenBalances[tokenIn]
+                  ? 'exceed-balance'
+                  : ''
+                  }`}
+                onCompositionStart={() => {
+                  setIsComposing(true);
+                }}
+                onCompositionEnd={(
+                  e: React.CompositionEvent<HTMLInputElement>,
+                ) => {
+                  setIsComposing(false);
+                  if (/^\d*\.?\d{0,18}$/.test(e.currentTarget.value)) {
+                    setInputString(e.currentTarget.value);
+                    if (
+                      (inputString.endsWith('.') && e.currentTarget.value === inputString.slice(0, -1)) ||
+                      (e.currentTarget.value.endsWith('.') && e.currentTarget.value.slice(0, -1) === inputString)
+                    ) {
+                      return;
+                    }
+                    const inputValue = BigInt(
+                      Math.round(
+                        (parseFloat(e.currentTarget.value || '0') || 0) *
+                        10 ** Number(tokendict[tokenIn].decimals),
+                      ),
+                    );
+                    setswitched(false);
+                    debouncedSetAmount(inputValue);
+                    if (isWrap) {
+                      setamountOutSwap(inputValue);
+                      setoutputString(e.currentTarget.value);
+                    }
+                    const percentage = !tokenBalances[tokenIn]
+                      ? 0
+                      : Math.min(
+                        100,
+                        Math.floor(
+                          Number(
+                            (inputValue * BigInt(100)) /
+                            tokenBalances[tokenIn],
+                          ),
+                        ),
+                      );
+                    setSliderPercent(percentage);
+                    const slider = document.querySelector(
+                      '.balance-amount-slider',
+                    );
+                    const popup = document.querySelector(
+                      '.slider-percentage-popup',
+                    );
+                    if (slider && popup) {
+                      const rect = slider.getBoundingClientRect();
+                      (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                        }px`;
+                    }
+                  }
+                }}
+                onChange={(e) => {
+                  if (isComposing) {
+                    setInputString(e.target.value);
+                    return;
+                  }
+                  if (/^\d*\.?\d{0,18}$/.test(e.target.value)) {
+                    setInputString(e.target.value);
+                    if (
+                      (inputString.endsWith('.') && e.target.value === inputString.slice(0, -1)) ||
+                      (e.target.value.endsWith('.') && e.target.value.slice(0, -1) === inputString)
+                    ) {
+                      return;
+                    }
+                    const inputValue = BigInt(
+                      Math.round(
+                        (parseFloat(e.target.value || '0') || 0) *
+                        10 ** Number(tokendict[tokenIn].decimals),
+                      ),
+                    );
+                    setswitched(false);
+                    debouncedSetAmount(inputValue);
+                    if (isWrap) {
+                      setamountOutSwap(inputValue);
+                      setoutputString(e.target.value);
+                    }
+                    const percentage = !tokenBalances[tokenIn]
+                      ? 0
+                      : Math.min(
+                        100,
+                        Math.floor(
+                          Number(
+                            (inputValue * BigInt(100)) /
+                            tokenBalances[tokenIn],
+                          ),
+                        ),
+                      );
+                    setSliderPercent(percentage);
+                    const slider = document.querySelector(
+                      '.balance-amount-slider',
+                    );
+                    const popup = document.querySelector(
+                      '.slider-percentage-popup',
+                    );
+                    if (slider && popup) {
+                      const rect = slider.getBoundingClientRect();
+                      (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                        }px`;
+                    }
+                  }
+                }}
+                placeholder="0.00"
+                value={inputString}
+                autoFocus={
+                  outputString === '' &&
+                  switched === false &&
+                  !(windowWidth <= 1020)
+                }
+              />
+            )}
+            <button
+              className={`button1 ${connected &&
+                amountIn > tokenBalances[tokenIn]
+                ? 'exceed-balance'
+                : ''
+                }`}
+              onClick={() => {
+                setpopup(1);
+              }}
+            >
+              <img className="button1pic" src={tokendict[tokenIn].image} />
+              <span>{tokendict[tokenIn].ticker || '?'}</span>
+              <svg
+                className={`button-arrow ${popup == 1 ? 'open' : ''}`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div className="balance1maxcontainer">
+            {displayValuesLoading &&
+              switched == true &&
+              !(inputString == '' && outputString == '') ? (
+              <div className="output-usd-skeleton" />
+            ) : (
+              <span className="usd-value">
+                {Math.round(
+                  (parseFloat(inputString || '0') || 0) *
+                  10 ** Number(tokendict[tokenIn].decimals),
+                ) == 0
+                  ? '$0.00'
+                  : formatUSDDisplay(
+                    calculateUSDValue(
+                      BigInt(
+                        Math.round(
+                          (parseFloat(inputString || '0') || 0) *
+                          10 ** Number(tokendict[tokenIn].decimals),
+                        ),
+                      ),
+                      tradesByMarket[
+                      (({ baseAsset, quoteAsset }) =>
+                        (baseAsset === wethticker ? ethticker : baseAsset) +
+                        (quoteAsset === wethticker ? ethticker : quoteAsset)
+                      )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                      ],
+                      tokenIn,
+                      getMarket(
+                        activeMarket.path.at(0),
+                        activeMarket.path.at(1),
+                      ),
+                    ),
+                  )}
+              </span>
+            )}
+            <div className="balance1">
+              <img src={walleticon} className="balance-wallet-icon" />{' '}
+              {formatDisplayValue(
+                tokenBalances[tokenIn],
+                Number(tokendict[tokenIn].decimals),
+              )}
+            </div>
+            <div
+              className="max-button"
+              onClick={() => {
+                if (tokenBalances[tokenIn] != BigInt(0)) {
+                  setswitched(false);
+                  let amount =
+                    (tokenIn == eth && !client)
+                      ? tokenBalances[tokenIn] -
+                        settings.chainConfig[activechain].gasamount >
+                        BigInt(0)
+                        ? tokenBalances[tokenIn] -
+                        settings.chainConfig[activechain].gasamount
+                        : BigInt(0)
+                      : tokenBalances[tokenIn];
+                  debouncedSetAmount(BigInt(amount));
+                  setInputString(
+                    customRound(
+                      Number(amount) /
+                      10 ** Number(tokendict[tokenIn].decimals),
+                      3,
+                    ).toString(),
+                  );
+                  if (isWrap) {
+                    setamountOutSwap(BigInt(amount));
+                    setoutputString(
+                      customRound(
+                        Number(amount) /
+                        10 ** Number(tokendict[tokenIn].decimals),
+                        3,
+                      ).toString(),
+                    );
+                  }
+                  setSliderPercent(100);
+                  const slider = document.querySelector(
+                    '.balance-amount-slider',
+                  );
+                  const popup = document.querySelector(
+                    '.slider-percentage-popup',
+                  );
+                  if (slider && popup) {
+                    const rect = slider.getBoundingClientRect();
+                    const trackWidth = rect.width - 15;
+                    const thumbPosition = trackWidth + 15 / 2;
+                    (popup as HTMLElement).style.left = `${thumbPosition}px`;
+                  }
+                }
+              }}
+            >
+              {t('max')}{' '}
+            </div>
+          </div>
+        </div>
+        <div
+          className="switch-button"
+          onClick={() => {
+            setTokenIn(tokenOut);
+            setTokenOut(tokenIn);
+            if (amountIn != BigInt(0) || amountOutSwap != BigInt(0)) {
+              if (!isWrap) {
+                if (switched == false) {
+                  setswitched(true);
+                  setStateIsLoading(true);
+                  setInputString('');
+                  setamountIn(BigInt(0));
+                  setamountOutSwap(amountIn);
+                  setoutputString(
+                    amountIn == BigInt(0)
+                      ? ''
+                      : String(
+                        customRound(
+                          Number(amountIn) /
+                          10 ** Number(tokendict[tokenIn].decimals),
+                          3,
+                        ),
+                      ),
+                  );
+                } else {
+                  setswitched(false);
+                  setStateIsLoading(true);
+                  setoutputString('');
+                  setamountOutSwap(BigInt(0));
+                  setamountIn(amountOutSwap);
+                  setInputString(
+                    amountOutSwap == BigInt(0)
+                      ? ''
+                      : String(
+                        customRound(
+                          Number(amountOutSwap) /
+                          10 ** Number(tokendict[tokenOut].decimals),
+                          3,
+                        ),
+                      ),
+                  );
+                  const percentage = !tokenBalances[tokenOut]
+                    ? 0
+                    : Math.min(
+                      100,
+                      Math.floor(
+                        Number(
+                          (amountOutSwap * BigInt(100)) /
+                          tokenBalances[tokenOut],
+                        ),
+                      ),
+                    );
+                  setSliderPercent(percentage);
+                  const slider = document.querySelector(
+                    '.balance-amount-slider',
+                  );
+                  const popup = document.querySelector(
+                    '.slider-percentage-popup',
+                  );
+                  if (slider && popup) {
+                    const rect = slider.getBoundingClientRect();
+                    (popup as HTMLElement).style.left =
+                      `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                  }
+                }
+              }
+            }
+          }}
+        >
+          <img src={tradearrow} className="switch-arrow" />
+        </div>
+        <div className="swap-container-divider" />
+        <div className="outputbg">
+          <div className="Recieve">{t('receive')}</div>
+          <div className="outputbutton2container">
+            {displayValuesLoading &&
+              switched == false &&
+              !(inputString == '' && outputString == '') ? (
+              <div className="output-skeleton" />
+            ) : (
+              <input
+                inputMode="decimal"
+                className="output"
+                onCompositionStart={() => {
+                  setIsComposing(true);
+                }}
+                onCompositionEnd={(
+                  e: React.CompositionEvent<HTMLInputElement>,
+                ) => {
+                  setIsComposing(false);
+                  if (/^\d*\.?\d{0,18}$/.test(e.currentTarget.value)) {
+                    setoutputString(e.currentTarget.value);
+                    if (
+                      (outputString.endsWith('.') && e.currentTarget.value === outputString.slice(0, -1)) ||
+                      (e.currentTarget.value.endsWith('.') && e.currentTarget.value.slice(0, -1) === outputString)
+                    ) {
+                      return;
+                    }
+                    const outputValue = BigInt(
+                      Math.round(
+                        (parseFloat(e.currentTarget.value || '0') || 0) *
+                        10 ** Number(tokendict[tokenOut].decimals),
+                      ),
+                    );
+                    setswitched(true);
+                    if (isWrap) {
+                      setamountIn(outputValue);
+                      setInputString(e.currentTarget.value);
+                    }
+                    debouncedSetAmountOut(outputValue);
+                  }
+                }}
+                onChange={(e) => {
+                  if (isComposing) {
+                    setoutputString(e.target.value);
+                    return;
+                  }
+                  if (/^\d*\.?\d{0,18}$/.test(e.target.value)) {
+                    setoutputString(e.target.value);
+                    if (
+                      (outputString.endsWith('.') && e.target.value === outputString.slice(0, -1)) ||
+                      (e.target.value.endsWith('.') && e.target.value.slice(0, -1) === outputString)
+                    ) {
+                      return;
+                    }
+                    const outputValue = BigInt(
+                      Math.round(
+                        (parseFloat(e.target.value || '0') || 0) *
+                        10 ** Number(tokendict[tokenOut].decimals),
+                      ),
+                    );
+                    setswitched(true);
+                    if (isWrap) {
+                      setamountIn(outputValue);
+                      setInputString(e.target.value);
+                    }
+                    debouncedSetAmountOut(outputValue);
+                  }
+                }}
+                value={outputString}
+                placeholder="0.00"
+              />
+            )}
+            <button
+              className="button2"
+              onClick={() => {
+                setpopup(2);
+              }}
+            >
+              <img className="button2pic" src={tokendict[tokenOut].image} />
+              <span>{tokendict[tokenOut].ticker || '?'}</span>
+              <svg
+                className={`button-arrow ${popup == 2 ? 'open' : ''}`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div className="balance1maxcontainer">
+            {displayValuesLoading &&
+              switched == false &&
+              !(inputString == '' && outputString == '') ? (
+              <div className="output-usd-skeleton" />
+            ) : (
+              <div className="output-usd-value">
+                {amountOutSwap === BigInt(0)
+                  ? '$0.00'
+                  : (() => {
+                    const outputUSD = calculateUSDValue(
+                      BigInt(
+                        Math.round(
+                          (parseFloat(outputString || '0') || 0) *
+                          10 ** Number(tokendict[tokenOut].decimals),
+                        ),
+                      ),
+                      tradesByMarket[
+                      (({ baseAsset, quoteAsset }) =>
+                        (baseAsset === wethticker ? ethticker : baseAsset) +
+                        (quoteAsset === wethticker ? ethticker : quoteAsset)
+                      )(getMarket(activeMarket.path.at(-2), activeMarket.path.at(-1)))
+                      ],
+                      tokenOut,
+                      getMarket(
+                        activeMarket.path.at(-2),
+                        activeMarket.path.at(-1),
+                      ),
+                    );
+
+                    const inputUSD = calculateUSDValue(
+                      amountIn,
+                      tradesByMarket[
+                      (({ baseAsset, quoteAsset }) =>
+                        (baseAsset === wethticker ? ethticker : baseAsset) +
+                        (quoteAsset === wethticker ? ethticker : quoteAsset)
+                      )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                      ],
+                      tokenIn,
+                      getMarket(
+                        activeMarket.path.at(0),
+                        activeMarket.path.at(1),
+                      ),
+                    );
+
+                    const percentageDiff =
+                      inputUSD > 0
+                        ? ((outputUSD - inputUSD) / inputUSD) * 100
+                        : 0;
+
+                    return (
+                      <div className="output-usd-container">
+                        <span>{formatUSDDisplay(outputUSD)}</span>
+                        {inputUSD > 0 && !displayValuesLoading && !stateIsLoading && (
+                          <span
+                            className={`output-percentage ${percentageDiff >= 0 ? 'positive' : 'negative'}`}
+                          >
+                            ({percentageDiff >= 0 ? '+' : ''}
+                            {percentageDiff.toFixed(2)}%)
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
+              </div>
+            )}
+            <div className="balance2">
+              <img src={walleticon} className="balance-wallet-icon" />{' '}
+              {formatDisplayValue(
+                tokenBalances[tokenOut],
+                Number(tokendict[tokenOut].decimals),
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="balance-slider-wrapper">
+          <div className="slider-container">
+            <input
+              type="range"
+              className={`balance-amount-slider ${isDragging ? 'dragging' : ''}`}
+              min="0"
+              max="100"
+              step="1"
+              value={sliderPercent}
+              disabled={!connected}
+              onChange={(e) => {
+                const percent = parseInt(e.target.value);
+                const newAmount =
+                  (((tokenIn == eth && !client)
+                    ? tokenBalances[tokenIn] -
+                      settings.chainConfig[activechain].gasamount >
+                      BigInt(0)
+                      ? tokenBalances[tokenIn] -
+                      settings.chainConfig[activechain].gasamount
+                      : BigInt(0)
+                    : tokenBalances[tokenIn]) *
+                    BigInt(percent)) /
+                  100n;
+                setSliderPercent(percent);
+                setswitched(false);
+                setInputString(
+                  newAmount == BigInt(0)
+                    ? ''
+                    : customRound(
+                      Number(newAmount) /
+                      10 ** Number(tokendict[tokenIn].decimals),
+                      3,
+                    ).toString(),
+                );
+                debouncedSetAmount(newAmount);
+                if (isWrap) {
+                  setoutputString(
+                    newAmount == BigInt(0)
+                      ? ''
+                      : customRound(
+                        Number(newAmount) /
+                        10 ** Number(tokendict[tokenIn].decimals),
+                        3,
+                      ).toString(),
+                  );
+                  setamountOutSwap(newAmount);
+                }
+                const slider = e.target;
+                const rect = slider.getBoundingClientRect();
+                const trackWidth = rect.width - 15;
+                const thumbPosition = (percent / 100) * trackWidth + 15 / 2;
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) {
+                  popup.style.left = `${thumbPosition}px`;
+                }
+              }}
+              onMouseDown={() => {
+                setIsDragging(true);
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) popup.classList.add('visible');
+              }}
+              onMouseUp={() => {
+                setIsDragging(false);
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) popup.classList.remove('visible');
+              }}
+              style={{
+                background: `linear-gradient(to right,rgb(171, 176, 224) ${sliderPercent}%,rgb(21, 21, 25) ${sliderPercent}%)`,
+              }}
+            />
+            <div className="slider-percentage-popup">{sliderPercent}%</div>
+            <div className="balance-slider-marks">
+              {[0, 25, 50, 75, 100].map((markPercent) => (
+                <span
+                  key={markPercent}
+                  className="balance-slider-mark"
+                  data-active={sliderPercent >= markPercent}
+                  data-percentage={markPercent}
+                  onClick={() => {
+                    if (connected) {
+                      const newAmount =
+                        (((tokenIn == eth && !client)
+                          ? tokenBalances[tokenIn] -
+                            settings.chainConfig[activechain].gasamount >
+                            BigInt(0)
+                            ? tokenBalances[tokenIn] -
+                            settings.chainConfig[activechain].gasamount
+                            : BigInt(0)
+                          : tokenBalances[tokenIn]) *
+                          BigInt(markPercent)) /
+                        100n;
+                      setSliderPercent(markPercent);
+                      setswitched(false);
+                      setInputString(
+                        newAmount == BigInt(0)
+                          ? ''
+                          : customRound(
+                            Number(newAmount) /
+                            10 ** Number(tokendict[tokenIn].decimals),
+                            3,
+                          ).toString(),
+                      );
+                      debouncedSetAmount(newAmount);
+                      if (isWrap) {
+                        setoutputString(
+                          newAmount == BigInt(0)
+                            ? ''
+                            : customRound(
+                              Number(newAmount) /
+                              10 ** Number(tokendict[tokenIn].decimals),
+                              3,
+                            ).toString(),
+                        );
+                        setamountOutSwap(newAmount);
+                      }
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup: HTMLElement | null = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        popup.style.left = `${(rect.width - 15) * (markPercent / 100) + 15 / 2
+                          }px`;
+                      }
+                    }
+                  }}
+                >
+                  {markPercent}%
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <button
+          className={`swap-button ${isSigning ? 'signing' : ''}`}
+          onClick={async () => {
+            if (connected && userchain === activechain) {
+              if (warning == 1) {
+                setpopup(13);
+                const confirmed = await new Promise((resolve) => {
+                  const handleConfirm = () => {
+                    cleanup();
+                    resolve(true);
+                  };
+
+                  const handleCancel = () => {
+                    cleanup();
+                    resolve(false);
+                  };
+
+                  const cleanup = () => {
+                    window.removeEventListener('high-impact-confirm', handleConfirm);
+                    window.removeEventListener('high-impact-cancel', handleCancel);
+                  };
+
+                  window.addEventListener('high-impact-confirm', handleConfirm);
+                  window.addEventListener('high-impact-cancel', handleCancel);
+
+                });
+                if (!confirmed) return;
+              }
+              let hash;
+              setIsSigning(true);
+              if (client) {
+                txPending.current = true;
+              }
+              try {
+                if (tokenIn == eth && tokenOut == weth) {
+                  hash = await wrapeth(sendUserOperationAsync, amountIn, weth);
+                  newTxPopup(
+                    (client
+                      ? hash.hash
+                      : await waitForTxReceipt(hash.hash)),
+                    'wrap',
+                    eth,
+                    weth,
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[eth].decimals), 3),
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[eth].decimals), 3),
+                    '',
+                    ''
+                  );
+                } else if (tokenIn == weth && tokenOut == eth) {
+                  hash = await unwrapeth(sendUserOperationAsync, amountIn, weth);
+                  newTxPopup(
+                    (client
+                      ? hash.hash
+                      : await waitForTxReceipt(hash.hash)),
+                    'unwrap',
+                    weth,
+                    eth,
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[eth].decimals), 3),
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[eth].decimals), 3),
+                    '',
+                    ''
+                  );
+                } else if (tokenIn == eth && tokendict[tokenOut]?.lst == true && isStake) {
+                  hash = await stake(sendUserOperationAsync, tokenOut, address, amountIn);
+                  newTxPopup(
+                    (client
+                      ? hash.hash
+                      : await waitForTxReceipt(hash.hash)),
+                    'stake',
+                    eth,
+                    tokenOut,
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[eth].decimals), 3),
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[eth].decimals), 3),
+                    '',
+                    ''
+                  );
+                } else {
+                  if (switched == false) {
+                    if (tokenIn == eth) {
+                      if (orderType == 1 || multihop) {
+                        hash = await sendUserOperationAsync({
+                          uo: swapExactETHForTokens(
+                            router,
+                            amountIn,
+                            (amountOutSwap * slippage + 5000n) / 10000n,
+                            activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                            address as `0x${string}`,
+                            BigInt(Math.floor(Date.now() / 1000) + 900),
+                            usedRefAddress as `0x${string}`
+                          )
+                        })
+                      } else {
+                        hash = await sendUserOperationAsync({
+                          uo: _swap(
+                            router,
+                            amountIn,
+                            activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                            activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                            true,
+                            BigInt(0),
+                            amountIn,
+                            tokenIn == activeMarket.quoteAddress
+                              ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                              : (highestBid * slippage + 5000n) / 10000n,
+                            BigInt(Math.floor(Date.now() / 1000) + 900),
+                            usedRefAddress as `0x${string}`
+                          )
+                        })
+                      }
+                    } else {
+                      if (allowance < amountIn) {
+                        if (client) {
+                          let uo = []
+                          uo.push(approve(
+                            tokenIn as `0x${string}`,
+                            getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address,
+                            maxUint256
+                          ))
+                          if (tokenOut == eth) {
+                            if (orderType == 1 || multihop) {
+                              uo.push(swapExactTokensForETH(
+                                router,
+                                amountIn,
+                                (amountOutSwap * slippage + 5000n) / 10000n,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            } else {
+                              uo.push(_swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountIn,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            }
+                          } else {
+                            if (orderType == 1 || multihop) {
+                              uo.push(swapExactTokensForTokens(
+                                router,
+                                amountIn,
+                                (amountOutSwap * slippage + 5000n) / 10000n,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            } else {
+                              uo.push(_swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountIn,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            }
+                          }
+                          hash = await sendUserOperationAsync({ uo: uo })
+                          newTxPopup(
+                            hash.hash,
+                            'approve',
+                            tokenIn,
+                            '',
+                            customRound(Number(amountIn) / 10 ** Number(tokendict[tokenIn].decimals), 3),
+                            0,
+                            '',
+                            getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address
+                          );
+                        }
+                        else {
+                          hash = await sendUserOperationAsync({
+                            uo: approve(
+                              tokenIn as `0x${string}`,
+                              getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address,
+                              maxUint256
+                            )
+                          })
+                          newTxPopup(
+                            client
+                              ? hash.hash
+                              : await waitForTxReceipt(hash.hash),
+                            'approve',
+                            tokenIn,
+                            '',
+                            customRound(Number(amountIn) / 10 ** Number(tokendict[tokenIn].decimals), 3),
+                            0,
+                            '',
+                            getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address
+                          );
+                        }
+                      }
+                      if (!client || !(allowance < amountIn)) {
+                        if (tokenOut == eth) {
+                          if (orderType == 1 || multihop) {
+                            hash = await sendUserOperationAsync({
+                              uo: swapExactTokensForETH(
+                                router,
+                                amountIn,
+                                (amountOutSwap * slippage + 5000n) / 10000n,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          } else {
+                            hash = await sendUserOperationAsync({
+                              uo: _swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountIn,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          }
+                        } else {
+                          if (orderType == 1 || multihop) {
+                            hash = await sendUserOperationAsync({
+                              uo: swapExactTokensForTokens(
+                                router,
+                                amountIn,
+                                (amountOutSwap * slippage + 5000n) / 10000n,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          } else {
+                            hash = await sendUserOperationAsync({
+                              uo: _swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountIn,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          }
+                        }
+                      }
+                    }
+                  } else {
+                    if (tokenIn == eth) {
+                      if (orderType == 1 || multihop) {
+                        hash = await sendUserOperationAsync({
+                          uo: swapETHForExactTokens(
+                            router,
+                            amountOutSwap,
+                            (amountIn * 10000n + slippage / 2n) / slippage,
+                            activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                            address as `0x${string}`,
+                            BigInt(Math.floor(Date.now() / 1000) + 900),
+                            usedRefAddress as `0x${string}`
+                          )
+                        })
+                      } else {
+                        hash = await sendUserOperationAsync({
+                          uo: _swap(
+                            router,
+                            BigInt((amountIn * 10000n + slippage / 2n) / slippage),
+                            activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                            activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                            false,
+                            BigInt(0),
+                            amountOutSwap,
+                            tokenIn == activeMarket.quoteAddress
+                              ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                              : (highestBid * slippage + 5000n) / 10000n,
+                            BigInt(Math.floor(Date.now() / 1000) + 900),
+                            usedRefAddress as `0x${string}`
+                          )
+                        })
+                      }
+                    } else {
+                      if (allowance < amountIn) {
+                        if (client) {
+                          let uo = []
+                          uo.push(approve(
+                            tokenIn as `0x${string}`,
+                            getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address,
+                            maxUint256
+                          ))
+                          if (tokenOut == eth) {
+                            if (orderType == 1 || multihop) {
+                              uo.push(swapTokensForExactETH(
+                                router,
+                                amountOutSwap,
+                                (amountIn * 10000n + slippage / 2n) / slippage,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            } else {
+                              uo.push(_swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountOutSwap,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            }
+                          } else {
+                            if (orderType == 1 || multihop) {
+                              uo.push(swapTokensForExactTokens(
+                                router,
+                                amountOutSwap,
+                                (amountIn * 10000n + slippage / 2n) / slippage,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            } else {
+                              uo.push(_swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountOutSwap,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              ))
+                            }
+                          }
+                          hash = await sendUserOperationAsync({ uo: uo })
+                          newTxPopup(
+                            hash.hash,
+                            'approve',
+                            tokenIn,
+                            '',
+                            customRound(Number(amountIn) / 10 ** Number(tokendict[tokenIn].decimals), 3),
+                            0,
+                            '',
+                            getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address
+                          );
+                        }
+                        else {
+                          hash = await sendUserOperationAsync({
+                            uo: approve(
+                              tokenIn as `0x${string}`,
+                              getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address,
+                              maxUint256
+                            )
+                          })
+                          newTxPopup(
+                            client
+                              ? hash.hash
+                              : await waitForTxReceipt(hash.hash),
+                            'approve',
+                            tokenIn,
+                            '',
+                            customRound(Number(amountIn) / 10 ** Number(tokendict[tokenIn].decimals), 3),
+                            0,
+                            '',
+                            getMarket(activeMarket.path.at(0), activeMarket.path.at(1)).address
+                          );
+                        }
+                      }
+                      if (!client || !(allowance < amountIn)) {
+                        if (tokenOut == eth) {
+                          if (orderType == 1 || multihop) {
+                            hash = await sendUserOperationAsync({
+                              uo: swapTokensForExactETH(
+                                router,
+                                amountOutSwap,
+                                (amountIn * 10000n + slippage / 2n) / slippage,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          } else {
+                            hash = await sendUserOperationAsync({
+                              uo: _swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountOutSwap,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          }
+                        } else {
+                          if (orderType == 1 || multihop) {
+                            hash = await sendUserOperationAsync({
+                              uo: swapTokensForExactTokens(
+                                router,
+                                amountOutSwap,
+                                (amountIn * 10000n + slippage / 2n) / slippage,
+                                activeMarket.path[0] == tokenIn ? activeMarket.path : [...activeMarket.path].reverse(),
+                                address as `0x${string}`,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          } else {
+                            hash = await sendUserOperationAsync({
+                              uo: _swap(
+                                router,
+                                BigInt(0),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(0) : activeMarket.path.at(1),
+                                activeMarket.path[0] == tokenIn ? activeMarket.path.at(1) : activeMarket.path.at(0),
+                                true,
+                                BigInt(0),
+                                amountOutSwap,
+                                tokenIn == activeMarket.quoteAddress
+                                  ? (lowestAsk * 10000n + slippage / 2n) / slippage
+                                  : (highestBid * slippage + 5000n) / 10000n,
+                                BigInt(Math.floor(Date.now() / 1000) + 900),
+                                usedRefAddress as `0x${string}`
+                              )
+                            })
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                if (!client) {
+                  txPending.current = true
+                  await waitForTxReceipt(hash.hash);
+                }
+                await refetch()
+                txPending.current = false
+                setTimeout(() => setoutputString(''), 0);
+                setTimeout(() => setamountOutSwap(BigInt(0)), 0);
+                setTimeout(() => setInputString(''), 0);
+                setTimeout(() => setamountIn(BigInt(0)), 0);
+                setswitched(false);
+                setInputString('');
+                setamountIn(BigInt(0));
+                setoutputString('')
+                setamountOutSwap(BigInt(0));
+                setSliderPercent(0);
+                setSwapButtonDisabled(true);
+                setSwapButton(1);
+                const slider = document.querySelector('.balance-amount-slider');
+                const popup = document.querySelector('.slider-percentage-popup');
+                if (slider && popup) {
+                  (popup as HTMLElement).style.left = `${15 / 2}px`;
+                }
+              } catch (error) {
+                if (!(error instanceof TransactionExecutionError)) {
+                  newTxPopup(
+                    hash.hash,
+                    "swapFailed",
+                    tokenIn == eth ? eth : tokenIn,
+                    tokenOut == eth ? eth : tokenOut,
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[tokenIn == eth ? eth : tokenIn].decimals), 3),
+                    customRound(Number(amountOutSwap) / 10 ** Number(tokendict[tokenOut == eth ? eth : tokenOut].decimals), 3),
+                    "",
+                    "",
+                  );
+                }
+              } finally {
+                txPending.current = false
+                setIsSigning(false)
+              }
+            } else {
+              !connected ? setpopup(4) : handleSetChain();
+            }
+          }}
+          disabled={swapButtonDisabled || displayValuesLoading || isSigning}
+        >
+          {isSigning ? (
+            <div className="button-content">
+              <div className="loading-spinner" />
+              {client ? t('sendingTransaction') : t('signTransaction')}
+            </div>
+          ) : swapButton == 0 ? (
+            t('insufficientLiquidity')
+          ) : swapButton == 1 ? (
+            t('enterAmount')
+          ) : swapButton == 2 ? (
+            t('swap')
+          ) : swapButton == 3 ? (
+            t('insufficient') +
+            (tokendict[tokenIn].ticker || '?') +
+            ' ' +
+            t('bal')
+          ) : swapButton == 4 ? (
+            `${t('switchto')} ${t(settings.chainConfig[activechain].name)}`
+          ) : swapButton == 5 ? (
+            t('connectWallet')
+          ) : (
+            client ? t('swap') : t('approve')
+          )}
+        </button>
+      </div>
+      <div className="trade-info-rectangle">
+        {!multihop && !isWrap && !((tokenIn == eth && tokendict[tokenOut]?.lst == true) && isStake) && (
+          <div className="trade-fee">
+            <div className="label-container">
+              <TooltipLabel
+                label={t('partialFill')}
+                tooltipText={
+                  <div>
+                    <div className="tooltip-description">
+                      {t('partialFillSubtitle')}
+                    </div>
+                  </div>
+                }
+                className="impact-label"
+              />
+            </div>
+            <ToggleSwitch
+              checked={orderType === 0}
+              onChange={() => {
+                const newValue = orderType === 1 ? 0 : 1;
+                setorderType(newValue);
+                localStorage.setItem(
+                  'crystal_order_type',
+                  JSON.stringify(newValue),
+                );
+              }}
+            />
+          </div>
+        )}
+
+        {!isWrap && !((tokenIn == eth && tokendict[tokenOut]?.lst == true) && isStake) && (
+          <div className="slippage-row">
+            <div className="label-container">
+              <div className="slippage-group">
+                <TooltipLabel
+                  label={t('slippage')}
+                  tooltipText={
+                    <div>
+                      <div className="tooltip-description">
+                        {t('slippageHelp')}
+                      </div>
+                    </div>
+                  }
+                  className="slippage-label"
+                />
+              </div>
+            </div>
+            <div className="slippage-input-container">
+              <input
+                inputMode="decimal"
+                className={`slippage-inline-input ${parseFloat(slippageString) > 5 ? 'red' : ''
+                  }`}
+                type="text"
+                value={slippageString}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (
+                    /^(?!0{2})\d*\.?\d{0,2}$/.test(value) &&
+                    !/^\d{2}\.\d{2}$/.test(value)
+                  ) {
+                    if (value === '') {
+                      setSlippageString('');
+                      setSlippage(BigInt(9900));
+                      localStorage.setItem('crystal_slippage_string', '1');
+                      localStorage.setItem('crystal_slippage', '9900');
+                    } else if (parseFloat(value) <= 50) {
+                      setSlippageString(value);
+                      localStorage.setItem('crystal_slippage_string', value);
+
+                      const newSlippage = BigInt(
+                        10000 - parseFloat(value) * 100,
+                      );
+                      setSlippage(newSlippage);
+                      localStorage.setItem(
+                        'crystal_slippage',
+                        newSlippage.toString(),
+                      );
+                    }
+                  }
+                }}
+                onBlur={() => {
+                  if (slippageString === '') {
+                    setSlippageString('1');
+                    localStorage.setItem('crystal_slippage_string', '1');
+
+                    setSlippage(BigInt(9900));
+                    localStorage.setItem('crystal_slippage', '9900');
+                  }
+                }}
+              />
+              <span
+                className={`slippage-symbol ${parseFloat(slippageString) > 5 ? 'red' : ''
+                  }`}
+              >
+                %
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!isWrap && (
+          <div className="average-price">
+            <div className="label-container">
+              <TooltipLabel
+                label={t('averagePrice')}
+                tooltipText={
+                  <div>
+                    <div className="tooltip-description">
+                      {t('averagePriceHelp')}
+                    </div>
+                  </div>
+                }
+                className="impact-label"
+              />
+            </div>
+            <div className="value-container">
+              {displayValuesLoading ? (
+                <div className="limit-fee-skeleton" style={{ width: 80 }} />
+              ) : isWrap ? (
+                `1 ${tokendict[tokenOut].ticker}`
+              ) : (
+                `${formatSubscript(multihop ? parseFloat(averagePrice).toString() : parseFloat(averagePrice).toFixed(Math.floor(Math.log10(Number(activeMarket.priceFactor)))))} ${multihop ? tokendict[tokenIn].ticker : 'USDC'}`
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="price-impact">
+          <div className="label-container">
+            <TooltipLabel
+              label={t('priceImpact')}
+              tooltipText={
+                <div>
+                  <div className="tooltip-description">
+                    {t('priceImpactHelp')}
+                  </div>
+                </div>
+              }
+              className="impact-label"
+            />
+          </div>
+          <div className="value-container">
+            {displayValuesLoading ? (
+              <div className="limit-fee-skeleton" style={{ width: 60 }} />
+            ) : isWrap || ((tokenIn == eth && tokendict[tokenOut]?.lst == true) && isStake) ? (
+              `0%`
+            ) : priceImpact ? (
+              formatCommas(priceImpact)
+            ) : (
+              '0.00%'
+            )}
+          </div>
+        </div>
+
+        <div className="trade-fee">
+          <div className="label-container">
+            <TooltipLabel
+              label={`${t('fee')} (0.${isWrap || ((tokenIn == eth && tokendict[tokenOut]?.lst == true) && isStake) ? '00' : String(Number(BigInt(100000) - activeMarket.fee) / 100).replace(/\./g, "")}%)`}
+              tooltipText={
+                <div>
+                  <div className="tooltip-description">
+                    {isWrap ? t('nofeeforwrap') : t('takerfeeexplanation')}
+                  </div>
+                </div>
+              }
+              className="impact-label"
+            />
+          </div>
+          <div className="value-container">
+            {displayValuesLoading ? (
+              <div className="limit-fee-skeleton" style={{ width: 70 }} />
+            ) : isWrap || ((tokenIn == eth && tokendict[tokenOut]?.lst == true) && isStake) ? (
+              `0 ${tokendict[tokenIn].ticker}`
+            ) : (
+              formatCommas(tradeFee)
+            )}
+          </div>
+        </div>
+
+        {(warning == 1 && (
+          <div className="price-impact-warning">{t('Warning')}</div>
+        )) ||
+          (warning == 2 && (
+            <div className="price-impact-warning">
+              {t('insufficientLiquidityWarning')}
+            </div>
+          )) ||
+          (warning == 3 && (
+            <div className="price-impact-warning">
+              {t('insufficientLiquidityWarningMultihop')}
+            </div>
+          ))}
+      </div>
+    </div>
+  );
+
+  // limit ui component
+  const limit = (
+    <div className="rectangle">
+      <div className="navlinkwrapper" data-active={location.pathname.slice(1)}>
+        <div className="innernavlinkwrapper">
+          <Link
+            to={simpleView ? "/swap" : "/market"}
+            className={`navlink ${location.pathname.slice(1) === 'swap' ? 'active' : ''}`}
+          >
+            {simpleView ? t('swap') : t('market')}
+          </Link>
+          <Link
+            to="/limit"
+            className={`navlink ${location.pathname.slice(1) === 'limit' ? 'active' : ''}`}
+            onClick={(e) => {
+              if (location.pathname === '/limit') {
+                e.preventDefault();
+              }
+            }}
+          >
+            {t('limit')}
+          </Link>
+          <span
+            ref={(el: HTMLSpanElement | null) => {
+              sendButtonRef.current = el;
+            }}
+            className={`navlink ${location.pathname.slice(1) != 'swap' && location.pathname.slice(1) != 'limit' ? 'active' : ''}`}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              setShowSendDropdown(!showSendDropdown);
+            }}
+          >
+            <span className="current-pro-text">{t(currentProText)}</span>
+            <svg
+              className={`dropdown-arrow ${showSendDropdown ? 'open' : ''}`}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+
+          {showSendDropdown && (
+            <div className="navlink-dropdown" ref={sendDropdownRef}>
+              <Link
+                to="/send"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('send');
+                }}
+              >
+                {t('send')}
+              </Link>
+              <Link
+                to="/scale"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('scale');
+                }}
+              >
+                <TooltipLabel
+                  label={t('scale')}
+                  tooltipText={
+                    <div>
+                      <div className="tooltip-description">
+                        {t('scaleTooltip')}
+                      </div>
+                    </div>
+                  }
+                  className="impact-label"
+                />
+              </Link>
+
+            </div>
+          )}
+        </div>
+        <div className="sliding-tab-indicator" />
+      </div>
+      <div className="swapmodal">
+        <div
+          className={`inputbg ${connected &&
+            ((amountIn > tokenBalances[tokenIn] &&
+              !isLoading &&
+              !stateIsLoading) ||
+              (amountIn != BigInt(0) &&
+                (tokenIn == activeMarket.quoteAddress
+                  ? amountIn < activeMarket.minSize
+                  : (amountIn * limitPrice) / activeMarket.scaleFactor <
+                  activeMarket.minSize)))
+            ? 'exceed-balance'
+            : ''
+            }`}
+        >
+          <div className="Pay">{t('pay')}</div>
+          <div className="inputbutton1container">
+            <input
+              inputMode="decimal"
+              className={`input ${connected &&
+                ((amountIn > tokenBalances[tokenIn] &&
+                  !isLoading &&
+                  !stateIsLoading) ||
+                  (amountIn !== BigInt(0) &&
+                    (tokenIn === activeMarket.quoteAddress
+                      ? amountIn < activeMarket.minSize
+                      : (amountIn * limitPrice) / activeMarket.scaleFactor <
+                      activeMarket.minSize)))
+                ? 'exceed-balance'
+                : ''
+                }`}
+              onCompositionStart={() => {
+                setIsComposing(true);
+              }}
+              onCompositionEnd={(
+                e: React.CompositionEvent<HTMLInputElement>,
+              ) => {
+                setIsComposing(false);
+                if (/^\d*\.?\d{0,18}$/.test(e.currentTarget.value)) {
+                  setInputString(e.currentTarget.value);
+                  if (
+                    (inputString.endsWith('.') && e.currentTarget.value === inputString.slice(0, -1)) ||
+                    (e.currentTarget.value.endsWith('.') && e.currentTarget.value.slice(0, -1) === inputString)
+                  ) {
+                    return;
+                  }
+                  const inputValue = BigInt(
+                    Math.round(
+                      (parseFloat(e.currentTarget.value || '0') || 0) *
+                      10 ** Number(tokendict[tokenIn].decimals),
+                    ),
+                  );
+
+                  setamountOutLimit(
+                    limitPrice !== BigInt(0) && inputValue !== BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? (inputValue * limitPrice) /
+                        (activeMarket.scaleFactor || BigInt(1))
+                        : (inputValue *
+                          (activeMarket.scaleFactor || BigInt(1))) /
+                        limitPrice
+                      : BigInt(0),
+                  );
+
+                  setlimitoutputString(
+                    (limitPrice !== BigInt(0) && inputValue !== BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? customRound(
+                          Number(
+                            (inputValue * limitPrice) /
+                            (activeMarket.scaleFactor || BigInt(1)),
+                          ) /
+                          10 ** Number(tokendict[tokenOut].decimals),
+                          3,
+                        )
+                        : customRound(
+                          Number(
+                            (inputValue *
+                              (activeMarket.scaleFactor || BigInt(1))) /
+                            limitPrice,
+                          ) /
+                          10 ** Number(tokendict[tokenOut].decimals),
+                          3,
+                        )
+                      : ''
+                    ).toString(),
+                  );
+
+                  debouncedSetAmount(inputValue);
+
+                  const percentage = !tokenBalances[tokenIn]
+                    ? 0
+                    : Math.min(
+                      100,
+                      Math.floor(
+                        Number(
+                          (inputValue * BigInt(100)) / tokenBalances[tokenIn],
+                        ),
+                      ),
+                    );
+                  setSliderPercent(percentage);
+
+                  const slider = document.querySelector(
+                    '.balance-amount-slider',
+                  );
+                  const popup = document.querySelector(
+                    '.slider-percentage-popup',
+                  );
+                  if (slider && popup) {
+                    const rect = slider.getBoundingClientRect();
+                    (popup as HTMLElement).style.left =
+                      `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                  }
+                }
+              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (isComposing) {
+                  setInputString(e.target.value);
+                  return;
+                }
+
+                if (/^\d*\.?\d{0,18}$/.test(e.target.value)) {
+                  setInputString(e.target.value);
+                  if (
+                    (inputString.endsWith('.') && e.target.value === inputString.slice(0, -1)) ||
+                    (e.target.value.endsWith('.') && e.target.value.slice(0, -1) === inputString)
+                  ) {
+                    return;
+                  }
+                  const inputValue = BigInt(
+                    Math.round(
+                      (parseFloat(e.target.value || '0') || 0) *
+                      10 ** Number(tokendict[tokenIn].decimals),
+                    ),
+                  );
+
+                  setamountOutLimit(
+                    limitPrice !== BigInt(0) && inputValue !== BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? (inputValue * limitPrice) /
+                        (activeMarket.scaleFactor || BigInt(1))
+                        : (inputValue *
+                          (activeMarket.scaleFactor || BigInt(1))) /
+                        limitPrice
+                      : BigInt(0),
+                  );
+
+                  setlimitoutputString(
+                    (limitPrice !== BigInt(0) && inputValue !== BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? customRound(
+                          Number(
+                            (inputValue * limitPrice) /
+                            (activeMarket.scaleFactor || BigInt(1)),
+                          ) /
+                          10 ** Number(tokendict[tokenOut].decimals),
+                          3,
+                        )
+                        : customRound(
+                          Number(
+                            (inputValue *
+                              (activeMarket.scaleFactor || BigInt(1))) /
+                            limitPrice,
+                          ) /
+                          10 ** Number(tokendict[tokenOut].decimals),
+                          3,
+                        )
+                      : ''
+                    ).toString(),
+                  );
+
+                  debouncedSetAmount(inputValue);
+
+                  const percentage = !tokenBalances[tokenIn]
+                    ? 0
+                    : Math.min(
+                      100,
+                      Math.floor(
+                        Number(
+                          (inputValue * BigInt(100)) / tokenBalances[tokenIn],
+                        ),
+                      ),
+                    );
+                  setSliderPercent(percentage);
+
+                  const slider = document.querySelector(
+                    '.balance-amount-slider',
+                  );
+                  const popup = document.querySelector(
+                    '.slider-percentage-popup',
+                  );
+                  if (slider && popup) {
+                    const rect = slider.getBoundingClientRect();
+                    (popup as HTMLElement).style.left =
+                      `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                  }
+                }
+              }}
+              placeholder="0.00"
+              value={inputString}
+              autoFocus={!(windowWidth <= 1020)}
+            />
+            <button
+              className={`button1 ${connected &&
+                ((amountIn > tokenBalances[tokenIn] &&
+                  !isLoading &&
+                  !stateIsLoading) ||
+                  (amountIn != BigInt(0) &&
+                    (tokenIn == activeMarket.quoteAddress
+                      ? amountIn < activeMarket.minSize
+                      : (amountIn * limitPrice) / activeMarket.scaleFactor <
+                      activeMarket.minSize)))
+                ? 'exceed-balance'
+                : ''
+                }`}
+              onClick={() => {
+                setpopup(1);
+              }}
+            >
+              <img className="button1pic" src={tokendict[tokenIn].image} />
+              <span>{tokendict[tokenIn].ticker || '?'}</span>
+              <svg
+                className={`button-arrow ${popup == 1 ? 'open' : ''}`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div className="balance1maxcontainer">
+            <span className="usd-value">
+              {Math.round(
+                (parseFloat(inputString || '0') || 0) *
+                10 ** Number(tokendict[tokenIn].decimals),
+              ) == 0
+                ? '$0.00'
+                : formatUSDDisplay(
+                  calculateUSDValue(
+                    BigInt(
+                      Math.round(
+                        (parseFloat(inputString || '0') || 0) *
+                        10 ** Number(tokendict[tokenIn].decimals),
+                      ),
+                    ),
+                    tradesByMarket[
+                    (({ baseAsset, quoteAsset }) =>
+                      (baseAsset === wethticker ? ethticker : baseAsset) +
+                      (quoteAsset === wethticker ? ethticker : quoteAsset)
+                    )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                    ],
+                    tokenIn,
+                    getMarket(
+                      activeMarket.path.at(0),
+                      activeMarket.path.at(1),
+                    ),
+                  ),
+                )}
+            </span>
+            <div className="balance1">
+              <img src={walleticon} className="balance-wallet-icon" />{' '}
+              {formatDisplayValue(
+                tokenBalances[tokenIn],
+                Number(tokendict[tokenIn].decimals),
+              )}
+            </div>
+            <div
+              className="max-button"
+              onClick={() => {
+                if (tokenBalances[tokenIn] != BigInt(0)) {
+                  let amount =
+                    (tokenIn == eth && !client)
+                      ? tokenBalances[tokenIn] -
+                        settings.chainConfig[activechain].gasamount >
+                        BigInt(0)
+                        ? tokenBalances[tokenIn] -
+                        settings.chainConfig[activechain].gasamount
+                        : BigInt(0)
+                      : tokenBalances[tokenIn];
+                  debouncedSetAmount(BigInt(amount));
+                  setInputString(
+                    customRound(
+                      Number(amount) /
+                      10 ** Number(tokendict[tokenIn].decimals),
+                      3,
+                    ).toString(),
+                  );
+                  setamountOutLimit(
+                    limitPrice != BigInt(0) && amount != BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? (amount * limitPrice) /
+                        (activeMarket.scaleFactor || BigInt(1))
+                        : (BigInt(amount) *
+                          (activeMarket.scaleFactor || BigInt(1))) /
+                        limitPrice
+                      : BigInt(0),
+                  );
+                  setlimitoutputString(
+                    (limitPrice != BigInt(0) && amount != BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? customRound(
+                          Number(
+                            (amount * limitPrice) /
+                            (activeMarket.scaleFactor || BigInt(1)),
+                          ) /
+                          10 ** Number(tokendict[tokenOut].decimals),
+                          3,
+                        )
+                        : customRound(
+                          Number(
+                            (BigInt(amount) *
+                              (activeMarket.scaleFactor || BigInt(1))) /
+                            limitPrice,
+                          ) /
+                          10 ** Number(tokendict[tokenOut].decimals),
+                          3,
+                        )
+                      : ''
+                    ).toString(),
+                  );
+                  setSliderPercent(100);
+                  const slider = document.querySelector(
+                    '.balance-amount-slider',
+                  );
+                  const popup = document.querySelector(
+                    '.slider-percentage-popup',
+                  );
+                  if (slider && popup) {
+                    const rect = slider.getBoundingClientRect();
+                    const trackWidth = rect.width - 15;
+                    const thumbPosition = trackWidth + 15 / 2;
+                    (popup as HTMLElement).style.left = `${thumbPosition}px`;
+                  }
+                }
+              }}
+            >
+              {t('max')}{' '}
+            </div>
+          </div>
+        </div>
+        <div
+          className="switch-button"
+          onClick={() => {
+            setTokenIn(tokenOut);
+            setTokenOut(tokenIn);
+            if (amountIn != BigInt(0)) {
+              if (limitChase && mids?.[activeMarketKey]?.[0]) {
+                const price = tokenOut === activeMarket?.baseAddress ? mids[activeMarketKey][0] == mids[activeMarketKey][1] ? mids[activeMarketKey][2] : mids[activeMarketKey][0] : mids[activeMarketKey][0] == mids[activeMarketKey][2] ? mids[activeMarketKey][1] : mids[activeMarketKey][0]
+                setlimitPrice(price);
+                setlimitPriceString(
+                  (
+                    Number(price) / Number(activeMarket.priceFactor)
+                  ).toFixed(Math.floor(Math.log10(Number(activeMarket.priceFactor)))),
+                );
+                setamountOutLimit(
+                  price != BigInt(0) && amountIn != BigInt(0)
+                    ? tokenOut === activeMarket?.baseAddress
+                      ? (amountIn * price) /
+                      (activeMarket.scaleFactor || BigInt(1))
+                      : (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                      price
+                    : BigInt(0),
+                );
+                setlimitoutputString(
+                  (price != BigInt(0) && amountIn != BigInt(0)
+                    ? tokenOut === activeMarket?.baseAddress
+                      ? customRound(
+                        Number(
+                          (amountIn * price) /
+                          (activeMarket.scaleFactor || BigInt(1)),
+                        ) /
+                        10 ** Number(tokendict[tokenIn].decimals),
+                        3,
+                      )
+                      : customRound(
+                        Number(
+                          (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                          price,
+                        ) /
+                        10 ** Number(tokendict[tokenIn].decimals),
+                        3,
+                      )
+                    : ''
+                  ).toString(),
+                );
+              }
+              setInputString(limitoutputString);
+              setlimitoutputString(inputString);
+              setamountIn(amountOutLimit);
+              setamountOutLimit(amountIn);
+              const percentage = !tokenBalances[tokenOut]
+                ? 0
+                : Math.min(
+                  100,
+                  Math.floor(
+                    Number(
+                      (amountOutLimit * BigInt(100)) /
+                      tokenBalances[tokenOut],
+                    ),
+                  ),
+                );
+              setSliderPercent(percentage);
+              const slider = document.querySelector('.balance-amount-slider');
+              const popup = document.querySelector('.slider-percentage-popup');
+              if (slider && popup) {
+                const rect = slider.getBoundingClientRect();
+                (popup as HTMLElement).style.left =
+                  `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+              }
+            }
+          }}
+        >
+          <img src={tradearrow} className="switch-arrow" />
+        </div>
+        <div className="swap-container-divider" />
+
+        <div className="outputbg">
+          <div className="Recieve">{t('receive')}</div>
+          <div className="outputbutton2container">
+            <>
+              <input
+                inputMode="decimal"
+                className="output"
+                onCompositionStart={() => {
+                  setIsComposing(true);
+                }}
+                onCompositionEnd={(
+                  e: React.CompositionEvent<HTMLInputElement>,
+                ) => {
+                  setIsComposing(false);
+                  if (/^\d*\.?\d{0,18}$/.test(e.currentTarget.value)) {
+                    setlimitoutputString(e.currentTarget.value);
+                    const outputValue = BigInt(
+                      Math.round(
+                        (parseFloat(e.currentTarget.value || '0') || 0) *
+                        10 ** Number(tokendict[tokenOut].decimals),
+                      ),
+                    );
+                    setamountOutLimit(outputValue);
+                    debouncedSetAmount(
+                      limitPrice !== BigInt(0) && outputValue !== BigInt(0)
+                        ? tokenIn === activeMarket?.baseAddress
+                          ? (outputValue *
+                            (activeMarket.scaleFactor || BigInt(1))) /
+                          limitPrice
+                          : (outputValue * limitPrice) /
+                          (activeMarket.scaleFactor || BigInt(1))
+                        : BigInt(0),
+                    );
+                    setInputString(
+                      (limitPrice !== BigInt(0) && outputValue !== BigInt(0)
+                        ? tokenIn === activeMarket?.baseAddress
+                          ? customRound(
+                            Number(
+                              (outputValue *
+                                (activeMarket.scaleFactor || BigInt(1))) /
+                              limitPrice,
+                            ) /
+                            10 ** Number(tokendict[tokenIn].decimals),
+                            3,
+                          )
+                          : customRound(
+                            Number(
+                              (outputValue * limitPrice) /
+                              (activeMarket.scaleFactor || BigInt(1)),
+                            ) /
+                            10 ** Number(tokendict[tokenIn].decimals),
+                            3,
+                          )
+                        : ''
+                      ).toString(),
+                    );
+                    const percentage =
+                      tokenBalances[tokenIn] === BigInt(0)
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              (limitPrice !== BigInt(0) &&
+                                outputValue !== BigInt(0)
+                                ? tokenIn === activeMarket?.baseAddress
+                                  ? (outputValue *
+                                    (activeMarket.scaleFactor ||
+                                      BigInt(1))) /
+                                  limitPrice
+                                  : (outputValue * limitPrice) /
+                                  (activeMarket.scaleFactor || BigInt(1))
+                                : BigInt(0)) * BigInt(100),
+                            ) / tokenBalances[tokenIn],
+                          ),
+                        );
+                    setSliderPercent(percentage);
+                    const slider = document.querySelector(
+                      '.balance-amount-slider',
+                    );
+                    const popup = document.querySelector(
+                      '.slider-percentage-popup',
+                    );
+                    if (slider && popup) {
+                      const rect = slider.getBoundingClientRect();
+                      (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                        }px`;
+                    }
+                  }
+                }}
+                onChange={(e) => {
+                  if (isComposing) {
+                    setlimitoutputString(e.target.value);
+                    return;
+                  }
+                  if (/^\d*\.?\d{0,18}$/.test(e.target.value)) {
+                    setlimitoutputString(e.target.value);
+                    const outputValue = BigInt(
+                      Math.round(
+                        (parseFloat(e.target.value || '0') || 0) *
+                        10 ** Number(tokendict[tokenOut].decimals),
+                      ),
+                    );
+                    setamountOutLimit(outputValue);
+                    debouncedSetAmount(
+                      limitPrice !== BigInt(0) && outputValue !== BigInt(0)
+                        ? tokenIn === activeMarket?.baseAddress
+                          ? (outputValue *
+                            (activeMarket.scaleFactor || BigInt(1))) /
+                          limitPrice
+                          : (outputValue * limitPrice) /
+                          (activeMarket.scaleFactor || BigInt(1))
+                        : BigInt(0),
+                    );
+                    setInputString(
+                      (limitPrice !== BigInt(0) && outputValue !== BigInt(0)
+                        ? tokenIn === activeMarket?.baseAddress
+                          ? customRound(
+                            Number(
+                              (outputValue *
+                                (activeMarket.scaleFactor || BigInt(1))) /
+                              limitPrice,
+                            ) /
+                            10 ** Number(tokendict[tokenIn].decimals),
+                            3,
+                          )
+                          : customRound(
+                            Number(
+                              (outputValue * limitPrice) /
+                              (activeMarket.scaleFactor || BigInt(1)),
+                            ) /
+                            10 ** Number(tokendict[tokenIn].decimals),
+                            3,
+                          )
+                        : ''
+                      ).toString(),
+                    );
+                    const percentage =
+                      tokenBalances[tokenIn] === BigInt(0)
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              (limitPrice !== BigInt(0) &&
+                                outputValue !== BigInt(0)
+                                ? tokenIn === activeMarket?.baseAddress
+                                  ? (outputValue *
+                                    (activeMarket.scaleFactor ||
+                                      BigInt(1))) /
+                                  limitPrice
+                                  : (outputValue * limitPrice) /
+                                  (activeMarket.scaleFactor || BigInt(1))
+                                : BigInt(0)) * BigInt(100) / tokenBalances[tokenIn]
+                            )
+                          ),
+                        );
+                    setSliderPercent(percentage);
+                    const slider = document.querySelector(
+                      '.balance-amount-slider',
+                    );
+                    const popup = document.querySelector(
+                      '.slider-percentage-popup',
+                    );
+                    if (slider && popup) {
+                      const rect = slider.getBoundingClientRect();
+                      (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                        }px`;
+                    }
+                  }
+                }}
+                value={limitoutputString}
+                placeholder="0.00"
+              />
+              <button
+                className="button2"
+                onClick={() => {
+                  setpopup(2);
+                }}
+              >
+                <img className="button2pic" src={tokendict[tokenOut].image} />
+                <span>{tokendict[tokenOut].ticker || '?'}</span>
+                <svg
+                  className={`button-arrow ${popup == 2 ? 'open' : ''}`}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+            </>
+          </div>
+          <div className="balance1maxcontainer">
+            <div className="output-usd-value">
+              {amountOutLimit === BigInt(0)
+                ? '$0.00'
+                : (() => {
+                  const outputUSD = calculateUSDValue(
+                    amountOutLimit,
+                    tradesByMarket[
+                    (({ baseAsset, quoteAsset }) =>
+                      (baseAsset === wethticker ? ethticker : baseAsset) +
+                      (quoteAsset === wethticker ? ethticker : quoteAsset)
+                    )(getMarket(activeMarket.path.at(-2), activeMarket.path.at(-1)))
+                    ],
+                    tokenOut,
+                    getMarket(
+                      activeMarket.path.at(-2),
+                      activeMarket.path.at(-1),
+                    ),
+                  );
+
+                  const inputUSD = calculateUSDValue(
+                    limitPrice != BigInt(0) && amountOutLimit != BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? (amountOutLimit *
+                          (activeMarket.scaleFactor || BigInt(1))) /
+                        limitPrice
+                        : (amountOutLimit * limitPrice) /
+                        (activeMarket.scaleFactor || BigInt(1))
+                      : BigInt(0),
+                    tradesByMarket[
+                    (({ baseAsset, quoteAsset }) =>
+                      (baseAsset === wethticker ? ethticker : baseAsset) +
+                      (quoteAsset === wethticker ? ethticker : quoteAsset)
+                    )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                    ],
+                    tokenIn,
+                    getMarket(
+                      activeMarket.path.at(0),
+                      activeMarket.path.at(1),
+                    ),
+                  );
+
+                  const percentageDiff =
+                    inputUSD > 0
+                      ? ((outputUSD - inputUSD) / inputUSD) * 100
+                      : 0;
+
+                  return (
+                    <div className="output-usd-container">
+                      <span>{formatUSDDisplay(outputUSD)}</span>
+                      {inputUSD > 0 && (
+                        <span
+                          className={`output-percentage ${percentageDiff >= 0 ? 'positive' : 'negative'}`}
+                        >
+                          ({percentageDiff >= 0 ? '+' : ''}
+                          {percentageDiff.toFixed(2)}%)
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
+            </div>
+            <div className="balance2">
+              <img src={walleticon} className="balance-wallet-icon" />{' '}
+              {formatDisplayValue(
+                tokenBalances[tokenOut],
+                Number(tokendict[tokenOut].decimals),
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="swap-container-divider" />
+
+        <div
+          className={`limitbg ${connected &&
+            !(
+              amountIn > tokenBalances[tokenIn] &&
+              !isLoading &&
+              !stateIsLoading
+            ) &&
+            addliquidityonly &&
+            amountIn != BigInt(0) &&
+            ((limitPrice >= lowestAsk &&
+              tokenIn == activeMarket.quoteAddress) ||
+              (limitPrice <= highestBid &&
+                tokenIn == activeMarket.baseAddress)) &&
+            !(tokenIn == activeMarket.quoteAddress
+              ? amountIn < activeMarket.minSize
+              : (amountIn * limitPrice) / activeMarket.scaleFactor <
+              activeMarket.minSize)
+            ? 'exceed-balance'
+            : ''
+            }`}
+        >
+          <div className="limit-label">
+            <span>{t('When')}</span>
+            <button
+              className="limit-token-button"
+              onClick={() => {
+                tokenIn == activeMarket?.quoteAddress
+                  ? setpopup(2)
+                  : setpopup(1);
+              }}
+            >
+              <img
+                className="limit-token-icon"
+                src={tokendict[activeMarket?.baseAddress].image}
+              />
+              <span>{tokendict[activeMarket?.baseAddress].ticker || '?'}</span>
+            </button>
+            <span>{t('isWorth')}</span>
+            <button
+              className="use-market-button"
+              onClick={() => {
+                setlimitChase(true);
+              }}
+            >
+              {t('useMarket')}
+            </button>
+          </div>
+          <div className="limitpricecontainer">
+            <input
+              inputMode="decimal"
+              className={`limit-order ${connected &&
+                !(
+                  amountIn > tokenBalances[tokenIn] &&
+                  !isLoading &&
+                  !stateIsLoading
+                ) &&
+                addliquidityonly &&
+                amountIn != BigInt(0) &&
+                ((limitPrice >= lowestAsk &&
+                  tokenIn == activeMarket.quoteAddress) ||
+                  (limitPrice <= highestBid &&
+                    tokenIn == activeMarket.baseAddress)) &&
+                !(tokenIn == activeMarket.quoteAddress
+                  ? amountIn < activeMarket.minSize
+                  : (amountIn * limitPrice) / activeMarket.scaleFactor <
+                  activeMarket.minSize)
+                ? 'exceed-balance'
+                : ''
+                }`}
+              onChange={(e) => {
+                if (
+                  new RegExp(
+                    `^\\d*\\.?\\d{0,${Math.floor(Math.log10(Number(activeMarket.priceFactor)))}}$`
+                  ).test(e.target.value)
+                ) {
+                  setlimitChase(false);
+                  setlimitPriceString(e.target.value);
+                  let price = BigInt(
+                    Math.round(
+                      (parseFloat(e.target.value || '0') || 0) *
+                      Number(activeMarket.priceFactor)
+                    )
+                  );
+                  setlimitPrice(price);
+                  setamountOutLimit(
+                    price != BigInt(0) && amountIn != BigInt(0)
+                      ? tokenIn === activeMarket?.baseAddress
+                        ? (amountIn * price) /
+                        (activeMarket.scaleFactor || BigInt(1))
+                        : (amountIn * (activeMarket.scaleFactor || BigInt(1))) /
+                        price
+                      : BigInt(0)
+                  );
+                  setlimitoutputString(
+                    (
+                      price != BigInt(0) && amountIn != BigInt(0)
+                        ? tokenIn === activeMarket?.baseAddress
+                          ? customRound(
+                            Number(
+                              (amountIn * price) /
+                              (activeMarket.scaleFactor || BigInt(1))
+                            ) /
+                            10 ** Number(tokendict[tokenOut].decimals),
+                            3
+                          )
+                          : customRound(
+                            Number(
+                              (amountIn *
+                                (activeMarket.scaleFactor || BigInt(1))) /
+                              price
+                            ) /
+                            10 ** Number(tokendict[tokenOut].decimals),
+                            3
+                          )
+                        : ''
+                    ).toString()
+                  );
+                }
+              }}
+              placeholder="0.00"
+              value={limitPriceString}
+              step={1 / Math.pow(10, Math.floor(Math.log10(Number(activeMarket.priceFactor))))}
+            />
+            <span className="limit-order-usd-label">USDC</span>
+          </div>
+          <div className="limit-price-buttons">
+            <button
+              className="limit-price-button limit-custom-button"
+              onClick={() => {
+                const customButton = document.querySelector('.limit-custom-button');
+                if (customButton) {
+                  customButton.classList.add('editing');
+                }
+
+                setTimeout(() => {
+                  const input = document.querySelector('.limit-custom-input') as HTMLInputElement | null;
+                  if (input) {
+                    input.value = '';
+                    input.focus();
+                  }
+                }, 10);
+              }}
+            >
+              <span className="limit-custom-label">
+                {(() => {
+                  const marketPrice = Number(tokenIn === activeMarket?.baseAddress ? mids[activeMarketKey]?.[0] == mids[activeMarketKey]?.[1] ? mids[activeMarketKey]?.[2] : mids[activeMarketKey]?.[0] : mids[activeMarketKey]?.[0] == mids[activeMarketKey]?.[2] ? mids[activeMarketKey]?.[1] : mids[activeMarketKey]?.[0])
+
+                  if (marketPrice > 0 && limitPrice > 0) {
+                    const percentDiff = ((Number(limitPrice) - marketPrice) / marketPrice) * 100;
+                    if (Math.abs(percentDiff) < 0.01) {
+                      return t('custom');
+                    }
+
+                    return (percentDiff >= 0 ? "+" : "") + percentDiff.toFixed(1) + "%";
+                  }
+
+                  return t('custom');
+                })()}
+              </span>
+              <div className="custom-input-container">
+                <input
+                  className="limit-custom-input"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder={tokenIn === activeMarket?.quoteAddress ? "-%" : "+%"}
+                  onBlur={(e) => {
+                    const customButton = document.querySelector('.limit-custom-button');
+                    if (customButton) {
+                      customButton.classList.remove('editing');
+                    }
+
+                    let value = e.target.value.replace(/[^0-9.]/g, '');
+
+                    let numValue = parseFloat(value);
+                    if (isNaN(numValue)) numValue = 0;
+                    if (numValue > 100) {
+                      value = "100";
+                      numValue = 100;
+                    }
+
+                    if (value) {
+                      const marketPrice = tokenIn === activeMarket?.baseAddress
+                        ? Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor)
+                        : Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor);
+
+                      let newPrice;
+                      if (tokenIn === activeMarket?.quoteAddress) {
+                        newPrice = marketPrice * (1 - numValue / 100);
+                      } else {
+                        newPrice = marketPrice * (1 + numValue / 100);
+                      }
+
+                      updateLimitAmount(newPrice, Number(activeMarket.priceFactor));
+                    }
+                  }}
+                  onFocus={(e) => {
+                    const value = e.target.value.replace(/[^0-9.]/g, '');
+                    e.target.value = value;
+                  }}
+                  onKeyDown={(e) => {
+                    if ([46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
+                      (e.keyCode === 65 && e.ctrlKey === true) ||
+                      (e.keyCode === 67 && e.ctrlKey === true) ||
+                      (e.keyCode === 86 && e.ctrlKey === true) ||
+                      (e.keyCode === 88 && e.ctrlKey === true) ||
+                      (e.keyCode >= 35 && e.keyCode <= 39)) {
+                      return;
+                    }
+
+                    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) &&
+                      (e.keyCode < 96 || e.keyCode > 105)) {
+                      e.preventDefault();
+                    }
+
+                    if (e.key === 'Enter') {
+                      const input = e.target as HTMLInputElement;
+                      input.blur();
+                    } else if (e.key === 'Escape') {
+                      const customButton = document.querySelector('.limit-custom-button');
+                      if (customButton) {
+                        customButton.classList.remove('editing');
+                      }
+                    }
+                  }}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/[^0-9.]/g, '');
+
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue) && numValue > 100) {
+                      value = "100";
+                    }
+
+                    const sign = tokenIn === activeMarket?.quoteAddress ? "-" : "+";
+
+                    if (value && value !== "0") {
+                      e.target.value = sign + value;
+                    } else {
+                      e.target.value = value;
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </button>
+            <button
+              className="limit-price-button"
+              onClick={() => {
+                const marketPrice = tokenIn === activeMarket?.baseAddress
+                  ? Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor)
+                  : Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor);
+
+                const newPrice = tokenIn === activeMarket?.quoteAddress
+                  ? Math.max(0, marketPrice * 0.99)
+                  : marketPrice * 1.01;
+
+                updateLimitAmount(newPrice, Number(activeMarket.priceFactor));
+              }}
+            >
+              {tokenIn === activeMarket?.quoteAddress ? "-1%" : "+1%"}
+            </button>
+            <button
+              className="limit-price-button"
+              onClick={() => {
+                const marketPrice = tokenIn === activeMarket?.baseAddress
+                  ? Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor)
+                  : Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor);
+                const newPrice = tokenIn === activeMarket?.quoteAddress
+                  ? Math.max(0, marketPrice * 0.95)
+                  : marketPrice * 1.05;
+
+                updateLimitAmount(newPrice, Number(activeMarket.priceFactor));
+              }}
+            >
+              {tokenIn === activeMarket?.quoteAddress ? "-5%" : "+5%"}
+            </button>
+            <button
+              className="limit-price-button"
+              onClick={() => {
+                const marketPrice = tokenIn === activeMarket?.baseAddress
+                  ? Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor)
+                  : Number(mids[activeMarketKey]?.[0]) / Number(activeMarket.priceFactor);
+
+                const newPrice = tokenIn === activeMarket?.quoteAddress
+                  ? Math.max(0, marketPrice * 0.9)
+                  : marketPrice * 1.1;
+
+                updateLimitAmount(newPrice, Number(activeMarket.priceFactor));
+              }}
+            >
+              {tokenIn === activeMarket?.quoteAddress ? "-10%" : "+10%"}
+            </button>
+          </div>
+        </div>
+        <div className="balance-slider-wrapper">
+          <div className="slider-container">
+            <input
+              type="range"
+              className={`balance-amount-slider ${isDragging ? 'dragging' : ''}`}
+              min="0"
+              max="100"
+              step="1"
+              value={sliderPercent}
+              disabled={!connected}
+              onChange={(e) => {
+                const percent = parseInt(e.target.value);
+                const newAmount =
+                  (((tokenIn == eth && !client)
+                    ? tokenBalances[tokenIn] -
+                      settings.chainConfig[activechain].gasamount >
+                      BigInt(0)
+                      ? tokenBalances[tokenIn] -
+                      settings.chainConfig[activechain].gasamount
+                      : BigInt(0)
+                    : tokenBalances[tokenIn]) *
+                    BigInt(percent)) /
+                  100n;
+                setSliderPercent(percent);
+                setInputString(
+                  newAmount == BigInt(0)
+                    ? ''
+                    : customRound(
+                      Number(newAmount) /
+                      10 ** Number(tokendict[tokenIn].decimals),
+                      3,
+                    ).toString(),
+                );
+                debouncedSetAmount(newAmount);
+                setamountOutLimit(
+                  limitPrice != BigInt(0) && newAmount != BigInt(0)
+                    ? tokenIn === activeMarket?.baseAddress
+                      ? (newAmount * limitPrice) /
+                      (activeMarket.scaleFactor || BigInt(1))
+                      : (newAmount * (activeMarket.scaleFactor || BigInt(1))) /
+                      limitPrice
+                    : BigInt(0),
+                );
+                setlimitoutputString(
+                  (limitPrice != BigInt(0) && newAmount != BigInt(0)
+                    ? tokenIn === activeMarket?.baseAddress
+                      ? customRound(
+                        Number(
+                          (newAmount * limitPrice) /
+                          (activeMarket.scaleFactor || BigInt(1)),
+                        ) /
+                        10 ** Number(tokendict[tokenOut].decimals),
+                        3,
+                      )
+                      : customRound(
+                        Number(
+                          (newAmount *
+                            (activeMarket.scaleFactor || BigInt(1))) /
+                          limitPrice,
+                        ) /
+                        10 ** Number(tokendict[tokenOut].decimals),
+                        3,
+                      )
+                    : ''
+                  ).toString(),
+                );
+                const slider = e.target;
+                const rect = slider.getBoundingClientRect();
+                const trackWidth = rect.width - 15;
+                const thumbPosition = (percent / 100) * trackWidth + 15 / 2;
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) {
+                  popup.style.left = `${thumbPosition}px`;
+                }
+              }}
+              onMouseDown={() => {
+                setIsDragging(true);
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) popup.classList.add('visible');
+              }}
+              onMouseUp={() => {
+                setIsDragging(false);
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) popup.classList.remove('visible');
+              }}
+              style={{
+                background: `linear-gradient(to right,rgb(171, 176, 224) ${sliderPercent}%,rgb(21, 21, 25) ${sliderPercent}%)`,
+              }}
+            />
+            <div className="slider-percentage-popup">{sliderPercent}%</div>
+            <div className="balance-slider-marks">
+              {[0, 25, 50, 75, 100].map((markPercent) => (
+                <div
+                  key={markPercent}
+                  className="balance-slider-mark"
+                  data-active={sliderPercent >= markPercent}
+                  data-percentage={markPercent}
+                  onClick={() => {
+                    if (connected) {
+                      const newAmount =
+                        (((tokenIn == eth && !client)
+                          ? tokenBalances[tokenIn] -
+                            settings.chainConfig[activechain].gasamount >
+                            BigInt(0)
+                            ? tokenBalances[tokenIn] -
+                            settings.chainConfig[activechain].gasamount
+                            : BigInt(0)
+                          : tokenBalances[tokenIn]) *
+                          BigInt(markPercent)) /
+                        100n;
+                      setSliderPercent(markPercent);
+                      setInputString(
+                        newAmount == BigInt(0)
+                          ? ''
+                          : customRound(
+                            Number(newAmount) /
+                            10 ** Number(tokendict[tokenIn].decimals),
+                            3,
+                          ).toString(),
+                      );
+                      debouncedSetAmount(newAmount);
+                      setamountOutLimit(
+                        limitPrice != BigInt(0) && newAmount != BigInt(0)
+                          ? tokenIn === activeMarket?.baseAddress
+                            ? (newAmount * limitPrice) /
+                            (activeMarket.scaleFactor || BigInt(1))
+                            : (newAmount *
+                              (activeMarket.scaleFactor || BigInt(1))) /
+                            limitPrice
+                          : BigInt(0),
+                      );
+                      setlimitoutputString(
+                        (limitPrice != BigInt(0) && newAmount != BigInt(0)
+                          ? tokenIn === activeMarket?.baseAddress
+                            ? customRound(
+                              Number(
+                                (newAmount * limitPrice) /
+                                (activeMarket.scaleFactor || BigInt(1)),
+                              ) /
+                              10 ** Number(tokendict[tokenOut].decimals),
+                              3,
+                            )
+                            : customRound(
+                              Number(
+                                (newAmount *
+                                  (activeMarket.scaleFactor || BigInt(1))) /
+                                limitPrice,
+                              ) /
+                              10 ** Number(tokendict[tokenOut].decimals),
+                              3,
+                            )
+                          : ''
+                        ).toString(),
+                      );
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup: HTMLElement | null = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        popup.style.left = `${(rect.width - 15) * (markPercent / 100) + 15 / 2
+                          }px`;
+                      }
+                    }
+                  }}
+                >
+                  {markPercent}%
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <button
+          className={`limit-swap-button ${isSigning ? 'signing' : ''}`}
+          onClick={async () => {
+            if (connected && userchain === activechain) {
+              let hash;
+              setIsSigning(true)
+              if (client) {
+                txPending.current = true
+              }
+              try {
+                if (tokenIn == eth) {
+                  if (addliquidityonly) {
+                    hash = await sendUserOperationAsync({
+                      uo: limitOrder(
+                        router,
+                        amountIn,
+                        eth,
+                        tokenOut as `0x${string}`,
+                        limitPrice,
+                        amountIn,
+                      )
+                    })
+                  } else {
+                    hash = await sendUserOperationAsync({
+                      uo: _swap(
+                        router,
+                        amountIn,
+                        eth,
+                        tokenOut as `0x${string}`,
+                        true,
+                        BigInt(2),
+                        amountIn,
+                        limitPrice,
+                        BigInt(Math.floor(Date.now() / 1000) + 900),
+                        usedRefAddress as `0x${string}`,
+                      )
+                    })
+                  }
+                } else {
+                  if (allowance < amountIn) {
+                    if (client) {
+                      let uo = []
+                      uo.push(approve(
+                        tokenIn as `0x${string}`,
+                        getMarket(
+                          activeMarket.path.at(0),
+                          activeMarket.path.at(1),
+                        ).address,
+                        maxUint256,
+                      ))
+                      if (addliquidityonly) {
+                        uo.push(limitOrder(
+                          router,
+                          BigInt(0),
+                          tokenIn as `0x${string}`,
+                          tokenOut as `0x${string}`,
+                          limitPrice,
+                          amountIn,
+                        ))
+                      } else {
+                        uo.push(_swap(
+                          router,
+                          BigInt(0),
+                          tokenIn as `0x${string}`,
+                          tokenOut as `0x${string}`,
+                          true,
+                          BigInt(2),
+                          amountIn,
+                          limitPrice,
+                          BigInt(Math.floor(Date.now() / 1000) + 900),
+                          usedRefAddress as `0x${string}`,
+                        ))
+                      }
+                      hash = await sendUserOperationAsync({ uo: uo })
+                      newTxPopup(
+                        hash.hash,
+                        'approve',
+                        tokenIn,
+                        '',
+                        customRound(
+                          Number(amountIn) /
+                          10 ** Number(tokendict[tokenIn].decimals),
+                          3,
+                        ),
+                        0,
+                        '',
+                        activeMarket.address,
+                      );
+                    }
+                    else {
+                      hash = await sendUserOperationAsync({
+                        uo: approve(
+                          tokenIn as `0x${string}`,
+                          getMarket(
+                            activeMarket.path.at(0),
+                            activeMarket.path.at(1),
+                          ).address,
+                          maxUint256,
+                        )
+                      })
+                      newTxPopup(
+                        client
+                          ? hash.hash
+                          : await waitForTxReceipt(hash.hash),
+                        'approve',
+                        tokenIn,
+                        '',
+                        customRound(
+                          Number(amountIn) /
+                          10 ** Number(tokendict[tokenIn].decimals),
+                          3,
+                        ),
+                        0,
+                        '',
+                        activeMarket.address,
+                      );
+                    }
+                  }
+                  if (!client || !(allowance < amountIn)) {
+                    if (addliquidityonly) {
+                      hash = await sendUserOperationAsync({
+                        uo: limitOrder(
+                          router,
+                          BigInt(0),
+                          tokenIn as `0x${string}`,
+                          tokenOut as `0x${string}`,
+                          limitPrice,
+                          amountIn,
+                        )
+                      })
+                    } else {
+                      hash = await sendUserOperationAsync({
+                        uo: _swap(
+                          router,
+                          BigInt(0),
+                          tokenIn as `0x${string}`,
+                          tokenOut as `0x${string}`,
+                          true,
+                          BigInt(2),
+                          amountIn,
+                          limitPrice,
+                          BigInt(Math.floor(Date.now() / 1000) + 900),
+                          usedRefAddress as `0x${string}`,
+                        )
+                      })
+                    }
+                  }
+                }
+                if (!client && hash?.hash) {
+                  txPending.current = true
+                  await waitForTxReceipt(hash.hash);
+                }
+                await refetch()
+                txPending.current = false
+                setInputString('');
+                setamountIn(BigInt(0));
+                setamountOutLimit(BigInt(0));
+                setlimitoutputString('');
+                setLimitButtonDisabled(true);
+                setLimitButton(0);
+                setSliderPercent(0);
+                const slider = document.querySelector('.balance-amount-slider');
+                const popup = document.querySelector('.slider-percentage-popup');
+                if (slider && popup) {
+                  (popup as HTMLElement).style.left = `${15 / 2}px`;
+                }
+              } catch (error) {
+                if (!(error instanceof TransactionExecutionError)) {
+                  newTxPopup(
+                    hash?.hash,
+                    "limitFailed",
+                    tokenIn == eth ? eth : tokenIn,
+                    tokenOut == eth ? eth : tokenOut,
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[tokenIn == eth ? eth : tokenIn].decimals), 3),
+                    customRound(Number(amountOutLimit) / 10 ** Number(tokendict[tokenOut == eth ? eth : tokenOut].decimals), 3),
+                    `${limitPrice / activeMarket.priceFactor} ${activeMarket.quoteAsset}`,
+                    "",
+                  );
+                }
+              } finally {
+                txPending.current = false
+                setIsSigning(false)
+              }
+            } else {
+              !connected ? setpopup(4) : handleSetChain();
+            }
+          }}
+          disabled={limitButtonDisabled || isSigning}
+        >
+          {isSigning ? (
+            <div className="button-content">
+              <div className="loading-spinner" />
+              {client ? t('sendingTransaction') : t('signTransaction')}
+            </div>
+          ) : limitButton == 0 ? (
+            t('enterAmount')
+          ) : limitButton == 1 ? (
+            t('enterLimitPrice')
+          ) : limitButton == 2 ? (
+            t('priceOutOfRangeBuy')
+          ) : limitButton == 3 ? (
+            t('priceOutOfRangeSell')
+          ) : limitButton == 4 ? (
+            t('lessThanMinSize')
+          ) : limitButton == 5 ? (
+            t('placeOrder')
+          ) : limitButton == 6 ? (
+            t('insufficient') +
+            (tokendict[tokenIn].ticker || '?') +
+            ' ' +
+            t('bal')
+          ) : limitButton == 7 ? (
+            `${t('switchto')} ${t(settings.chainConfig[activechain].name)}`
+          ) : limitButton == 8 ? (
+            t('connectWallet')
+          ) : (
+            client ? t('placeOrder') : t('approve')
+          )}
+        </button>
+      </div>
+      <div className="limit-info-rectangle">
+        <div className="trade-fee">
+          <div className="label-container">
+            <TooltipLabel
+              label={t('addLiquidityOnly')}
+              tooltipText={
+                <div>
+                  <div className="tooltip-description">
+                    {t('addLiquidityOnlySubtitle')}
+                  </div>
+                </div>
+              }
+              className="impact-label"
+            />
+          </div>
+          <ToggleSwitch
+            checked={addliquidityonly}
+            onChange={() => {
+              const newValue = !addliquidityonly;
+              setAddLiquidityOnly(newValue);
+              localStorage.setItem(
+                'crystal_add_liquidity_only',
+                JSON.stringify(newValue),
+              );
+            }}
+          />
+        </div>
+        <div className="trade-fee">
+          <div className="label-container">
+            <TooltipLabel
+              label={`${t('fee')} (0.00%)`}
+              tooltipText={
+                <div>
+                  <div className="tooltip-description">
+                    {t('makerfeeexplanation')}
+                  </div>
+                </div>
+              }
+              className="impact-label"
+            />
+          </div>
+          <div className="value-container">
+            {`${0} ${tokendict[tokenIn].ticker}`}
+          </div>
+        </div>
+
+        {!addliquidityonly && !limitChase && 
+          limitPrice != BigInt(0) &&
+          ((limitPrice >= lowestAsk && tokenIn == activeMarket.quoteAddress) ||
+            (limitPrice <= highestBid &&
+              tokenIn == activeMarket.baseAddress)) &&
+          amountIn != BigInt(0) && (
+            <div className="limit-impact-warning">
+              {tokenIn == activeMarket.quoteAddress
+                ? t('priceOutOfRangeWarningBuy')
+                : t('priceOutOfRangeWarningSell')}
+            </div>
+          )}
+      </div>
+      {simpleView && <div className="orders-info-rectangle">
+        <SimpleOrdersContainer
+          orders={orders}
+          router={router}
+          address={address}
+          refetch={refetch}
+          sendUserOperationAsync={sendUserOperationAsync}
+          setChain={handleSetChain}
+          waitForTxReceipt={waitForTxReceipt}
+        />
+      </div>}
+    </div>
+  );
+
+  // send ui component
+  const send = (
+    <div className="rectangle">
+      <div className="navlinkwrapper" data-active={location.pathname.slice(1)}>
+        <div className="innernavlinkwrapper">
+          <Link
+            to={simpleView ? "/swap" : "/market"}
+            className={`navlink ${location.pathname.slice(1) === 'swap' ? 'active' : ''}`}
+          >
+            {simpleView ? t('swap') : t('market')}
+          </Link>
+          <Link
+            to="/limit"
+            className={`navlink ${location.pathname.slice(1) === 'limit' ? 'active' : ''}`}
+          >
+            {t('limit')}
+          </Link>
+          <span
+            ref={(el: HTMLSpanElement | null) => {
+              sendButtonRef.current = el;
+            }}
+            className={`navlink ${location.pathname.slice(1) != 'swap' && location.pathname.slice(1) != 'limit' ? 'active' : ''}`}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              setShowSendDropdown(!showSendDropdown);
+            }}
+          >
+            <span className="current-pro-text">{t(currentProText)}</span>
+            <svg
+              className={`dropdown-arrow ${showSendDropdown ? 'open' : ''}`}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+
+          {showSendDropdown && (
+            <div className="navlink-dropdown" ref={sendDropdownRef}>
+              <Link
+                to="/send"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('send');
+                }}
+              >
+                {t('send')}
+              </Link>
+              <Link
+                to="/scale"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('scale');
+                }}
+              >
+                <TooltipLabel
+                  label={t('scale')}
+                  tooltipText={
+                    <div>
+                      <div className="tooltip-description">
+                        {t('scaleTooltip')}
+                      </div>
+                    </div>
+                  }
+                  className="impact-label"
+                />
+              </Link>
+
+            </div>
+          )}
+        </div>
+        <div className="sliding-tab-indicator" />
+      </div>
+      <div className="swapmodal">
+        <div
+          className={`sendbg ${connected && amountIn > tokenBalances[tokenIn]
+            ? 'exceed-balance'
+            : ''
+            }`}
+        >
+          <div className="sendbutton1container">
+            <div className="send-Send">{t('send')}</div>
+            <button
+              className="send-button1"
+              onClick={() => {
+                setpopup(1);
+              }}
+            >
+              <img className="send-button1pic" src={tokendict[tokenIn].image} />
+              <span>{tokendict[tokenIn].ticker || '?'}</span>
+            </button>
+          </div>
+          <div className="sendinputcontainer">
+            <input
+              inputMode="decimal"
+              className={`send-input ${connected &&
+                amountIn > tokenBalances[tokenIn]
+                ? 'exceed-balance'
+                : ''
+                }`}
+              onCompositionStart={() => {
+                setIsComposing(true);
+              }}
+              onCompositionEnd={(
+                e: React.CompositionEvent<HTMLInputElement>,
+              ) => {
+                setIsComposing(false);
+                const value = e.currentTarget.value;
+
+                if (/^\$?\d*\.?\d{0,18}$/.test(value)) {
+                  if (displayMode === 'usd') {
+                    if (value === '$') {
+                      setsendInputString('');
+                      setInputString('');
+                      debouncedSetAmount(BigInt(0));
+                      setSliderPercent(0);
+
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        (popup as HTMLElement).style.left = `${15 / 2}px`;
+                      }
+                    } else {
+                      const numericValue = value.replace(/^\$/, '');
+                      setsendInputString(`$${numericValue}`);
+
+                      const tokenBigInt = calculateTokenAmount(
+                        numericValue,
+                        tradesByMarket[
+                        (({ baseAsset, quoteAsset }) =>
+                          (baseAsset === wethticker ? ethticker : baseAsset) +
+                          (quoteAsset === wethticker ? ethticker : quoteAsset)
+                        )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                        ],
+                        tokenIn,
+                        getMarket(
+                          activeMarket.path.at(0),
+                          activeMarket.path.at(1),
+                        ),
+                      );
+
+                      setInputString(
+                        customRound(
+                          Number(tokenBigInt) /
+                          10 ** Number(tokendict[tokenIn].decimals),
+                          3,
+                        ).toString(),
+                      );
+
+                      debouncedSetAmount(tokenBigInt);
+
+                      const percentage = !tokenBalances[tokenIn]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              (tokenBigInt * BigInt(100)) /
+                              tokenBalances[tokenIn],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                          }px`;
+                      }
+                    }
+                  } else {
+                    setInputString(value);
+
+                    const tokenBigInt = BigInt(
+                      Math.round(
+                        (parseFloat(value || '0') || 0) *
+                        10 ** Number(tokendict[tokenIn].decimals),
+                      ),
+                    );
+                    debouncedSetAmount(tokenBigInt);
+
+                    const usd = calculateUSDValue(
+                      tokenBigInt,
+                      tradesByMarket[
+                      (({ baseAsset, quoteAsset }) =>
+                        (baseAsset === wethticker ? ethticker : baseAsset) +
+                        (quoteAsset === wethticker ? ethticker : quoteAsset)
+                      )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                      ],
+                      tokenIn,
+                      getMarket(
+                        activeMarket.path.at(0),
+                        activeMarket.path.at(1),
+                      ),
+                    ).toFixed(2);
+                    setsendInputString(`$${usd}`);
+
+                    const percentage = !tokenBalances[tokenIn]
+                      ? 0
+                      : Math.min(
+                        100,
+                        Math.floor(
+                          Number(
+                            (tokenBigInt * BigInt(100)) /
+                            tokenBalances[tokenIn],
+                          ),
+                        ),
+                      );
+                    setSliderPercent(percentage);
+
+                    const slider = document.querySelector(
+                      '.balance-amount-slider',
+                    );
+                    const popup = document.querySelector(
+                      '.slider-percentage-popup',
+                    );
+                    if (slider && popup) {
+                      const rect = slider.getBoundingClientRect();
+                      (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                        }px`;
+                    }
+                  }
+                }
+              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (isComposing) {
+                  if (displayMode === 'usd') {
+                    setsendInputString(e.target.value);
+                  } else {
+                    setInputString(e.target.value);
+                  }
+                  return;
+                }
+
+                const value = e.target.value;
+                if (/^\$?\d*\.?\d{0,18}$/.test(value)) {
+                  if (displayMode === 'usd') {
+                    if (value === '$') {
+                      setsendInputString('');
+                      setInputString('');
+                      debouncedSetAmount(BigInt(0));
+                      setSliderPercent(0);
+
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        (popup as HTMLElement).style.left = `${15 / 2}px`;
+                      }
+                    } else {
+                      const numericValue = value.replace(/^\$/, '');
+                      setsendInputString(`$${numericValue}`);
+
+                      const tokenBigInt = calculateTokenAmount(
+                        numericValue,
+                        tradesByMarket[
+                        (({ baseAsset, quoteAsset }) =>
+                          (baseAsset === wethticker ? ethticker : baseAsset) +
+                          (quoteAsset === wethticker ? ethticker : quoteAsset)
+                        )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                        ],
+                        tokenIn,
+                        getMarket(
+                          activeMarket.path.at(0),
+                          activeMarket.path.at(1),
+                        ),
+                      );
+
+                      setInputString(
+                        customRound(
+                          Number(tokenBigInt) /
+                          10 ** Number(tokendict[tokenIn].decimals),
+                          3,
+                        ).toString(),
+                      );
+                      debouncedSetAmount(tokenBigInt);
+
+                      const percentage = !tokenBalances[tokenIn]
+                        ? 0
+                        : Math.min(
+                          100,
+                          Math.floor(
+                            Number(
+                              (tokenBigInt * BigInt(100)) /
+                              tokenBalances[tokenIn],
+                            ),
+                          ),
+                        );
+                      setSliderPercent(percentage);
+
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                          }px`;
+                      }
+                    }
+                  } else {
+                    setInputString(value);
+                    const tokenBigInt = BigInt(
+                      Math.round(
+                        (parseFloat(value || '0') || 0) *
+                        10 ** Number(tokendict[tokenIn].decimals),
+                      ),
+                    );
+                    debouncedSetAmount(tokenBigInt);
+
+                    const usd = calculateUSDValue(
+                      tokenBigInt,
+                      tradesByMarket[
+                      (({ baseAsset, quoteAsset }) =>
+                        (baseAsset === wethticker ? ethticker : baseAsset) +
+                        (quoteAsset === wethticker ? ethticker : quoteAsset)
+                      )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                      ],
+                      tokenIn,
+                      getMarket(
+                        activeMarket.path.at(0),
+                        activeMarket.path.at(1),
+                      ),
+                    ).toFixed(2);
+                    setsendInputString(`$${usd}`);
+
+                    const percentage = !tokenBalances[tokenIn]
+                      ? 0
+                      : Math.min(
+                        100,
+                        Math.floor(
+                          Number(
+                            (tokenBigInt * BigInt(100)) /
+                            tokenBalances[tokenIn],
+                          ),
+                        ),
+                      );
+                    setSliderPercent(percentage);
+
+                    const slider = document.querySelector(
+                      '.balance-amount-slider',
+                    );
+                    const popup = document.querySelector(
+                      '.slider-percentage-popup',
+                    );
+                    if (slider && popup) {
+                      const rect = slider.getBoundingClientRect();
+                      (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                        }px`;
+                    }
+                  }
+                }
+              }}
+              placeholder={displayMode === 'usd' ? '$0.00' : '0.00'}
+              value={displayMode === 'usd' ? sendInputString : inputString}
+              autoFocus={!(windowWidth <= 1020)}
+            />
+          </div>
+          <div className="send-balance-wrapper">
+            <div className="send-balance-max-container">
+              <div className="send-balance1">
+                <img src={walleticon} className="send-balance-wallet-icon" />{' '}
+                {formatDisplayValue(
+                  tokenBalances[tokenIn],
+                  Number(tokendict[tokenIn].decimals),
+                )}
+              </div>
+              <div
+                className="send-max-button"
+                onClick={() => {
+                  if (tokenBalances[tokenIn] != BigInt(0)) {
+                    let amount =
+                      (tokenIn == eth && !client)
+                        ? tokenBalances[tokenIn] -
+                          settings.chainConfig[activechain].gasamount >
+                          BigInt(0)
+                          ? tokenBalances[tokenIn] -
+                          settings.chainConfig[activechain].gasamount
+                          : BigInt(0)
+                        : tokenBalances[tokenIn];
+                    setamountIn(BigInt(amount));
+                    setInputString(
+                      customRound(
+                        Number(amount) /
+                        10 ** Number(tokendict[tokenIn].decimals),
+                        3,
+                      ).toString(),
+                    );
+                    setsendInputString(
+                      `$${calculateUSDValue(
+                        amount,
+                        tradesByMarket[
+                        (({ baseAsset, quoteAsset }) =>
+                          (baseAsset === wethticker ? ethticker : baseAsset) +
+                          (quoteAsset === wethticker ? ethticker : quoteAsset)
+                        )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                        ],
+                        tokenIn,
+                        getMarket(
+                          activeMarket.path.at(0),
+                          activeMarket.path.at(1),
+                        ),
+                      ).toFixed(2)}`,
+                    );
+                    setSliderPercent(100);
+                    const slider = document.querySelector(
+                      '.balance-amount-slider',
+                    );
+                    const popup = document.querySelector(
+                      '.slider-percentage-popup',
+                    );
+                    if (slider && popup) {
+                      const rect = slider.getBoundingClientRect();
+                      const trackWidth = rect.width - 15;
+                      const thumbPosition = trackWidth + 15 / 2;
+                      (popup as HTMLElement).style.left = `${thumbPosition}px`;
+                    }
+                  }
+                }}
+              >
+                {t('max')}
+              </div>
+            </div>
+            <div
+              className="send-usd-switch-wrapper"
+              onClick={() => {
+                if (displayMode === 'usd') {
+                  setDisplayMode('token');
+                  if (parseFloat(sendInputString.replace(/^\$|,/g, '')) == 0) {
+                    setInputString('');
+                  }
+                } else {
+                  setDisplayMode('usd');
+                  if (parseFloat(inputString) == 0) {
+                    setsendInputString('');
+                  }
+                }
+              }}
+            >
+              <div className="send-usd-value">
+                {displayMode === 'usd'
+                  ? `${customRound(
+                    Number(amountIn) /
+                    10 ** Number(tokendict[tokenIn].decimals),
+                    3,
+                  )} ${tokendict[tokenIn].ticker}`
+                  : amountIn === BigInt(0)
+                    ? '$0.00'
+                    : Math.round(
+                      (parseFloat(inputString || '0') || 0) *
+                      10 ** Number(tokendict[tokenIn].decimals),
+                    ) == 0
+                      ? '$0.00'
+                      : formatUSDDisplay(
+                        calculateUSDValue(
+                          BigInt(
+                            Math.round(
+                              (parseFloat(inputString || '0') || 0) *
+                              10 ** Number(tokendict[tokenIn].decimals),
+                            ),
+                          ),
+                          tradesByMarket[
+                          (({ baseAsset, quoteAsset }) =>
+                            (baseAsset === wethticker ? ethticker : baseAsset) +
+                            (quoteAsset === wethticker ? ethticker : quoteAsset)
+                          )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                          ],
+                          tokenIn,
+                          getMarket(
+                            activeMarket.path.at(0),
+                            activeMarket.path.at(1),
+                          ),
+                        ),
+                      )}
+              </div>
+              <img src={sendSwitch} className="send-arrow" />
+            </div>
+          </div>
+        </div>
+        <div className="swap-container-divider" />
+
+        <div className="sendaddressbg">
+          <div className="send-To">{t('to')}</div>
+          <div className="send-address-input-container">
+            <input
+              className="send-output"
+              onChange={(e) => {
+                if (e.target.value === '' || /^(0x[0-9a-fA-F]{0,40}|0)$/.test(e.target.value)) {
+                  setrecipient(e.target.value);
+                }
+              }}
+              value={recipient}
+              placeholder={t('enterWalletAddress')}
+            />
+            <button
+              className="address-paste-button"
+              onClick={async () => {
+                try {
+                  const text = await navigator.clipboard.readText();
+                  if (/^(0x[0-9a-fA-F]{40})$/.test(text)) {
+                    setrecipient(text);
+                  }
+                } catch (err) {
+                  console.error('Failed to read clipboard: ', err);
+                }
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button
+          className={`send-swap-button ${isSigning ? 'signing' : ''}`}
+          onClick={async () => {
+            if (
+              connected &&
+              userchain === activechain
+            ) {
+              let hash;
+              setIsSigning(true)
+              if (client) {
+                txPending.current = true
+              }
+              try {
+                if (tokenIn == eth) {
+                  hash = await sendeth(
+                    sendUserOperationAsync,
+                    recipient as `0x${string}`,
+                    amountIn,
+                  );
+                  if (!client) {
+                    txPending.current = true
+                  }
+                  newTxPopup(
+                    (client ? hash.hash : await waitForTxReceipt(hash.hash)),
+                    'send',
+                    eth,
+                    '',
+                    customRound(
+                      Number(amountIn) / 10 ** Number(tokendict[eth].decimals),
+                      3,
+                    ),
+                    0,
+                    '',
+                    recipient,
+                  );
+                } else {
+                  hash = await sendtokens(
+                    sendUserOperationAsync,
+                    tokenIn as `0x${string}`,
+                    recipient as `0x${string}`,
+                    amountIn,
+                  );
+                  if (!client) {
+                    txPending.current = true
+                  }
+                  newTxPopup(
+                    (client ? hash.hash : await waitForTxReceipt(hash.hash)),
+                    'send',
+                    tokenIn,
+                    '',
+                    customRound(
+                      Number(amountIn) /
+                      10 ** Number(tokendict[tokenIn].decimals),
+                      3,
+                    ),
+                    0,
+                    '',
+                    recipient,
+                  );
+                }
+                await refetch()
+                txPending.current = false
+                setInputString('');
+                setsendInputString('');
+                setamountIn(BigInt(0));
+                setSliderPercent(0);
+                setSendButton(0);
+                setSendButtonDisabled(true);
+                const slider = document.querySelector('.balance-amount-slider');
+                const popup = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (slider && popup) {
+                  (popup as HTMLElement).style.left = `${15 / 2}px`;
+                }
+              } catch (error) {
+                if (!(error instanceof TransactionExecutionError)) {
+                  newTxPopup(
+                    hash.hash,
+                    "sendFailed",
+                    tokenIn === eth ? eth : tokenIn,
+                    "",
+                    customRound(
+                      Number(amountIn) / 10 ** Number(tokendict[tokenIn === eth ? eth : tokenIn].decimals),
+                      3,
+                    ),
+                    0,
+                    "",
+                    recipient,
+                  );
+                }
+              } finally {
+                txPending.current = false
+                setIsSigning(false)
+              }
+            } else {
+              !connected
+                ? setpopup(4)
+                : handleSetChain()
+            }
+          }}
+          disabled={sendButtonDisabled || isSigning}
+        >
+          {isSigning ? (
+            <div className="button-content">
+              <div className="loading-spinner" />
+              {client ? t('sendingTransaction') : t('signTransaction')}
+            </div>
+          ) : !connected ? (
+            t('connectWallet')
+          ) : sendButton == 0 ? (
+            t('enterAmount')
+          ) : sendButton == 1 ? (
+            t('enterWalletAddress')
+          ) : sendButton == 2 ? (
+            t('send')
+          ) : sendButton == 3 ? (
+            t('insufficient') +
+            (tokendict[tokenIn].ticker || '?') +
+            ' ' +
+            t('bal')
+          ) : sendButton == 4 ? (
+            `${t('switchto')} ${t(settings.chainConfig[activechain].name)}`
+          ) : (
+            t('connectWallet')
+          )}
+        </button>
+      </div>
+    </div>
+  );
+
+  // scale ui component
+  const scale = (
+    <div className="rectangle">
+      <div className="navlinkwrapper" data-active={location.pathname.slice(1)}>
+        <div className="innernavlinkwrapper">
+          <Link
+            to={simpleView ? "/swap" : "/market"}
+            className={`navlink ${location.pathname.slice(1) === 'swap' ? 'active' : ''}`}
+          >
+            {simpleView ? t('swap') : t('market')}
+          </Link>
+          <Link
+            to="/limit"
+            className={`navlink ${location.pathname.slice(1) === 'limit' ? 'active' : ''}`}
+          >
+            {t('limit')}
+          </Link>
+          <span
+            ref={(el: HTMLSpanElement | null) => {
+              sendButtonRef.current = el;
+            }}
+            className={`navlink ${location.pathname.slice(1) != 'swap' && location.pathname.slice(1) != 'limit' ? 'active' : ''}`}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              setShowSendDropdown(!showSendDropdown);
+            }}
+          >
+            <span className="current-pro-text">{t(currentProText)}</span>
+            <svg
+              className={`dropdown-arrow ${showSendDropdown ? 'open' : ''}`}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="12"
+              height="12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+
+          {showSendDropdown && (
+            <div className="navlink-dropdown" ref={sendDropdownRef}>
+              <Link
+                to="/send"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('send');
+                }}
+              >
+                {t('send')}
+              </Link>
+              <Link
+                to="/scale"
+                className="dropdown-item"
+                onClick={() => {
+                  setShowSendDropdown(false);
+                  setCurrentProText('scale');
+                }}
+              >
+                <TooltipLabel
+                  label={t('scale')}
+                  tooltipText={
+                    <div>
+                      <div className="tooltip-description">
+                        {t('scaleTooltip')}
+                      </div>
+                    </div>
+                  }
+                  className="impact-label"
+                />
+              </Link>
+
+            </div>
+          )}
+        </div>
+        <div className="sliding-tab-indicator" />
+      </div>
+      <div className="swapmodal">
+        <div
+          className={`inputbg ${connected &&
+            ((amountIn > tokenBalances[tokenIn] &&
+              !isLoading &&
+              !stateIsLoading) ||
+              (amountIn != BigInt(0) &&
+                (tokenIn == activeMarket.quoteAddress
+                  ? amountIn < activeMarket.minSize
+                  : (amountIn * limitPrice) / activeMarket.scaleFactor <
+                  activeMarket.minSize)))
+            ? 'exceed-balance'
+            : ''
+            }`}
+        >
+          <div className="Pay">{t('pay')}</div>
+          <div className="inputbutton1container">
+            <input
+              inputMode="decimal"
+              className={`input ${connected &&
+                ((amountIn > tokenBalances[tokenIn] &&
+                  !isLoading &&
+                  !stateIsLoading) ||
+                  (amountIn !== BigInt(0) &&
+                    (tokenIn === activeMarket.quoteAddress
+                      ? amountIn < activeMarket.minSize
+                      : (amountIn * limitPrice) / activeMarket.scaleFactor <
+                      activeMarket.minSize)))
+                ? 'exceed-balance'
+                : ''
+                }`}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (isComposing) {
+                  setInputString(e.target.value);
+                  return;
+                }
+
+                if (/^\d*\.?\d{0,18}$/.test(e.target.value)) {
+                  setInputString(e.target.value);
+                  if (
+                    (inputString.endsWith('.') && e.target.value === inputString.slice(0, -1)) ||
+                    (e.target.value.endsWith('.') && e.target.value.slice(0, -1) === inputString)
+                  ) {
+                    return;
+                  }
+                  setIsOutputBasedScaleOrder(false);
+                  const inputValue = BigInt(
+                    Math.round(
+                      (parseFloat(e.currentTarget.value || '0') || 0) *
+                      10 ** Number(tokendict[tokenIn].decimals),
+                    ),
+                  );
+                  if (scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+                    setScaleOutput(Number(inputValue), Number(scaleStart), Number(scaleEnd), Number(scaleOrders), Number(scaleSkew))
+                  }
+
+                  debouncedSetAmount(inputValue);
+
+                  const percentage = !tokenBalances[tokenIn]
+                    ? 0
+                    : Math.min(
+                      100,
+                      Math.floor(
+                        Number(
+                          (inputValue * BigInt(100)) / tokenBalances[tokenIn],
+                        ),
+                      ),
+                    );
+                  setSliderPercent(percentage);
+
+                  const slider = document.querySelector(
+                    '.balance-amount-slider',
+                  );
+                  const popup = document.querySelector(
+                    '.slider-percentage-popup',
+                  );
+                  if (slider && popup) {
+                    const rect = slider.getBoundingClientRect();
+                    (popup as HTMLElement).style.left =
+                      `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+                  }
+                }
+              }}
+              placeholder="0.00"
+              value={inputString}
+              autoFocus={!(windowWidth <= 1020)}
+            />
+            <button
+              className={`button1 ${connected &&
+                ((amountIn > tokenBalances[tokenIn] &&
+                  !isLoading &&
+                  !stateIsLoading) ||
+                  (amountIn != BigInt(0) &&
+                    (tokenIn == activeMarket.quoteAddress
+                      ? amountIn < activeMarket.minSize
+                      : (amountIn * limitPrice) / activeMarket.scaleFactor <
+                      activeMarket.minSize)))
+                ? 'exceed-balance'
+                : ''
+                }`}
+              onClick={() => {
+                setpopup(1);
+              }}
+            >
+              <img className="button1pic" src={tokendict[tokenIn].image} />
+              <span>{tokendict[tokenIn].ticker || '?'}</span>
+              <svg
+                className={`button-arrow ${popup == 1 ? 'open' : ''}`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div className="balance1maxcontainer">
+            <span className="usd-value">
+              {Math.round(
+                (parseFloat(inputString || '0') || 0) *
+                10 ** Number(tokendict[tokenIn].decimals),
+              ) == 0
+                ? '$0.00'
+                : formatUSDDisplay(
+                  calculateUSDValue(
+                    BigInt(
+                      Math.round(
+                        (parseFloat(inputString || '0') || 0) *
+                        10 ** Number(tokendict[tokenIn].decimals),
+                      ),
+                    ),
+                    tradesByMarket[
+                    (({ baseAsset, quoteAsset }) =>
+                      (baseAsset === wethticker ? ethticker : baseAsset) +
+                      (quoteAsset === wethticker ? ethticker : quoteAsset)
+                    )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                    ],
+                    tokenIn,
+                    getMarket(
+                      activeMarket.path.at(0),
+                      activeMarket.path.at(1),
+                    ),
+                  ),
+                )}
+            </span>
+            <div className="balance1">
+              <img src={walleticon} className="balance-wallet-icon" />{' '}
+              {formatDisplayValue(
+                tokenBalances[tokenIn],
+                Number(tokendict[tokenIn].decimals),
+              )}
+            </div>
+            <div
+              className="max-button"
+              onClick={() => {
+                if (tokenBalances[tokenIn] != BigInt(0)) {
+                  let amount =
+                    (tokenIn == eth && !client)
+                      ? tokenBalances[tokenIn] -
+                        settings.chainConfig[activechain].gasamount >
+                        BigInt(0)
+                        ? tokenBalances[tokenIn] -
+                        settings.chainConfig[activechain].gasamount
+                        : BigInt(0)
+                      : tokenBalances[tokenIn];
+                  debouncedSetAmount(BigInt(amount));
+                  setInputString(
+                    customRound(
+                      Number(amount) /
+                      10 ** Number(tokendict[tokenIn].decimals),
+                      3,
+                    ).toString(),
+                  );
+                  if (scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+                    setScaleOutput(Number(amount), Number(scaleStart), Number(scaleEnd), Number(scaleOrders), Number(scaleSkew))
+                  }
+                  setSliderPercent(100);
+                  const slider = document.querySelector(
+                    '.balance-amount-slider',
+                  );
+                  const popup = document.querySelector(
+                    '.slider-percentage-popup',
+                  );
+                  if (slider && popup) {
+                    const rect = slider.getBoundingClientRect();
+                    const trackWidth = rect.width - 15;
+                    const thumbPosition = trackWidth + 15 / 2;
+                    (popup as HTMLElement).style.left = `${thumbPosition}px`;
+                  }
+                }
+              }}
+            >
+              {t('max')}{' '}
+            </div>
+          </div>
+        </div>
+        <div
+          className="switch-button"
+          onClick={() => {
+            setTokenIn(tokenOut);
+            setTokenOut(tokenIn);
+            if (amountIn != BigInt(0) && scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+              setInputString(scaleOutputString);
+              setScaleOutputString(inputString);
+              setamountIn(amountOutScale);
+              setAmountOutScale(amountIn);
+              const percentage = !tokenBalances[tokenOut]
+                ? 0
+                : Math.min(
+                  100,
+                  Math.floor(
+                    Number(
+                      (amountOutScale * BigInt(100)) /
+                      tokenBalances[tokenOut],
+                    ),
+                  ),
+                );
+              setSliderPercent(percentage);
+              const slider = document.querySelector('.balance-amount-slider');
+              const popup = document.querySelector('.slider-percentage-popup');
+              if (slider && popup) {
+                const rect = slider.getBoundingClientRect();
+                (popup as HTMLElement).style.left =
+                  `${(rect.width - 15) * (percentage / 100) + 15 / 2}px`;
+              }
+            }
+            else {
+              setamountIn(BigInt(0))
+              setInputString('')
+            }
+          }}
+        >
+          <img src={tradearrow} className="switch-arrow" />
+        </div>
+        <div className="swap-container-divider" />
+        <div className="outputbg">
+          <div className="Recieve">{t('receive')}</div>
+          <div className="outputbutton2container">
+            <>
+              <input
+                inputMode="decimal"
+                className="output"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (/^\d*\.?\d{0,18}$/.test(e.target.value)) {
+                    setScaleOutputString(e.currentTarget.value);
+                    setIsOutputBasedScaleOrder(true);
+                    const outputValue = BigInt(
+                      Math.round(
+                        (parseFloat(e.currentTarget.value || '0') || 0) *
+                        10 ** Number(tokendict[tokenOut].decimals),
+                      ),
+                    )
+                    setAmountOutScale(outputValue);
+                    if (scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+                      const requiredInput = calculateScaleInput(
+                        outputValue,
+                        Number(scaleStart),
+                        Number(scaleEnd),
+                        Number(scaleOrders),
+                        Number(scaleSkew)
+                      );
+                      setamountIn(requiredInput);
+                      setInputString(
+                        customRound(
+                          Number(requiredInput) / 10 ** Number(tokendict[tokenIn].decimals),
+                          3
+                        ).toString()
+                      );
+                      const percentage =
+                        tokenBalances[tokenIn] === BigInt(0)
+                          ? 0
+                          : Math.min(
+                            100,
+                            Math.floor(
+                              Number(
+                                (requiredInput) * BigInt(100) / tokenBalances[tokenIn])
+                            ),
+                          );
+                      setSliderPercent(percentage);
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        (popup as HTMLElement).style.left = `${(rect.width - 15) * (percentage / 100) + 15 / 2
+                          }px`;
+                      }
+                    }
+                  }
+                }}
+                placeholder="0.00"
+                value={scaleOutputString}
+              />
+              <button
+                className="button2"
+                onClick={() => {
+                  setpopup(2);
+                }}
+              >
+                <img className="button2pic" src={tokendict[tokenOut].image} />
+                <span>{tokendict[tokenOut].ticker || "?"}</span>
+                <svg
+                  className={`button-arrow ${popup == 2 ? 'open' : ''}`}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+            </>
+          </div>
+          <div className="balance1maxcontainer">
+            <div className="output-usd-value">
+              {amountOutScale === BigInt(0)
+                ? "$0.00"
+                : (() => {
+                  const outputUSD = calculateUSDValue(
+                    amountOutScale,
+                    tradesByMarket[
+                    (({ baseAsset, quoteAsset }) =>
+                      (baseAsset === wethticker ? ethticker : baseAsset) +
+                      (quoteAsset === wethticker ? ethticker : quoteAsset)
+                    )(getMarket(activeMarket.path.at(-2), activeMarket.path.at(-1)))
+                    ],
+                    tokenOut,
+                    getMarket(
+                      activeMarket.path.at(-2),
+                      activeMarket.path.at(-1)
+                    )
+                  );
+
+                  const inputUSD = calculateUSDValue(
+                    BigInt(
+                      Math.round(
+                        (parseFloat(inputString || "0") || 0) *
+                        10 ** Number(tokendict[tokenIn].decimals)
+                      )
+                    ),
+                    tradesByMarket[
+                    (({ baseAsset, quoteAsset }) =>
+                      (baseAsset === wethticker ? ethticker : baseAsset) +
+                      (quoteAsset === wethticker ? ethticker : quoteAsset)
+                    )(getMarket(activeMarket.path.at(0), activeMarket.path.at(1)))
+                    ],
+                    tokenIn,
+                    getMarket(
+                      activeMarket.path.at(0),
+                      activeMarket.path.at(1)
+                    )
+                  );
+
+                  const percentageDiff =
+                    inputUSD > 0 ? ((outputUSD - inputUSD) / inputUSD) * 100 : 0;
+
+                  return (
+                    <div className="output-usd-container">
+                      <span>{formatUSDDisplay(outputUSD)}</span>
+                      {inputUSD > 0 && (
+                        <span
+                          className={`output-percentage ${percentageDiff >= 0 ? "positive" : "negative"
+                            }`}
+                        >
+                          ({percentageDiff >= 0 ? "+" : ""}
+                          {percentageDiff.toFixed(2)}%)
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
+            </div>
+            <div className="balance2">
+              <img src={walleticon} className="balance-wallet-icon" />{" "}
+              {formatDisplayValue(
+                tokenBalances[tokenOut],
+                Number(tokendict[tokenOut].decimals)
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="scale-start-end-container">
+          <div
+            className={`scalebgtop ${connected &&
+              !(
+                amountIn > tokenBalances[tokenIn] &&
+                !isLoading &&
+                !stateIsLoading
+              ) &&
+              amountIn != BigInt(0) &&
+              ((scaleStart >= lowestAsk &&
+                tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                (scaleStart <= highestBid &&
+                  tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth))) &&
+              !(tokenIn == activeMarket.quoteAddress
+                ? amountIn < activeMarket.minSize
+                : (amountIn * scaleStart) / activeMarket.scaleFactor <
+                activeMarket.minSize)
+              ? 'exceed-balance'
+              : ''
+              }`}
+          >
+            <div className="scalepricecontainer">
+              <span className="scale-order-start-label">{t('start')}</span>
+              <input
+                inputMode="decimal"
+                className={`scale-input ${connected &&
+                  !(
+                    amountIn > tokenBalances[tokenIn] &&
+                    !isLoading &&
+                    !stateIsLoading
+                  ) &&
+                  amountIn != BigInt(0) &&
+                  ((scaleStart >= lowestAsk &&
+                    tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                    (scaleStart <= highestBid &&
+                      tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth))) &&
+                  !(tokenIn == activeMarket.quoteAddress
+                    ? amountIn < activeMarket.minSize
+                    : (amountIn * scaleStart) / activeMarket.scaleFactor <
+                    activeMarket.minSize)
+                  ? 'exceed-balance'
+                  : ''
+                  }`}
+                onChange={(e) => {
+                  if (
+                    new RegExp(
+                      `^\\d*\\.?\\d{0,${Math.floor(Math.log10(Number(activeMarket.priceFactor)))}}$`
+                    ).test(e.target.value)
+                  ) {
+                    setScaleStartString(e.target.value);
+                    let price = BigInt(
+                      Math.round(
+                        (parseFloat(e.target.value || '0') || 0) *
+                        Number(activeMarket.priceFactor)
+                      )
+                    );
+                    setScaleStart(price);
+                    if (price && scaleEnd && scaleOrders && scaleSkew) {
+                      if (!isOutputBasedScaleOrder) {
+                        setScaleOutput(
+                          Number(amountIn),
+                          Number(price),
+                          Number(scaleEnd),
+                          Number(scaleOrders),
+                          Number(scaleSkew)
+                        );
+                      } else {
+                        const requiredInput = calculateScaleInput(
+                          BigInt(Number(scaleOutputString) * 10 ** Number(tokendict[tokenOut].decimals)),
+                          Number(price),
+                          Number(scaleEnd),
+                          Number(scaleOrders),
+                          Number(scaleSkew)
+                        );
+                        setamountIn(BigInt(requiredInput));
+                        setInputString(
+                          customRound(
+                            Number(requiredInput) / 10 ** Number(tokendict[tokenIn].decimals),
+                            3
+                          ).toString()
+                        );
+                      }
+                    }
+                  }
+                }}
+                placeholder="0.00"
+                value={scaleStartString}
+              />
+            </div>
+          </div>
+          <div
+            className={`scalebgtop ${connected &&
+              !(
+                amountIn > tokenBalances[tokenIn] &&
+                !isLoading &&
+                !stateIsLoading
+              ) &&
+              amountIn != BigInt(0) &&
+              ((scaleEnd >= lowestAsk &&
+                tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                (scaleEnd <= highestBid &&
+                  tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth))) &&
+              !(tokenIn == activeMarket.quoteAddress
+                ? amountIn < activeMarket.minSize
+                : (amountIn * scaleEnd) / activeMarket.scaleFactor <
+                activeMarket.minSize)
+              ? 'exceed-balance'
+              : ''
+              }`}
+          >
+            <div className="scalepricecontainer">
+              <span className="scale-order-end-label">{t('end')}</span>
+              <input
+                inputMode="decimal"
+                className={`scale-input ${connected &&
+                  !(
+                    amountIn > tokenBalances[tokenIn] &&
+                    !isLoading &&
+                    !stateIsLoading
+                  ) &&
+                  amountIn != BigInt(0) &&
+                  ((scaleEnd >= lowestAsk &&
+                    tokenIn == activeMarket.quoteAddress && (addliquidityonly || tokenIn == eth)) ||
+                    (scaleEnd <= highestBid &&
+                      tokenIn == activeMarket.baseAddress && (addliquidityonly || tokenIn == eth))) &&
+                  !(tokenIn == activeMarket.quoteAddress
+                    ? amountIn < activeMarket.minSize
+                    : (amountIn * scaleEnd) / activeMarket.scaleFactor <
+                    activeMarket.minSize)
+                  ? 'exceed-balance'
+                  : ''
+                  }`}
+                onChange={(e) => {
+                  if (
+                    new RegExp(
+                      `^\\d*\\.?\\d{0,${Math.floor(Math.log10(Number(activeMarket.priceFactor)))}}$`
+                    ).test(e.target.value)
+                  ) {
+                    setScaleEndString(e.target.value);
+                    let price = BigInt(
+                      Math.round(
+                        (parseFloat(e.target.value || '0') || 0) *
+                        Number(activeMarket.priceFactor)
+                      )
+                    );
+                    setScaleEnd(price);
+                    if (price && scaleStart && scaleOrders && scaleSkew) {
+                      if (!isOutputBasedScaleOrder) {
+                        setScaleOutput(
+                          Number(amountIn),
+                          Number(scaleStart),
+                          Number(price),
+                          Number(scaleOrders),
+                          Number(scaleSkew)
+                        );
+                      } else {
+                        const requiredInput = calculateScaleInput(
+                          BigInt(Number(scaleOutputString) * 10 ** Number(tokendict[tokenOut].decimals)),
+                          Number(scaleStart),
+                          Number(price),
+                          Number(scaleOrders),
+                          Number(scaleSkew)
+                        );
+                        setamountIn(BigInt(requiredInput));
+                        setInputString(
+                          customRound(
+                            Number(requiredInput) / 10 ** Number(tokendict[tokenIn].decimals),
+                            3
+                          ).toString()
+                        );
+                      }
+                    }
+                  }
+                }}
+                placeholder="0.00"
+                value={scaleEndString}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="scale-size-skew">
+          <div
+            className={`scalebottombg ${scaleOrdersString == '1'
+              ? 'exceed-balance'
+              : ''
+              }`}
+          >
+            <div className="scalebottomcontainer">
+              <span className="scale-order-total-label">{t('orders')}</span>
+              <input
+                inputMode="numeric" pattern="[0-9]*"
+                className={`scale-bottom-input ${scaleOrdersString == '1'
+                  ? 'exceed-balance'
+                  : ''
+                  }`}
+                onChange={(e) => {
+                  if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= 100) {
+                    setScaleOrdersString(e.target.value);
+                    let temporders = BigInt(e.target.value == "1" ? 0 : e.target.value)
+                    setScaleOrders(temporders)
+                    if (temporders && scaleStart && scaleSkew && scaleEnd) {
+                      if (!isOutputBasedScaleOrder) {
+                        setScaleOutput(
+                          Number(amountIn),
+                          Number(scaleStart),
+                          Number(scaleEnd),
+                          Number(temporders),
+                          Number(scaleSkew)
+                        );
+                      } else {
+                        const requiredInput = calculateScaleInput(
+                          BigInt(Number(scaleOutputString) * 10 ** Number(tokendict[tokenOut].decimals)),
+                          Number(scaleStart),
+                          Number(scaleEnd),
+                          Number(temporders),
+                          Number(scaleSkew)
+                        );
+                        setamountIn(requiredInput);
+                        setInputString(
+                          customRound(
+                            Number(requiredInput) / 10 ** Number(tokendict[tokenIn].decimals),
+                            3
+                          ).toString()
+                        );
+                      }
+                    }
+                    else {
+                      setScaleOutput(Number(amountIn), Number(scaleStart), Number(scaleEnd), Number(0), Number(scaleSkew))
+                    }
+                  }
+                }}
+                placeholder="0"
+                value={scaleOrdersString}
+              />
+            </div>
+          </div>
+          <div
+            className={`scalebottombg`}
+          >
+            <div className="scalebottomcontainer">
+              <span className="scale-order-size-label">{t('skew')}</span>
+              <input
+                inputMode="decimal"
+                className={`scale-bottom-input`}
+                onChange={(e) => {
+                  if (/^\d*\.?\d{0,2}$/.test(e.target.value) && Number(e.target.value) <= 100) {
+                    setScaleSkewString(e.target.value);
+                    let skew = Number(e.target.value)
+                    setScaleSkew(skew)
+                    if (skew && scaleStart && scaleOrders && scaleEnd) {
+                      if (!isOutputBasedScaleOrder) {
+                        setScaleOutput(
+                          Number(amountIn),
+                          Number(scaleStart),
+                          Number(scaleEnd),
+                          Number(scaleOrders),
+                          Number(skew)
+                        );
+                      } else {
+                        const requiredInput = calculateScaleInput(
+                          BigInt(Number(scaleOutputString) * 10 ** Number(tokendict[tokenOut].decimals)),
+                          Number(scaleStart),
+                          Number(scaleEnd),
+                          Number(scaleOrders),
+                          Number(skew)
+                        );
+                        setamountIn(requiredInput);
+                        setInputString(
+                          customRound(
+                            Number(requiredInput) / 10 ** Number(tokendict[tokenIn].decimals),
+                            3
+                          ).toString()
+                        );
+                      }
+                    }
+                  }
+                }}
+                placeholder="0.00"
+                value={scaleSkewString}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="balance-slider-wrapper">
+          <div className="slider-container">
+            <input
+              type="range"
+              className={`balance-amount-slider ${isDragging ? 'dragging' : ''}`}
+              min="0"
+              max="100"
+              step="1"
+              value={sliderPercent}
+              disabled={!connected}
+              onChange={(e) => {
+                const percent = parseInt(e.target.value);
+                const newAmount =
+                  (((tokenIn == eth && !client)
+                    ? tokenBalances[tokenIn] -
+                      settings.chainConfig[activechain].gasamount >
+                      BigInt(0)
+                      ? tokenBalances[tokenIn] -
+                      settings.chainConfig[activechain].gasamount
+                      : BigInt(0)
+                    : tokenBalances[tokenIn]) *
+                    BigInt(percent)) /
+                  100n;
+                setSliderPercent(percent);
+                setInputString(
+                  newAmount == BigInt(0)
+                    ? ''
+                    : customRound(
+                      Number(newAmount) /
+                      10 ** Number(tokendict[tokenIn].decimals),
+                      3,
+                    ).toString(),
+                );
+                debouncedSetAmount(newAmount);
+
+                if (scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+                  setScaleOutput(Number(newAmount), Number(scaleStart), Number(scaleEnd), Number(scaleOrders), Number(scaleSkew))
+                }
+                const slider = e.target;
+                const rect = slider.getBoundingClientRect();
+                const trackWidth = rect.width - 15;
+                const thumbPosition = (percent / 100) * trackWidth + 15 / 2;
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) {
+                  popup.style.left = `${thumbPosition}px`;
+                }
+              }}
+              onMouseDown={() => {
+                setIsDragging(true);
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) popup.classList.add('visible');
+              }}
+              onMouseUp={() => {
+                setIsDragging(false);
+                const popup: HTMLElement | null = document.querySelector(
+                  '.slider-percentage-popup',
+                );
+                if (popup) popup.classList.remove('visible');
+              }}
+              style={{
+                background: `linear-gradient(to right,rgb(171, 176, 224) ${sliderPercent}%,rgb(21, 21, 25) ${sliderPercent}%)`,
+              }}
+            />
+            <div className="slider-percentage-popup">{sliderPercent}%</div>
+            <div className="balance-slider-marks">
+              {[0, 25, 50, 75, 100].map((markPercent) => (
+                <div
+                  key={markPercent}
+                  className="balance-slider-mark"
+                  data-active={sliderPercent >= markPercent}
+                  data-percentage={markPercent}
+                  onClick={() => {
+                    if (connected) {
+                      const newAmount =
+                        (((tokenIn == eth && !client)
+                          ? tokenBalances[tokenIn] -
+                            settings.chainConfig[activechain].gasamount >
+                            BigInt(0)
+                            ? tokenBalances[tokenIn] -
+                            settings.chainConfig[activechain].gasamount
+                            : BigInt(0)
+                          : tokenBalances[tokenIn]) *
+                          BigInt(markPercent)) /
+                        100n;
+                      setSliderPercent(markPercent);
+                      setInputString(
+                        newAmount == BigInt(0)
+                          ? ''
+                          : customRound(
+                            Number(newAmount) /
+                            10 ** Number(tokendict[tokenIn].decimals),
+                            3,
+                          ).toString(),
+                      );
+                      debouncedSetAmount(newAmount);
+                      if (scaleStart && scaleEnd && scaleOrders && scaleSkew) {
+                        setScaleOutput(Number(newAmount), Number(scaleStart), Number(scaleEnd), Number(scaleOrders), Number(scaleSkew))
+                      }
+                      const slider = document.querySelector(
+                        '.balance-amount-slider',
+                      );
+                      const popup: HTMLElement | null = document.querySelector(
+                        '.slider-percentage-popup',
+                      );
+                      if (slider && popup) {
+                        const rect = slider.getBoundingClientRect();
+                        popup.style.left = `${(rect.width - 15) * (markPercent / 100) + 15 / 2
+                          }px`;
+                      }
+                    }
+                  }}
+                >
+                  {markPercent}%
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <button
+          className={`limit-swap-button ${isSigning ? 'signing' : ''}`}
+          onClick={async () => {
+            if (connected && userchain === activechain) {
+              let finalAmountIn = amountIn;
+              if (isOutputBasedScaleOrder) {
+                const desiredOutput =
+                  Number(scaleOutputString) *
+                  10 ** Number(tokendict[tokenOut].decimals);
+                finalAmountIn = calculateScaleInput(
+                  BigInt(desiredOutput),
+                  Number(scaleStart),
+                  Number(scaleEnd),
+                  Number(scaleOrders),
+                  Number(scaleSkew)
+                );
+              }
+              let o = calculateScaleOutput(
+                finalAmountIn,
+                Number(scaleStart),
+                Number(scaleEnd),
+                Number(scaleOrders),
+                Number(scaleSkew)
+              );
+              let action: any = [[]];
+              let price: any = [[]];
+              let param1: any = [[]];
+              let param2: any = [[]];
+              let sum = BigInt(0)
+              o.forEach((order) => {
+                sum += tokenIn == activeMarket.quoteAddress ? BigInt(order[2]) : BigInt(order[1])
+                action[0].push(tokenIn == activeMarket.quoteAddress ? ((addliquidityonly || tokenIn == eth) ? 1 : 5) : ((addliquidityonly || tokenIn == eth) ? 2 : 6));
+                price[0].push(order[0]);
+                param1[0].push(tokenIn == activeMarket.quoteAddress ? order[2] : order[1]);
+                param2[0].push(tokenIn == eth ? router : address);
+              });
+              let hash;
+              setIsSigning(true)
+              if (client) {
+                txPending.current = true
+              }
+              try {
+                if (tokenIn == eth) { // sell
+                  hash = await sendUserOperationAsync({
+                    uo: multiBatchOrders(
+                      router,
+                      BigInt(finalAmountIn),
+                      [activeMarket.address],
+                      action,
+                      price,
+                      param1,
+                      param2,
+                      usedRefAddress
+                    )
+                  })
+                } else {
+                  if (allowance < finalAmountIn) {
+                    if (client) {
+                      let uo = []
+                      uo.push(approve(
+                        tokenIn as `0x${string}`,
+                        getMarket(
+                          activeMarket.path.at(0),
+                          activeMarket.path.at(1),
+                        ).address,
+                        maxUint256,
+                      ))
+                      uo.push(multiBatchOrders(
+                        router,
+                        BigInt(0),
+                        [activeMarket.address],
+                        action,
+                        price,
+                        param1,
+                        param2,
+                        usedRefAddress
+                      ))
+                      hash = await sendUserOperationAsync({ uo: uo })
+                      newTxPopup(
+                        hash.hash,
+                        'approve',
+                        tokenIn,
+                        '',
+                        customRound(
+                          Number(finalAmountIn) /
+                          10 ** Number(tokendict[tokenIn].decimals),
+                          3,
+                        ),
+                        0,
+                        '',
+                        activeMarket.address,
+                      );
+                    }
+                    else {
+                      hash = await sendUserOperationAsync({
+                        uo: approve(
+                          tokenIn as `0x${string}`,
+                          getMarket(
+                            activeMarket.path.at(0),
+                            activeMarket.path.at(1),
+                          ).address,
+                          maxUint256,
+                        )
+                      })
+                      newTxPopup(
+                        (client
+                          ? hash.hash
+                          : await waitForTxReceipt(hash.hash)
+                        ),
+                        'approve',
+                        tokenIn,
+                        '',
+                        customRound(
+                          Number(finalAmountIn) /
+                          10 ** Number(tokendict[tokenIn].decimals),
+                          3,
+                        ),
+                        0,
+                        '',
+                        activeMarket.address,
+                      );
+                    }
+                  }
+                  if (!client || !(allowance < finalAmountIn)) {
+                    hash = await sendUserOperationAsync({
+                      uo: multiBatchOrders(
+                        router,
+                        BigInt(0),
+                        [activeMarket.address],
+                        action,
+                        price,
+                        param1,
+                        param2,
+                        usedRefAddress
+                      )
+                    })
+                  }
+                }
+                if (!client && hash?.hash) {
+                  txPending.current = true
+                  await waitForTxReceipt(hash.hash);
+                }
+                await refetch()
+                txPending.current = false
+                setInputString('');
+                setamountIn(BigInt(0));
+                setAmountOutScale(BigInt(0));
+                setScaleOutputString('');
+                setScaleButtonDisabled(true);
+                setScaleButton(0);
+                setScaleStart(BigInt(0));
+                setScaleEnd(BigInt(0));
+                setScaleStartString('');
+                setScaleEndString('');
+                setScaleSkew(1);
+                setScaleSkewString('1.00');
+                setScaleOrders(BigInt(0));
+                setScaleOrdersString('');
+                setSliderPercent(0);
+                const slider = document.querySelector('.balance-amount-slider');
+                const popup = document.querySelector('.slider-percentage-popup');
+                if (slider && popup) {
+                  (popup as HTMLElement).style.left = `${15 / 2}px`;
+                }
+              } catch (error) {
+                console.log(error)
+                if (!(error instanceof TransactionExecutionError)) {
+                  newTxPopup(
+                    hash?.hash,
+                    "limitFailed",
+                    tokenIn == eth ? eth : tokenIn,
+                    tokenOut == eth ? eth : tokenOut,
+                    customRound(Number(amountIn) / 10 ** Number(tokendict[tokenIn == eth ? eth : tokenIn].decimals), 3),
+                    customRound(Number(amountOutScale) / 10 ** Number(tokendict[tokenOut == eth ? eth : tokenOut].decimals), 3),
+                    "",
+                    "",
+                  );
+                }
+              } finally {
+                txPending.current = false
+                setIsSigning(false)
+              }
+            } else {
+              !connected ? setpopup(4) : handleSetChain();
+            }
+          }}
+          disabled={scaleButtonDisabled || isSigning}
+        >
+          {isSigning ? (
+            <div className="button-content">
+              <div className="loading-spinner" />
+              {client ? t('sendingTransaction') : t('signTransaction')}
+            </div>
+          ) : scaleButton == 0 ? (
+            t('enterAmount')
+          ) : scaleButton == 1 ? (
+            t('enterStartPrice')
+          ) : scaleButton == 2 ? (
+            t('enterEndPrice')
+          ) : scaleButton == 3 ? (
+            t('startPriceHigh')
+          ) : scaleButton == 4 ? (
+            t('startPriceLow')
+          ) : scaleButton == 5 ? (
+            t('endPriceHigh')
+          ) : scaleButton == 6 ? (
+            t('endPriceLow')
+          ) : scaleButton == 7 ? (
+            t('scaleMinSize')
+          ) : scaleButton == 8 ? (
+            t('enterOrders')
+          ) : scaleButton == 9 ? (
+            t('enterSkew')
+          ) : scaleButton == 10 ? (
+            t('insufficient') + (tokendict[tokenIn].ticker || '?') + ' ' + t('bal')
+          ) : scaleButton == 11 ? (
+            `${t('switchto')} ${t(settings.chainConfig[activechain].name)}`
+          ) : scaleButton == 12 ? (
+            t('connectWallet')
+          ) : scaleButton == 13 ? (
+            client ? t('placeOrder') : t('approve')
+          ) : (
+            t('placeOrder')
+          )}
+        </button>
+      </div>
+      <div className="limit-info-rectangle">
+        <div className="trade-fee">
+          <div className="label-container">
+            <TooltipLabel
+              label={t('addLiquidityOnly')}
+              tooltipText={
+                <div>
+                  <div className="tooltip-description">
+                    {t('addLiquidityOnlySubtitle')}
+                  </div>
+                </div>
+              }
+              className="impact-label"
+            />
+          </div>
+          <ToggleSwitch
+            checked={(addliquidityonly || tokenIn == eth)}
+            onChange={() => {
+              const newValue = !addliquidityonly;
+              setAddLiquidityOnly(newValue);
+              localStorage.setItem(
+                'crystal_add_liquidity_only',
+                JSON.stringify(newValue),
+              );
+            }}
+            disabled={tokenIn == eth}
+          />
+        </div>
+        <div className="trade-fee">
+          <div className="label-container">
+            <TooltipLabel
+              label={`${t('fee')} (0.00%)`}
+              tooltipText={
+                <div>
+                  <div className="tooltip-description">
+                    {t('makerfeeexplanation')}
+                  </div>
+                </div>
+              }
+              className="impact-label"
+            />
+          </div>
+          <div className="value-container">
+            {`${0} ${tokendict[tokenIn].ticker}`}
+          </div>
+        </div>
+      </div>
+      {simpleView && <div className="orders-info-rectangle">
+        <SimpleOrdersContainer
+          orders={orders}
+          router={router}
+          address={address}
+          refetch={refetch}
+          sendUserOperationAsync={sendUserOperationAsync}
+          setChain={handleSetChain}
+          waitForTxReceipt={waitForTxReceipt}
+        />
+      </div>}
+    </div>
+  );
+
+  const renderChartComponent = useMemo(() => (
+    <ChartComponent
+      activeMarket={activeMarket}
+      tradehistory={tradehistory}
+      isMarksVisible={isMarksVisible}
+      orders={orders}
+      isOrdersVisible={isOrdersVisible}
+      showChartOutliers={showChartOutliers}
+      router={router}
+      refetch={refetch}
+      sendUserOperationAsync={sendUserOperationAsync}
+      setChain={handleSetChain}
+      waitForTxReceipt={waitForTxReceipt}
+      address={address}
+      client={client}
+      newTxPopup={newTxPopup}
+      usedRefAddress={usedRefAddress}
+      data={advChartData}
+      setData={setChartData}
+      realtimeCallbackRef={realtimeCallbackRef}
+    />
+  ), [
+    activeMarket,
+    tradehistory,
+    isMarksVisible,
+    orders,
+    isOrdersVisible,
+    showChartOutliers,
+    router,
+    refetch,
+    handleSetChain,
+    waitForTxReceipt,
+    address,
+    client,
+    newTxPopup,
+    usedRefAddress,
+    advChartData,
+    realtimeCallbackRef
+  ]);
+
+  const TradeLayout = (swapComponent: JSX.Element) => (
+    <div className="trade-container">
+      {windowWidth <= 1020 && (
+        <div className="mobile-nav" data-active={mobileView}>
+          <div className="mobile-nav-inner">
+            <button
+              className={`mobile-nav-link ${mobileView === 'chart' ? 'active' : ''}`}
+              onClick={() => setMobileView('chart')}
+            >
+              {t('chart')}
+            </button>
+            <button
+              className={`mobile-nav-link ${mobileView === 'orderbook' ? 'active' : ''}`}
+              onClick={() => {
+                setMobileView('orderbook');
+                setOBTab('orderbook');
+              }}
+            >
+              {t('orderbook')}
+            </button>
+            <button
+              className={`mobile-nav-link ${mobileView === 'trades' ? 'active' : ''}`}
+              onClick={() => {
+                setMobileView('trades');
+                setOBTab('trades');
+              }}
+            >
+              {t('trades')}
+            </button>
+            <div className="mobile-sliding-indicator" />
+          </div>
+        </div>
+      )}
+      <div
+        className={`main-content-wrapper ${simpleView ? 'simple-view' : ''}`}
+        style={{
+          flexDirection:
+            layoutSettings === 'alternative' ? 'row-reverse' : 'row',
+        }}
+      >
+        {simpleView ? (
+          <>
+            <div className="right-column">{swapComponent}</div>
+          </>
+        ) : (
+          <>
+            <div className="chartandorderbookandordercenter">
+              <div className="chartandorderbook">
+                <ChartOrderbookPanel
+                  layoutSettings={layoutSettings}
+                  orderbookPosition={orderbookPosition}
+                  orderdata={{
+                    roundedBuyOrders,
+                    roundedSellOrders,
+                    spreadData,
+                    priceFactor,
+                    symbolIn,
+                    symbolOut,
+                  }}
+                  windowWidth={windowWidth}
+                  mobileView={mobileView}
+                  isOrderbookVisible={isOrderbookVisible}
+                  orderbookWidth={orderbookWidth}
+                  setOrderbookWidth={setOrderbookWidth}
+                  obInterval={obInterval}
+                  amountsQuote={amountsQuote}
+                  setAmountsQuote={setAmountsQuote}
+                  obtrades={trades}
+                  setOBInterval={setOBInterval}
+                  baseInterval={baseInterval}
+                  viewMode={viewMode}
+                  setViewMode={setViewMode}
+                  activeTab={obTab}
+                  setActiveTab={setOBTab}
+                  updateLimitAmount={updateLimitAmount}
+                  renderChartComponent={renderChartComponent}
+                />
+              </div>
+              <div
+                className={`oc-spacer ${!isOrderCenterVisible ? 'collapsed' : ''}`}
+              >
+                <div
+                  className="ordercenter-drag-handle"
+                  onMouseDown={handleVertMouseDown}
+                />
+              </div>
+              <OrderCenter
+                orders={orders}
+                tradehistory={tradehistory}
+                canceledorders={canceledorders}
+                router={router}
+                address={address}
+                trades={tradesByMarket}
+                currentMarket={
+                  activeMarketKey.replace(
+                    new RegExp(
+                      `^${wethticker}|${wethticker}$`,
+                      'g'
+                    ),
+                    ethticker
+                  )
+                }
+                orderCenterHeight={orderCenterHeight}
+                hideBalances={true}
+                tokenList={memoizedTokenList}
+                onMarketSelect={onMarketSelect}
+                setSendTokenIn={setSendTokenIn}
+                setpopup={setpopup}
+                sortConfig={memoizedSortConfig}
+                onSort={emptyFunction}
+                tokenBalances={tokenBalances}
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+                filter={filter}
+                setFilter={setFilter}
+                onlyThisMarket={onlyThisMarket}
+                setOnlyThisMarket={setOnlyThisMarket}
+                refetch={refetch}
+                sendUserOperationAsync={sendUserOperationAsync}
+                setChain={handleSetChain}
+                waitForTxReceipt={waitForTxReceipt}
+                isVertDragging={isVertDragging}
+                isOrderCenterVisible={isOrderCenterVisible}
+              />
+            </div>
+            {windowWidth > 1020 && (
+              <div className="right-column"> {swapComponent} </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="app-wrapper" key={language}>
+      <NavigationProgress location={location} />
+      <FullScreenOverlay isVisible={loading} />
+      {Modals}
+      <SidebarNav simpleView={simpleView} setSimpleView={setSimpleView} />
+      {windowWidth <= 1020 &&
+        !simpleView &&
+        ['swap', 'limit', 'send', 'scale', 'market'].includes(location.pathname.slice(1)) && (
+          <>
+            <button
+              className="mobile-trade-button"
+              onClick={() => {
+                if (showTrade && !simpleView) {
+                  document.body.style.overflow = 'hidden'
+                  document
+                    .querySelector('.right-column')
+                    ?.classList.add('hide');
+                  document
+                    .querySelector('.right-column')
+                    ?.classList.remove('show');
+                  document
+                    .querySelector('.trade-mobile-switch')
+                    ?.classList.remove('open');
+                  setTimeout(() => {
+                    setShowTrade(false);
+                  }, 300);
+                } else {
+                  setShowTrade(true);
+                  document
+                    .querySelector('.trade-mobile-switch')
+                    ?.classList.add('open');
+                }
+              }}
+            >
+              <img src={mobiletradeswap} className="trade-mobile-switch" />
+            </button>
+            <div className={`right-column ${showTrade ? 'show' : ''}`}>
+              {location.pathname.slice(1) == 'swap' || location.pathname.slice(1) == 'market' ? swap : location.pathname.slice(1) == 'limit' ? limit : location.pathname.slice(1) == 'send' ? send : scale}
+            </div>
+          </>
+        )}
+      {
+        <>
+          <Header
+            setTokenIn={setTokenIn}
+            setTokenOut={setTokenOut}
+            setorders={setorders}
+            settradehistory={settradehistory}
+            settradesByMarket={settradesByMarket}
+            setcanceledorders={setcanceledorders}
+            setpopup={setpopup}
+            setChain={handleSetChain}
+            account={{
+              connected: connected,
+              address: address,
+              chainId: userchain,
+            }}
+            activechain={activechain}
+            tokenIn={tokenIn}
+            setShowTrade={setShowTrade}
+            simpleView={simpleView}
+            setSimpleView={setSimpleView}
+            tokendict={tokendict}
+            transactions={transactions}
+            activeMarket={activeMarket}
+            orderdata={{
+              liquidityBuyOrders,
+              liquiditySellOrders,
+            }}
+            onMarketSelect={onMarketSelect}
+            marketsData={sortedMarkets}
+            tradesloading={tradesloading}
+            tradesByMarket={tradesByMarket}
+          />
+          <div className="headerfiller"></div>
+        </>
+      }
+      <div className="app-container sidebar-adjusted">
+        <Routes>
+          <Route path="/" element={<Navigate to="/market" replace />} />
+          <Route path="*" element={<Navigate to="/market" replace />} />
+          <Route
+            path="/referrals"
+            element={
+              <Referrals
+                tokenList={Object.values(tokendict)}
+                markets={markets}
+                router={router}
+                address={address ?? undefined}
+                usedRefLink={usedRefLink}
+                usedRefAddress={usedRefAddress}
+                setUsedRefAddress={setUsedRefAddress}
+                setUsedRefLink={setUsedRefLink}
+                totalClaimableFees={totalClaimableFees}
+                claimableFees={claimableFees}
+                refLink={refLink}
+                setRefLink={setRefLink}
+                showModal={showReferralsModal}
+                setShowModal={setShowReferralsModal}
+                setChain={handleSetChain}
+                waitForTxReceipt={waitForTxReceipt}
+                setpopup={setpopup}
+                account={{
+                  connected: connected,
+                  address: address,
+                  chainId: userchain,
+                }}
+                refetch={refRefetch}
+                sendUserOperationAsync={sendUserOperationAsync}
+                client={client}
+              />
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <Leaderboard
+                setpopup={setpopup}
+                orders={orders}
+                address={address}
+                username={username}
+                setIsTransitioning={setIsTransitioning}
+                setTransitionDirection={setTransitionDirection}
+              />
+            }
+          />
+          <Route
+            path="/portfolio"
+            element={
+              <Portfolio
+                orders={orders}
+                tradehistory={tradehistory}
+                trades={tradesByMarket}
+                canceledorders={canceledorders}
+                tokenList={memoizedTokenList}
+                router={router}
+                address={address ?? ''}
+                isBlurred={isBlurred}
+                setIsBlurred={setIsBlurred}
+                onMarketSelect={onMarketSelect}
+                setSendTokenIn={setSendTokenIn}
+                setpopup={setpopup}
+                tokenBalances={tokenBalances}
+                totalAccountValue={totalAccountValue}
+                setTotalVolume={setTotalVolume}
+                totalVolume={totalVolume}
+                chartData={typeof totalAccountValue === 'number' ? [
+                  ...chartData.slice(0, -1),
+                  {
+                    ...chartData[chartData.length - 1],
+                    value: totalAccountValue,
+                  },
+                ] : chartData}
+                portChartLoading={portChartLoading}
+                chartDays={chartDays}
+                setChartDays={setChartDays}
+                totalClaimableFees={totalClaimableFees}
+                refLink={refLink}
+                setShowRefModal={setShowReferralsModal}
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+                filter={filter}
+                setFilter={setFilter}
+                onlyThisMarket={onlyThisMarket}
+                setOnlyThisMarket={setOnlyThisMarket}
+                account={{
+                  connected: connected,
+                  address: address,
+                  chainId: userchain,
+                  logout: logout,
+                }}
+                refetch={refetch}
+                sendUserOperationAsync={sendUserOperationAsync}
+                setChain={handleSetChain}
+                waitForTxReceipt={waitForTxReceipt}
+              />
+            }
+          />
+          <Route path="/swap" element={TradeLayout(swap)} />
+          <Route path="/market" element={TradeLayout(swap)} />
+          <Route path="/limit" element={TradeLayout(limit)} />
+          <Route path="/send" element={TradeLayout(send)} />
+          <Route path="/scale" element={TradeLayout(scale)} />
+        </Routes>
+        <TransactionPopupManager
+          transactions={transactions}
+          setTransactions={setTransactions}
+          tokendict={tokendict}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default App;

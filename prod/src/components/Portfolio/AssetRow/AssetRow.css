@@ -1,0 +1,124 @@
+.portfolio-row {
+  align-items: center;
+  color: #ffffffca;
+  display: grid;
+  grid-template-columns:
+    minmax(140px, 1.2fr) minmax(120px, 1.1fr) minmax(80px, 0.7fr)
+    minmax(150px, 0.4fr);
+  justify-content: flex-start;
+  border-radius: 4px;
+  min-width: 410px;
+  text-align: left;
+  user-select: none;
+}
+
+.portfolio-row:hover {
+  background: #ffffff04;
+}
+
+.blurred {
+  filter: blur(4px);
+  user-select: none;
+}
+
+.asset-icon {
+  border-radius: 360px;
+  height: 25px;
+  margin-right: 7px;
+  width: 25px;
+}
+
+.asset-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.asset-ticker {
+  color: #ffffffca;
+  display: flex;
+  font-size: 0.8rem;
+  gap: 3px;
+  margin-bottom: -4px;
+  font-weight: 450;
+}
+
+.asset-name {
+  color: rgb(255 255 255 / 50%);
+  font-size: 0.7rem;
+  line-height: 1.3;
+}
+
+.amount-details,
+.price-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.usd-asset-amount {
+  color: #ffffffca;
+  font-size: 0.8rem;
+  font-weight: 300;
+  margin-bottom: -3px;
+}
+
+.asset-amount {
+  color: #ffffff89;
+  font-size: 0.75rem;
+  margin: 0;
+  text-wrap: nowrap;
+}
+
+.port-token-price {
+  color: #ffffffca;
+  font-size: 0.8rem;
+  font-weight: 300;
+}
+
+.action-icons {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+/* shared */
+
+.icon-container {
+  align-items: center;
+  cursor: pointer;
+  overflow: visible;
+  position: relative;
+}
+
+.asset-price-change {
+  font-size: 0.75rem;
+  margin-top: -2px;
+}
+
+.asset-price-change.positive {
+  color: #29ec97;
+}
+
+.asset-price-change.negative {
+  color: #ec4343;
+}
+
+@media (width >= 1720px) {
+  .asset-icon {
+    border-radius: 360px;
+    height: 26px;
+    margin-right: 8px;
+    width: 26px;
+  }
+
+  .asset-ticker {
+    color: white;
+    display: flex;
+    font-size: 0.75rem;
+    margin-bottom: -2px;
+  }
+
+  .asset-name {
+    color: rgb(255 255 255 / 70%);
+    font-size: 0.7rem;
+  }
+}

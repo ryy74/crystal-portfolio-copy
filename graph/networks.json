@@ -1,0 +1,11 @@
+{
+  "monad-testnet": {
+    "crystal": {
+      "address": "0xbe7ff5637460ed8482a787520d2bfd65e2880df6",
+      "startBlock": 0
+    },
+    "Contract": {
+      "address": "0xbe7ff5637460ed8482a787520d2bfd65e2880df6"
+    }
+  }
+}

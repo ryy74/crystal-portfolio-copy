@@ -1,0 +1,530 @@
+type Account @entity {
+  id: Bytes!
+  userIds: [UserId!]! @derivedFrom(field: "account")
+  orderMap: AccountOrderMap @derivedFrom(field: "account")
+  openOrderMap: AccountOpenOrderMap @derivedFrom(field: "account")
+  fillMap: AccountFillMap @derivedFrom(field: "account")
+  tradeMap: AccountTradeMap @derivedFrom(field: "account")
+  launchpadTradeMap: AccountLaunchpadTradeMap @derivedFrom(field: "account")
+  tokensLaunched: Int!
+  tokensGraduated: Int!
+  createdTokens: [LaunchpadToken!]! @derivedFrom(field: "creator")
+  positions: [UserVaultPosition!]! @derivedFrom(field: "account")
+}
+
+type UserId @entity(immutable: true) {
+  id: String!
+  account: Account!
+  isMargin: Boolean!
+  timestamp: BigInt!
+  orderMap: UserOrderMap @derivedFrom(field: "user")
+  openOrderMap: UserOpenOrderMap @derivedFrom(field: "user")
+  fillMap: UserFillMap @derivedFrom(field: "user")
+  tradeMap: UserTradeMap @derivedFrom(field: "user")
+}
+
+type Market @entity {
+  id: Bytes!
+  timestamp: BigInt!
+  isCanonical: Boolean!
+  quoteAsset: Bytes!
+  baseAsset: Bytes!
+  quoteToken: Bytes! # dupe
+  quoteDecimals: BigInt!
+  quoteTicker: String!
+  quoteName: String!
+  baseToken: Bytes! # dupe
+  baseDecimals: BigInt!
+  baseTicker: String!
+  baseName: String!
+  marketId: BigInt
+  marketType: BigInt!
+  scaleFactor: Int!
+  tickSize: BigInt!
+  maxPrice: BigInt!
+  minSize: BigInt!
+  takerFee: BigInt!
+  makerRebate: BigInt!
+  volume: BigInt!
+  trades: [MarketRecentTrade!]! @derivedFrom(field: "market")
+  latestPrice: BigInt!
+  metadataCID: String
+  series: [Series!]! @derivedFrom(field: "market")
+}
+
+type Order @entity {
+  id: String! # market:cloid:userId | market:price:nativeId
+  isCloid: Boolean!
+  cloid: Int
+  nativeId: BigInt
+  market: Market!
+  marketType: BigInt!
+  user: UserId!
+  account: Account!
+  isBuy: Boolean!
+  price: BigInt!
+  originalSize: BigInt!
+  remainingSize: BigInt!
+  status: Int!
+  placedAt: BigInt!
+  updatedAt: BigInt!
+  openIndex: Int
+  userOpenIndex: Int
+  accountOrderBatch: AccountOrderBatch
+  userOrderBatch: UserOrderBatch
+  accountOpenOrderBatch: AccountOpenOrderBatch
+  userOpenOrderBatch: UserOpenOrderBatch
+  txHash: Bytes!
+}
+
+# account-scoped orderhistory
+# map -> shards -> batches -> orders
+type AccountOrderMap @entity {
+  id: Bytes!
+  account: Account!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [AccountOrderShard!]! @derivedFrom(field: "map")
+}
+
+type AccountOrderShard @entity {
+  id: String! # <account>-ord-shard-<shardIndex>
+  map: AccountOrderMap!
+  index: Int!
+  batchCount: Int!
+  batches: [AccountOrderBatch!]! @derivedFrom(field: "shard")
+}
+
+type AccountOrderBatch @entity {
+  id: String! # <account>-ord-<shardIndex>-<batchIndex>
+  shard: AccountOrderShard!
+  index: Int!
+  total: Int!
+  orders: [Order!]! @derivedFrom(field: "accountOrderBatch")
+}
+
+# user-scoped orderhistory
+type UserOrderMap @entity {
+  id: String!
+  user: UserId!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [UserOrderShard!]! @derivedFrom(field: "map")
+}
+
+type UserOrderShard @entity {
+  id: String! # <userId>-ord-shard-<shardIndex>
+  map: UserOrderMap!
+  index: Int!
+  batchCount: Int!
+  batches: [UserOrderBatch!]! @derivedFrom(field: "shard")
+}
+
+type UserOrderBatch @entity {
+  id: String! # <userId>-ord-<shardIndex>-<batchIndex>
+  shard: UserOrderShard!
+  index: Int!
+  total: Int!
+  orders: [Order!]! @derivedFrom(field: "userOrderBatch")
+}
+
+# account-scoped open orders (dense arrays with brute force shifting)
+type AccountOpenOrderMap @entity {
+  id: Bytes!
+  account: Account!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [AccountOpenOrderShard!]! @derivedFrom(field: "map")
+}
+
+type AccountOpenOrderShard @entity {
+  id: String! # <account>-open-shard-<shardIndex>
+  map: AccountOpenOrderMap!
+  index: Int!
+  batchCount: Int!
+  batches: [AccountOpenOrderBatch!]! @derivedFrom(field: "shard")
+}
+
+type AccountOpenOrderBatch @entity {
+  id: String! # <account>-open-<shardIndex>-<batchIndex>
+  shard: AccountOpenOrderShard!
+  index: Int!
+  total: Int!
+  orders: [Order!]! @derivedFrom(field: "accountOpenOrderBatch")
+}
+
+# user scoped open orders
+type UserOpenOrderMap @entity {
+  id: String!
+  user: UserId!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [UserOpenOrderShard!]! @derivedFrom(field: "map")
+}
+
+type UserOpenOrderShard @entity {
+  id: String! # <userId>-open-shard-<shardIndex>
+  map: UserOpenOrderMap!
+  index: Int!
+  batchCount: Int!
+  batches: [UserOpenOrderBatch!]! @derivedFrom(field: "shard")
+}
+
+type UserOpenOrderBatch @entity {
+  id: String! # <userId>-open-<shardIndex>-<batchIndex>
+  shard: UserOpenOrderShard!
+  index: Int!
+  total: Int!
+  orders: [Order!]! @derivedFrom(field: "userOpenOrderBatch")
+}
+
+type Fill @entity(immutable: true) {
+  id: String!
+  block: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
+  market: Market!
+  user: UserId!
+  account: Account!
+  price: BigInt!
+  nativeId: BigInt
+  cloid: Int
+  fillAmount: BigInt!
+  receivedAmount: BigInt!
+  remaining: BigInt!
+  accountBatch: AccountFillBatch!
+  userBatch: UserFillBatch!
+}
+
+type AccountFillMap @entity {
+  id: Bytes!
+  account: Account!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [AccountFillShard!]! @derivedFrom(field: "map")
+}
+
+type AccountFillShard @entity {
+  id: String! # <account>-fill-shard-<i>
+  map: AccountFillMap!
+  index: Int!
+  batchCount: Int!
+  batches: [AccountFillBatch!]! @derivedFrom(field: "shard")
+}
+
+type AccountFillBatch @entity {
+  id: String! # <account>-fill-<i>-<j>"=
+  shard: AccountFillShard!
+  index: Int!
+  total: Int!
+  fills: [Fill!]! @derivedFrom(field: "accountBatch")
+}
+
+type UserFillMap @entity {
+  id: String!
+  user: UserId!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [UserFillShard!]! @derivedFrom(field: "map")
+}
+
+type UserFillShard @entity {
+  id: String!
+  map: UserFillMap!
+  index: Int!
+  batchCount: Int!
+  batches: [UserFillBatch!]! @derivedFrom(field: "shard")
+}
+
+type UserFillBatch @entity {
+  id: String!
+  shard: UserFillShard!
+  index: Int!
+  total: Int!
+  fills: [Fill!]! @derivedFrom(field: "userBatch")
+}
+
+type Taker @entity(immutable: true) {
+  id: String!
+  block: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
+  market: Market!
+  account: Account!
+  user: UserId!
+  amountIn: BigInt!
+  amountOut: BigInt!
+  startPrice: BigInt!
+  endPrice: BigInt!
+  isBuy: Boolean!
+  accountBatch: AccountTradeBatch!
+  userBatch: UserTradeBatch
+  timestamp: BigInt!
+}
+
+type MarketRecentTrade @entity {
+  id: ID!
+  market: Market! @index
+  rank: Int! @index
+  trade: Taker!
+}
+
+type LaunchpadRecentTrade @entity {
+  id: ID!
+  token: LaunchpadToken! @index
+  rank: Int! @index
+  trade: LaunchpadTrade!
+}
+
+type AccountTradeMap @entity {
+  id: Bytes!
+  account: Account!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [AccountTradeShard!]! @derivedFrom(field: "map")
+}
+
+type AccountTradeShard @entity {
+  id: String!
+  map: AccountTradeMap!
+  index: Int!
+  batchCount: Int!
+  batches: [AccountTradeBatch!]! @derivedFrom(field: "shard")
+}
+
+type AccountTradeBatch @entity {
+  id: String!
+  shard: AccountTradeShard!
+  index: Int!
+  total: Int!
+  trades: [Taker!]! @derivedFrom(field: "accountBatch")
+}
+
+type UserTradeMap @entity {
+  id: String!
+  user: UserId!
+  nextIndex: BigInt!
+  shardCount: Int!
+  shards: [UserTradeShard!]! @derivedFrom(field: "map")
+}
+
+type UserTradeShard @entity {
+  id: String!
+  map: UserTradeMap!
+  index: Int!
+  batchCount: Int!
+  batches: [UserTradeBatch!]! @derivedFrom(field: "shard")
+}
+
+type UserTradeBatch @entity {
+  id: String!
+  shard: UserTradeShard!
+  index: Int!
+  total: Int!
+  trades: [Taker!]! @derivedFrom(field: "userBatch")
+}
+
+# type CloidSlot @entity {
+#   id: String! # <account>-<userId>-<cloid>-<market>
+#   account: Account!
+#   user: UserId!
+#   market: Market!
+#   cloid: Int!
+#   order: Order!
+#   timestamp: BigInt!
+# }
+
+type Candle @entity {
+  id: ID! # <market>-<startTimeRounded>-<intervalSeconds>
+  series: Series!
+  time: BigInt!
+  open: BigInt!
+  high: BigInt!
+  low: BigInt!
+  close: BigInt!
+  baseVolume: BigInt!
+  quoteVolume: BigInt!
+  usdVolume: BigInt!
+  vol24h: BigInt
+}
+
+type Series @entity {
+  id: ID! # <market>-<intervalSeconds>
+  klines: [Candle!]! @derivedFrom(field: "series")
+  market: Market
+  intervalSeconds: Int  
+}
+
+type LaunchpadToken @entity {
+  id: Bytes!
+  creator: Account!
+  name: String!
+  symbol: String!
+  metadataCID: String
+  description: String
+  social1: String
+  social2: String
+  social3: String
+  social4: String
+  decimals: Int!
+  initialSupply: BigInt!
+  timestamp: BigInt!
+  migrated: Boolean!
+  migratedAt: BigInt
+  migratedMarket: Market
+  volumeNative: BigInt!
+  volumeToken: BigInt!
+  buyTxs: Int!
+  sellTxs: Int!
+  distinctBuyers: Int!
+  distinctSellers: Int!
+  lastPriceNativePerTokenWad: BigInt!
+  lastUpdatedAt: BigInt!
+  trades: [LaunchpadRecentTrade!]! @derivedFrom(field: "token")
+  series1: Series
+  series5: Series
+  series15: Series
+  series60: Series
+  series300: Series
+  series900: Series
+  series3600: Series
+  series14400: Series
+  series86400: Series
+  holders: [LaunchpadPosition!]! @derivedFrom(field: "token")
+  totalHolders: Int!
+  devHoldingAmount: BigInt!
+}
+
+type LaunchpadTrade @entity(immutable: true) {
+  id: String!
+  block: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
+  token: LaunchpadToken!
+  account: Account!
+  isBuy: Boolean!
+  amountIn: BigInt!
+  amountOut: BigInt!
+  priceNativePerTokenWad: BigInt!
+  virtualNativeReserve: BigInt!
+  virtualTokenReserve: BigInt!
+  map: AccountLaunchpadTradeMap!
+  batch: AccountLaunchpadTradeBatch!
+  timestamp: BigInt!
+}
+
+type AccountLaunchpadTradeMap @entity {
+  id: Bytes!
+  account: Account!
+  counter: Int!
+  batches: [AccountLaunchpadTradeBatch!]! @derivedFrom(field: "map")
+}
+
+type AccountLaunchpadTradeBatch @entity {
+  id: String!
+  map: AccountLaunchpadTradeMap!
+  index: Int!
+  total: Int!
+  trades: [LaunchpadTrade!]! @derivedFrom(field: "batch")
+}
+
+type LaunchpadBuyer @entity { id: String!, token: LaunchpadToken!, account: Account! }
+type LaunchpadSeller @entity { id: String!, token: LaunchpadToken!, account: Account! }
+
+type LaunchpadPosition @entity {
+  id: String!
+  token: LaunchpadToken!
+  account: Account!
+  tokenBought: BigInt!
+  tokenSold: BigInt!
+  nativeSpent: BigInt!
+  nativeReceived: BigInt!
+  realized: BigInt!
+  tokens: BigInt!
+  lastUpdatedAt: BigInt!
+}
+
+type Token @entity {
+  id: ID!
+  symbol: String!
+  name: String!
+  decimals: BigInt!
+}
+
+type Vault @entity {
+  id: ID!
+  owner: Bytes!
+  factory: Bytes!
+  quoteAsset: Token!
+  baseAsset: Token!
+  symbol: String!
+  name: String!
+  description: String!
+  social1: String
+  social2: String
+  social3: String
+  lockup: BigInt!
+  decreaseOnWithdraw: Boolean!
+  locked: Boolean!
+  closed: Boolean!
+  maxShares: BigInt!
+  totalShares: BigInt!
+  quoteBalance: BigInt!
+  baseBalance: BigInt!
+  depositCount: Int!
+  withdrawalCount: Int!
+  uniqueDepositors: Int!
+  createdAt: BigInt!
+  createdBlock: BigInt!
+  createdTx: Bytes!
+  lastUpdatedAt: BigInt!
+  positions: [UserVaultPosition!]! @derivedFrom(field: "vault")
+  deposits: [Deposit!]! @derivedFrom(field: "vault")
+  withdrawals: [Withdrawal!]! @derivedFrom(field: "vault")
+}
+
+type UserVaultPosition @entity {
+  id: ID!
+  vault: Vault!
+  account: Account!
+  shares: BigInt!
+  depositCount: Int!
+  withdrawCount: Int!
+  totalDepositedQuote: BigInt!
+  totalDepositedBase: BigInt!
+  totalWithdrawnQuote: BigInt!
+  totalWithdrawnBase: BigInt!
+  lastDepositAt: BigInt
+  lastWithdrawAt: BigInt
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type Deposit @entity(immutable: true) {
+  id: ID!
+  vault: Vault!
+  account: Account!
+  shares: BigInt!
+  amountQuote: BigInt!
+  amountBase: BigInt!
+  txHash: Bytes!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type Withdrawal @entity(immutable: true) {
+  id: ID!
+  vault: Vault!
+  account: Account!
+  shares: BigInt!
+  amountQuote: BigInt!
+  amountBase: BigInt!
+  txHash: Bytes!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type Lookup @entity {
+  id: String!
+  address: Bytes!
+}

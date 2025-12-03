@@ -1,0 +1,48 @@
+.orders-oc-item {
+  align-items: center;
+  color: #ffffffca;
+  display: grid;
+  grid-template-columns:
+    40px minmax(120px, 0.9fr) minmax(115px, 1fr) minmax(100px, 1fr)
+    minmax(145px, 1fr) minmax(145px, 0.8fr) minmax(100px, 0.3fr);
+  justify-content: flex-start;
+  border-radius: 4px;
+  min-width: 765px;
+  text-align: left;
+  user-select: none;
+}
+
+.orders-oc-item:hover {
+  background: #ffffff04;
+}
+
+.orders-oc-item > *:not(:nth-last-child(1)) {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.orders-oc-item > *:nth-last-child(1) {
+  justify-content: center;
+}
+
+.oc-cell.cancel-cell {
+  justify-self: center;
+  padding: 0;
+}
+
+.edit-limit-price-button,
+.edit-order-size-button{
+  width: 17px;
+  cursor: pointer;
+}
+
+.open-order-price-level{
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.edit-icon{
+    filter: brightness(0) saturate(100%) invert(83%) sepia(11%) saturate(527%) hue-rotate(194deg) brightness(95%) contrast(92%);
+}
+

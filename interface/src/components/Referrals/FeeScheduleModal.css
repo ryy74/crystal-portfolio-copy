@@ -1,0 +1,324 @@
+.fee-schedule-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / 60%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 101;
+  animation: bgFadeIn 0.2s ease-out;
+}
+
+.fee-schedule-container {
+  background-color: rgb(8, 8, 8);
+  border: 1px solid rgba(179, 184, 249, 0.15);
+  border-radius: 6px;
+  width: 450px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 102;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.fee-schedule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 15px;
+  border-bottom: 1px solid rgba(179, 184, 249, 0.1);
+  position: sticky;
+  top: 0;
+  background-color: rgb(8, 8, 8);
+}
+
+.fee-schedule-title {
+  color: #ffffff;
+  font-size: 1rem;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.fee-schedule-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.fee-schedule-body {
+  padding: 20px;
+}
+
+.fee-schedule-intro {
+  margin-bottom: 1.5rem;
+}
+
+.fee-schedule-description {
+  color: #cdd0ddf4;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  margin: 0;
+  font-weight: 300;
+  letter-spacing: -0.3px;
+}
+
+
+.fee-schedule-section-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+}
+
+.fee-schedule-subsection-description {
+  color: rgba(217, 222, 243, 0.6);
+  font-size: 0.75rem;
+  margin: -0.5rem 0 1rem 0;
+}
+
+.fee-schedule-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fee-tier-requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(179, 184, 249, 0.1);
+  border-radius: 10px;
+  opacity: 0.5;
+  transition: all 0.2s;
+}
+
+.fee-tier-requirement-item.achieved {
+  opacity: 1;
+  border-color: rgba(179, 184, 249, 0.1);
+  background-color: transparent;
+}
+
+.tier-requirement-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: #000;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+
+.tier-requirement-badge.tier-1 {
+  background: linear-gradient(135deg, #58483b 0%, #5b4223 100%);
+}
+
+.tier-requirement-badge.tier-2 {
+  background: linear-gradient(135deg, #D4D4D4 0%, #7A7A7A 100%);
+}
+
+.tier-requirement-badge.tier-3 {
+  background: linear-gradient(135deg, #F5D576 0%, #CC8400 100%);
+}
+
+.tier-requirement-badge.tier-4 {
+  background: linear-gradient(135deg, #aaaecf 0%, #7f82a1 100%);
+}
+
+.tier-requirement-badge.tier-5 {
+  background: #4A4A4A;
+}
+
+.tier-requirement-badge.tier-6 {
+  background: linear-gradient(135deg, #9D4EDD 0%, #7B2CBF 100%);
+}
+
+.fee-tier-requirement-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.fee-tier-requirement-volume {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+
+.fee-tier-requirement-benefits {
+  color: rgba(217, 222, 243, 0.6);
+  font-size: 0.8rem;
+  letter-spacing: -0.3px;
+}
+
+.rebate-tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.rebate-tier-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(170, 174, 207, 0.15);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.rebate-tier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.rebate-tier-badge {
+  padding: 0.3rem 0.6rem;
+  background: linear-gradient(135deg, #aaaecf 0%, #7f82a1 100%);
+  color: #000;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.rebate-tier-value {
+  color: #22c55e;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+.rebate-tier-requirement {
+  color: #cdd0ddf4;
+  font-size: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+
+.rebate-tier-description {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+}
+
+/* Staking Discount Card */
+.staking-discount-card {
+  background: linear-gradient(135deg, rgba(170, 174, 207, 0.1) 0%, rgba(127, 130, 161, 0.05) 100%);
+  border: 1px solid rgba(170, 174, 207, 0.2);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.staking-discount-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.staking-discount-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.staking-discount-content {
+  flex: 1;
+}
+
+.staking-discount-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+}
+
+.staking-discount-description {
+  color: rgba(217, 222, 243, 0.6);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.staking-discount-tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.staking-discount-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.fee-schedule-subsection-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+}
+
+.staking-amount {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.staking-benefit {
+  color: #aaaecf;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Notes Section */
+.fee-schedule-notes {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(170, 174, 207, 0.05);
+  border-left: 3px solid #aaaecf;
+  border-radius: 4px;
+}
+
+.fee-schedule-notes-title {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0 0 0.75rem 0;
+}
+
+.fee-schedule-notes-list {
+  color: rgba(217, 222, 243, 0.6);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.fee-schedule-notes-list li {
+  margin-bottom: 0.4rem;
+}
+
+.fee-schedule-notes-list li:last-child {
+  margin-bottom: 0;
+}
+.fee-schedule-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fee-schedule-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.fee-schedule-container::-webkit-scrollbar-thumb {
+  background: rgba(170, 174, 207, 0.3);
+  border-radius: 4px;
+}
+
+.fee-schedule-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(170, 174, 207, 0.5);
+}

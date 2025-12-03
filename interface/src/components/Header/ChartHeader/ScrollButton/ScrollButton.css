@@ -1,0 +1,44 @@
+.scroll-button {
+  align-items: center;
+  border: none;
+  border-radius: 50%;
+  color: rgb(255 255 255 / 70%);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.8rem;
+  height: 24px;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: background-color 0.3s;
+  width: 24px;
+  z-index: 3;
+  padding: 0;
+}
+
+.scroll-button:hover {
+  color: rgb(255 255 255 / 90%);
+}
+
+.scroll-button.left {
+  left: 8px;
+}
+
+.scroll-button.right {
+  right: 8px;
+}
+
+.scroll-arrow-button {
+  width: 15px;
+  height: 15px;
+  transform: rotate(90deg);
+}
+
+.scroll-button.left .scroll-arrow-button {
+  transform: rotate(90deg);
+}
+
+.scroll-button.right .scroll-arrow-button {
+  transform: rotate(270deg);
+}

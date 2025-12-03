@@ -1,0 +1,17 @@
+.chart-header {
+  border-radius: 8px;
+  display: flex;
+  height: 47px;
+  justify-content: flex-start;
+  user-select: none;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+
+@media (max-width: 1020px) {
+  .chart-header {
+    max-width: calc(100vw - 5px);
+    padding: 0px 5px 0px 0px;
+  }
+}

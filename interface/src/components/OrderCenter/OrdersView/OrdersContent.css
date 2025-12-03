@@ -1,0 +1,64 @@
+.orders-oc-header {
+    background: rgb(6,6,6);
+
+  align-items: center;
+  color: #e0e3f473;
+  cursor: pointer;
+  display: grid;
+  font-size: 0.85rem;
+  grid-template-columns:
+    40px minmax(120px, 0.9fr) minmax(115px, 1fr) minmax(100px, 1fr)
+    minmax(145px, 1fr) minmax(145px, 0.8fr) minmax(100px, 0.3fr);
+  justify-content: flex-start;
+  height: 32px;
+  min-height: 32px;  
+  min-width: 765px;
+  padding: 1px 0 0 0;
+  position: sticky;
+  text-align: left;
+  text-wrap: nowrap;
+  top: 0;
+  user-select: none;
+  z-index: 2;
+  margin-bottom: -4px;
+}
+
+.orders-oc-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cancel-all-oc-cell {
+  border-radius: 3px;
+  color: #aaaecf;
+  cursor: default;
+  display: flex;
+  font-size: 0.75rem;
+  font-weight: 300;
+  justify-content: center;
+  overflow: hidden;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cancel-all-oc-cell.signing {
+  cursor: not-allowed;
+}
+
+.cancel-all-label:hover {
+  color: rgb(243 78 78);
+  cursor: pointer;
+}
+
+.cancel-all-loading-spinner {
+  animation: spin 1s linear infinite;
+  border: 2px solid #aaaecf;
+  border-radius: 50%;
+  border-top-color: #0f0f1230;
+  height: 14px;
+  width: 14px;
+}
